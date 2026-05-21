@@ -4,11 +4,13 @@
 
 import { ErrorState } from '@/components/shared/error-state';
 import { YearSelector } from '@/components/shared/year-selector';
+import { YearlyComparisonChart } from '@/components/shared/yearly-comparison-chart';
 import { Skeleton } from '@/components/ui/skeleton';
 import { COUNTRY_FLAGS } from '@/constants/countries';
 import { useCompany } from '@/hooks/companies/useCompanies';
 import {
     filterByYear,
+    getAnnualTotals,
     getAvailableYears,
     getMonthlyByScope,
     getScopeBreakdown,
@@ -55,6 +57,8 @@ export function CompanyDetailContent({ id }: { id: string }) {
     const monthlyByScope = getMonthlyByScope(filteredEmissions);
     const scopes = getScopeBreakdown(filteredEmissions);
     const totalBySource = getTotalBySource(filteredEmissions);
+    // 연도 필터 전 전체 데이터로 연도별 비교 차트 생성
+    const yearlyTotals = getAnnualTotals(company.emissions);
     const flag = COUNTRY_FLAGS[company.country] ?? '';
 
     return (
@@ -84,6 +88,14 @@ export function CompanyDetailContent({ id }: { id: string }) {
 
             {/* 월별 Scope 스택 에어리어 차트 */}
             <CompanyMonthlyChart data={monthlyByScope} year={selectedYear} />
+
+            {/* 연도별 배출량 비교 차트 */}
+            <YearlyComparisonChart
+                data={yearlyTotals}
+                selectedYear={selectedYear}
+                title="연도별 배출량 추이"
+                description={`${company.name} · 연도별 누적 온실가스 배출량 (tCO₂e)`}
+            />
 
             {/* Scope 비중 + 배출원별 차트 */}
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

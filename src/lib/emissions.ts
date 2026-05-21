@@ -4,6 +4,7 @@ import { SCOPE_MAP } from '@/constants/ghg-scope';
 import type { Company, GhgEmission } from '@/types';
 
 export type MonthlyTotal = { month: string; total: number };
+export type AnnualTotal = { year: number; total: number };
 export type CompanyTotal = { id: string; name: string; country: string; total: number };
 export type ScopeBreakdownItem = { scope: 1 | 2 | 3; pct: number };
 
@@ -145,6 +146,18 @@ export function getTotalBySource(
 export function getAvailableYears(emissions: GhgEmission[]): number[] {
     const years = new Set(emissions.map((e) => parseInt(e.yearMonth.slice(0, 4), 10)));
     return Array.from(years).sort((a, b) => b - a);
+}
+
+// 배출량 배열을 연도별로 합산 (전체 회사: flatMap 사용, 단일 회사: 그대로 전달)
+export function getAnnualTotals(emissions: GhgEmission[]): AnnualTotal[] {
+    const map = new Map<number, number>();
+    for (const e of emissions) {
+        const year = parseInt(e.yearMonth.slice(0, 4), 10);
+        map.set(year, (map.get(year) ?? 0) + e.emissions);
+    }
+    return Array.from(map.entries())
+        .sort(([a], [b]) => a - b)
+        .map(([year, total]) => ({ year, total: Math.round(total) }));
 }
 
 // URL 파라미터·함수 인자 연도를 사용 가능한 연도 목록과 조합해 최종 연도 반환

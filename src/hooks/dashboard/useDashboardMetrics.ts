@@ -2,6 +2,7 @@
 
 import {
     filterByYear,
+    getAnnualTotals,
     getAvailableYears,
     getImprovingCompanyCount,
     getMergedMonthlyData,
@@ -31,6 +32,8 @@ export function useDashboardMetrics(companies: Company[], year?: number | null) 
         return {
             selectedYear,
             availableYears,
+            // 연도 필터 적용 전 전체 데이터로 연도별 비교 차트용 집계
+            yearlyTotals: getAnnualTotals(allEmissions),
             monthlyTotals,
             momChange: getMonthOverMonthChange(monthlyTotals),
             totalByCompany: getTotalByCompany(filtered),

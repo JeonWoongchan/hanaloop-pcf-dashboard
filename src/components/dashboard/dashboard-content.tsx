@@ -4,6 +4,7 @@
 
 import { ErrorState } from '@/components/shared/error-state';
 import { YearSelector } from '@/components/shared/year-selector';
+import { YearlyComparisonChart } from '@/components/shared/yearly-comparison-chart';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCompanies } from '@/hooks/companies/useCompanies';
 import { useDashboardMetrics } from '@/hooks/dashboard/useDashboardMetrics';
@@ -32,7 +33,7 @@ export function DashboardContent() {
     const { data: companies, isLoading, error, refetch } = useCompanies();
     const [yearParam, setYearParam] = useQueryState('year', parseAsInteger);
 
-    const { selectedYear, availableYears, monthlyTotals, momChange, totalByCompany, mergedMonthlyData, improvingCount } =
+    const { selectedYear, availableYears, yearlyTotals, monthlyTotals, momChange, totalByCompany, mergedMonthlyData, improvingCount } =
         useDashboardMetrics(companies ?? [], yearParam);
 
     if (isLoading) return <DashboardSkeleton />;
@@ -64,6 +65,13 @@ export function DashboardContent() {
             <EmissionTrendChart year={selectedYear} data={mergedMonthlyData} companies={companies} />
 
             <CompanyBarChart year={selectedYear} data={totalByCompany} />
+
+            <YearlyComparisonChart
+                data={yearlyTotals}
+                selectedYear={selectedYear}
+                title="연도별 총 배출량 추이"
+                description="전체 회사 합산 · 연도별 누적 온실가스 배출량 (tCO₂e)"
+            />
         </div>
     );
 }
