@@ -21,5 +21,7 @@ export function formatCompanyName(name: string, maxLength = 14): string {
     return name.length > maxLength ? `${name.slice(0, maxLength)}…` : name;
 }
 
-export const formatTooltipValue = (value: unknown) =>
-  typeof value === 'number' ? [`${formatEmissions(value)} tCO₂e`] : ['-'];
+export const formatTooltipValue = (value: unknown, name: unknown) =>
+  typeof value === 'number'
+    ? [`${formatEmissions(value)} tCO₂e`, name as string]
+    : ['-', name as string];

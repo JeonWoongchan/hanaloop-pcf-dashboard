@@ -134,4 +134,8 @@
   html {
     @apply font-sans;
   }
+  /* Recharts SVG 클릭 시 브라우저 기본 포커스 아웃라인 제거 */
+  .recharts-surface:focus {
+    outline: none;
+  }
 }

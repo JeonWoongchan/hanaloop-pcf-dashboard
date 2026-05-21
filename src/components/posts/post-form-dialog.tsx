@@ -66,12 +66,14 @@ export function PostFormDialog({ companyId, post, open, onCloseAction }: Props) 
     // 다이얼로그 열릴 때 편집 데이터 또는 빈 폼으로 초기화
     useEffect(() => {
         if (open) {
+            /* eslint-disable react-hooks/set-state-in-effect */
             setForm(
                 post
                     ? { title: post.title, dateTime: post.dateTime, content: post.content }
                     : EMPTY
             );
             setErrors({});
+            /* eslint-enable react-hooks/set-state-in-effect */
         }
     }, [open, post]);
 
