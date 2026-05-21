@@ -23,6 +23,7 @@ import { useMemo } from 'react';
 import { CompanyMonthlyChart } from './company-monthly-chart';
 import { CompanyScopeChart } from './company-scope-chart';
 import { CompanySourceChart } from './company-source-chart';
+import { CompanyPosts } from '@/components/posts/company-posts';
 
 // 회사 상세 로딩 중 스켈레톤
 function CompanyDetailSkeleton() {
@@ -102,6 +103,9 @@ export function CompanyDetailContent({ id }: { id: string }) {
                 <CompanyScopeChart scopes={scopes} totalEmissions={annualTotal} />
                 <CompanySourceChart sources={totalBySource} year={selectedYear} />
             </div>
+
+            {/* 포스트 목록 및 CRUD */}
+            <CompanyPosts companyId={company.id} />
         </div>
     );
 }

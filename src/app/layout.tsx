@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { DashboardShell } from '@/components/layout/dashboard-shell';
 import { Providers } from '@/components/providers';
+import { Toaster } from '@/components/ui/sonner';
 import {ReactNode} from "react";
 
 const geistSans = Geist({
@@ -31,6 +32,7 @@ export default function RootLayout({
                 <Providers>
                     <DashboardShell>{children}</DashboardShell>
                 </Providers>
+                <Toaster richColors position="bottom-right" />
             </body>
         </html>
     );
