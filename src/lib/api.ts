@@ -2,8 +2,8 @@ import type { Company, Country, Post } from '@/types';
 import { companies as seedCompanies, countries as seedCountries, posts as seedPosts } from './data';
 
 // 모듈 스코프 in-memory 상태 — 서버 재시작 전까지 유지
-let _countries: Country[] = [...seedCountries];
-let _companies: Company[] = [...seedCompanies];
+const _countries: Country[] = [...seedCountries];
+const _companies: Company[] = [...seedCompanies];
 let _posts: Post[] = [...seedPosts];
 
 const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
