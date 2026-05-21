@@ -8,4 +8,6 @@ export const COUNTRY_FLAGS: Record<string, string> = {
     GB: '🇬🇧',
     FR: '🇫🇷',
     AU: '🇦🇺',
+    NO: '🇳🇴',
+    SG: '🇸🇬',
 };
