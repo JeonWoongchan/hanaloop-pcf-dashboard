@@ -1,7 +1,7 @@
 // 회사 카드 — 연간 배출량 및 GHG Scope 비중 시각화
 
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
-import { SCOPE_COLORS, SCOPE_DESCRIPTIONS } from '@/constants/ghg-scope';
+import { SCOPE_COLORS } from '@/constants/ghg-scope';
 import { ROUTES } from '@/constants/navigation';
 import { getScopeBreakdown } from '@/lib/emissions';
 import { formatEmissions } from '@/lib/format';
@@ -44,18 +44,20 @@ export function CompanyCard({ company, year }: { company: CompanyWithTotal; year
                             />
                         ))}
                     </div>
-                    {/* 각 레이블 너비를 해당 Scope 세그먼트 너비와 일치시켜 위치 정렬 */}
-                    <div className="flex text-[10px] text-muted-foreground">
+                    {/* Scope 레이블 — 색상 점으로 바와 연동, 고정 크기로 가독성 확보 */}
+                    <div className="flex flex-wrap gap-x-3 gap-y-1">
                         {scopes.map(({ scope, pct }) =>
                             pct > 0 ? (
-                                <div
+                                <span
                                     key={scope}
-                                    style={{ width: `${pct}%` }}
-                                    className="text-center"
-                                    title={SCOPE_DESCRIPTIONS[scope]}
+                                    className="flex items-center gap-1 text-xs text-muted-foreground"
                                 >
+                                    <span
+                                        className="size-2 shrink-0 rounded-sm"
+                                        style={{ backgroundColor: SCOPE_COLORS[scope] }}
+                                    />
                                     S{scope} {Math.round(pct)}%
-                                </div>
+                                </span>
                             ) : null
                         )}
                     </div>

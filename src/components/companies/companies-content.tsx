@@ -5,6 +5,7 @@
 import { EmptyState } from '@/components/shared/empty-state';
 import { ErrorState } from '@/components/shared/error-state';
 import { MultiSelectPopover } from '@/components/shared/multi-select-popover';
+import { ScopeLegend } from '@/components/shared/scope-legend';
 import { YearSelector } from '@/components/shared/year-selector';
 import {
     Select,
@@ -107,6 +108,9 @@ export function CompaniesContent() {
 
                 <p className="text-sm text-muted-foreground">{displayedCompanies.length}개 회사</p>
             </div>
+
+            {/* Scope 범례 — 카드 바 색상과 SCOPE_COLORS로 연동 */}
+            <ScopeLegend />
 
             {displayedCompanies.length === 0 ? (
                 <EmptyState message="해당 조건의 회사가 없습니다." />
