@@ -142,6 +142,42 @@ export function getTotalBySource(
         .sort((a, b) => b.total - a.total);
 }
 
+// 특정 배출원의 월별 합산 — 배출원 드릴다운 추이 차트용
+export function getMonthlyTotalsBySource(
+    emissions: GhgEmission[],
+    source: string
+): MonthlyTotal[] {
+    const map = new Map<string, number>();
+    for (const e of emissions) {
+        if (e.source !== source) continue;
+        map.set(e.yearMonth, (map.get(e.yearMonth) ?? 0) + e.emissions);
+    }
+    return Array.from(map.entries())
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([month, total]) => ({ month, total: Math.round(total) }));
+}
+
+// 특정 배출원의 회사별 연간 배출량 — 배출원 드릴다운 회사 차트용
+export function getCompanyTotalsForSource(
+    companies: Company[],
+    source: string,
+    year: number
+): CompanyTotal[] {
+    return companies
+        .map((c) => ({
+            id: c.id,
+            name: c.name,
+            country: c.country,
+            total: Math.round(
+                filterByYear(c.emissions, year)
+                    .filter((e) => e.source === source)
+                    .reduce((sum, e) => sum + e.emissions, 0)
+            ),
+        }))
+        .filter((c) => c.total > 0)
+        .sort((a, b) => b.total - a.total);
+}
+
 // 배출량 데이터에 포함된 연도 목록 추출 (내림차순)
 export function getAvailableYears(emissions: GhgEmission[]): number[] {
     const years = new Set(emissions.map((e) => parseInt(e.yearMonth.slice(0, 4), 10)));

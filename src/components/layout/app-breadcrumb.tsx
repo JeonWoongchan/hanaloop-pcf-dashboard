@@ -23,6 +23,10 @@ export function AppBreadcrumb() {
         return <span className="text-sm font-medium text-foreground">관리 대상 회사</span>;
     }
 
+    if (pathname === ROUTES.sources) {
+        return <span className="text-sm font-medium text-foreground">배출원 분석</span>;
+    }
+
     if (pathname === ROUTES.risk) {
         return <span className="text-sm font-medium text-foreground">리스크 관리</span>;
     }

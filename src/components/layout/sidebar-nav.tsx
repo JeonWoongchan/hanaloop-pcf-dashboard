@@ -15,7 +15,7 @@ import { COUNTRY_FLAGS } from '@/constants/countries';
 import { ROUTES } from '@/constants/navigation';
 import { useCompanies } from '@/hooks/companies/useCompanies';
 import type { LucideIcon } from 'lucide-react';
-import { Building2, ChevronDown, LayoutDashboard, ShieldAlert } from 'lucide-react';
+import { Building2, ChevronDown, FlameKindling, LayoutDashboard, ShieldAlert } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Collapsible } from 'radix-ui';
@@ -83,6 +83,13 @@ export function SidebarNav() {
                         href={ROUTES.risk}
                         icon={ShieldAlert}
                         isActive={pathname === ROUTES.risk}
+                    />
+
+                    <NavItem
+                        title="배출원 분석"
+                        href={ROUTES.sources}
+                        icon={FlameKindling}
+                        isActive={pathname === ROUTES.sources}
                     />
 
                     {/* 회사 목록 — 접을 수 있는 서브메뉴, 버튼 클릭 시 목록 페이지로 이동 */}
