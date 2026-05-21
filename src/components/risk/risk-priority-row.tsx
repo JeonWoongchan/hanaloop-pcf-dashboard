@@ -44,18 +44,18 @@ export function RiskPriorityRow({ assessment }: Props) {
                     <ArrowRight className="size-3 opacity-0 transition-opacity group-hover:opacity-100" />
                 </Link>
             </th>
-            <td className="py-4 pr-4">
+            <td className="py-4 pr-4 text-center">
                 <RiskLevelBadge level={assessment.level} />
             </td>
-            <td className="py-4 pr-4 text-right font-medium">{assessment.score}</td>
+            <td className="py-4 pr-4 text-center font-medium">{assessment.score}</td>
             <td className="py-4 pr-4 text-right">
                 {formatEmissions(assessment.annualEmissions)} tCO₂e
             </td>
             <td className="py-4 pr-4 text-right">{formatKrw(assessment.estimatedTaxKrw)}</td>
-            <td className={`py-4 pr-4 text-right font-medium ${trend.className}`}>
+            <td className={`py-4 pr-4 text-center font-medium ${trend.className}`}>
                 {trend.label}
             </td>
-            <td className="py-4 pr-4">{getDominantScopeLabel(assessment)}</td>
+            <td className="py-4 pr-4 text-center">{getDominantScopeLabel(assessment)}</td>
             <td className="py-4">
                 <ul className="max-w-80 space-y-1 text-muted-foreground">
                     {assessment.reasons.map((reason) => (
