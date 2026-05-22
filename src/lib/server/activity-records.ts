@@ -93,7 +93,7 @@ function rowsToActivityRecords(rows: ActivityRecordRow[]): ActivityRecord[] {
 }
 
 export async function listActivityRecords(): Promise<ActivityRecord[]> {
-    const rows = await sql`
+    const rows = await sql<ActivityRecordRow[]>`
         SELECT
             id, company_id,
             activity_date, year_month,
@@ -106,11 +106,11 @@ export async function listActivityRecords(): Promise<ActivityRecord[]> {
         ORDER BY company_id ASC, activity_date ASC, activity_type ASC, import_row_number ASC
     `;
 
-    return rowsToActivityRecords(rows as ActivityRecordRow[]);
+    return rowsToActivityRecords(rows);
 }
 
 export async function listActivityRecordsByCompany(companyId: string): Promise<ActivityRecord[]> {
-    const rows = await sql`
+    const rows = await sql<ActivityRecordRow[]>`
         SELECT
             id, company_id,
             activity_date, year_month,
@@ -124,5 +124,5 @@ export async function listActivityRecordsByCompany(companyId: string): Promise<A
         ORDER BY activity_date ASC, activity_type ASC, import_row_number ASC
     `;
 
-    return rowsToActivityRecords(rows as ActivityRecordRow[]);
+    return rowsToActivityRecords(rows);
 }

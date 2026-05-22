@@ -7,12 +7,12 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
     try {
-        const rows = await sql`
+        const rows = await sql<Record<string, unknown>[]>`
             SELECT code, name
             FROM countries
             ORDER BY name ASC
         `;
-        return NextResponse.json(rows.map((row) => rowToCountry(row as Record<string, unknown>)));
+        return NextResponse.json(rows.map(rowToCountry));
     } catch {
         return apiError('국가 목록을 불러오지 못했습니다.');
     }

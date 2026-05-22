@@ -78,25 +78,22 @@ export async function POST(request: Request) {
 
         const { target } = targetResult;
 
-        await sql.transaction(
-            (tx) => {
-                const createCompanyQueries = target.shouldCreateCompany
-                    ? [
-                          tx`
-                              INSERT INTO companies (id, name, country_code)
-                              VALUES (${target.companyId}, ${target.companyName}, ${target.countryCode})
-                          `,
-                      ]
-                    : [];
+        await sql.begin('isolation level serializable', async (tx) => {
+            if (target.shouldCreateCompany) {
+                await tx`
+                    INSERT INTO companies (id, name, country_code)
+                    VALUES (${target.companyId}, ${target.companyName}, ${target.countryCode})
+                `;
+            }
 
-                const deletePreviousImportQuery = tx`
+            await tx`
                     DELETE FROM activity_records
                     WHERE company_id = ${target.companyId}
                       AND import_file_name = ${fileName}
                 `;
 
-                const insertActivityRecordQueries = result.rows.map(
-                    (row) => tx`
+            for (const row of result.rows) {
+                await tx`
                         INSERT INTO activity_records (
                             company_id,
                             activity_date, year_month,
@@ -112,17 +109,9 @@ export async function POST(request: Request) {
                             ${row.emissionFactorKg}, ${row.emissionsKg}, ${row.emissions},
                             ${fileName}, ${row.rowNumber}
                         )
-                    `
-                );
-
-                return [
-                    ...createCompanyQueries,
-                    deletePreviousImportQuery,
-                    ...insertActivityRecordQueries,
-                ];
-            },
-            { isolationLevel: 'Serializable' }
-        );
+                    `;
+            }
+        });
 
         return NextResponse.json(
             { inserted: result.rows.length, companyId: target.companyId },

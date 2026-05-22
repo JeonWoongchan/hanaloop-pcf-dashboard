@@ -6,7 +6,7 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
     try {
-        const rows = await sql`
+        const rows = await sql<Record<string, unknown>[]>`
             SELECT id, title, resource_uid, date_time, content, author
             FROM posts
             ORDER BY created_at DESC
@@ -24,12 +24,12 @@ export async function POST(request: Request) {
         if (shouldFail()) return apiError('저장에 실패했습니다. 의도적인 실패입니다.(15%)');
 
         const { title, resourceUid, dateTime, content, author } = (await request.json()) as Post;
-        const [row] = await sql`
+        const [row] = await sql<Record<string, unknown>[]>`
             INSERT INTO posts (title, resource_uid, date_time, content, author)
             VALUES (${title}, ${resourceUid}, ${dateTime}, ${content}, ${author})
             RETURNING id, title, resource_uid, date_time, content, author
         `;
-        return NextResponse.json(rowToPost(row as Record<string, unknown>), { status: 201 });
+        return NextResponse.json(rowToPost(row), { status: 201 });
     } catch {
         return apiError('저장에 실패했습니다. 잠시 후 다시 시도해 주세요.');
     }

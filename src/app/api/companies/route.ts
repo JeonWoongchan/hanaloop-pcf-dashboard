@@ -51,7 +51,7 @@ function rowsToCompanies(rows: CompanyEmissionRow[]): Company[] {
 
 export async function GET() {
     try {
-        const rows = await sql`
+        const rows = await sql<CompanyEmissionRow[]>`
             SELECT
                 c.id,
                 c.name,
@@ -64,7 +64,7 @@ export async function GET() {
             ORDER BY c.name ASC, e.year_month ASC, e.source ASC
         `;
 
-        return NextResponse.json(rowsToCompanies(rows as CompanyEmissionRow[]));
+        return NextResponse.json(rowsToCompanies(rows));
     } catch {
         return apiError('회사 목록을 불러오지 못했습니다.');
     }

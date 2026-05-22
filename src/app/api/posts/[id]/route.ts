@@ -11,7 +11,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         if (shouldFail()) return apiError('저장에 실패했습니다. 의도적인 실패입니다.(15%)');
         const { id } = await params;
         const { title, resourceUid, dateTime, content, author } = (await request.json()) as Post;
-        const [row] = await sql`
+        const [row] = await sql<Record<string, unknown>[]>`
             UPDATE posts
             SET title = ${title}, resource_uid = ${resourceUid}, date_time = ${dateTime},
                 content = ${content}, author = ${author}
@@ -19,7 +19,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
             RETURNING id, title, resource_uid, date_time, content, author
         `;
         if (!row) return apiError('게시글을 찾을 수 없습니다.', 404);
-        return NextResponse.json(rowToPost(row as Record<string, unknown>));
+        return NextResponse.json(rowToPost(row));
     } catch {
         return apiError('수정에 실패했습니다.');
     }
