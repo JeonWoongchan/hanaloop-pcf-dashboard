@@ -10,24 +10,17 @@ import {
     SidebarMenuSub,
     SidebarMenuSubButton,
     SidebarMenuSubItem,
+    useSidebar,
 } from '@/components/ui/sidebar';
 import { COUNTRY_FLAGS } from '@/constants/countries';
 import { ROUTES } from '@/constants/navigation';
 import { useCompanies } from '@/hooks/companies/useCompanies';
 import type { LucideIcon } from 'lucide-react';
-import { Building2, ChevronDown, FlameKindling, LayoutDashboard, ShieldAlert } from 'lucide-react';
+import { Building2, ChevronDown, FlameKindling, LayoutDashboard, List, ShieldAlert } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Collapsible } from 'radix-ui';
-
-// 활성 항목 강조 스타일
-const ACTIVE_CLASS =
-    'data-[active=true]:bg-sidebar-primary data-[active=true]:text-sidebar-primary-foreground';
-
-// Collapsible.Trigger asChild 시 data-[state=open]:hover가 active 배경을 덮는 충돌 방지
-// data-[active=true]:data-[state=open]:hover (specificity 0-3-0) > data-[state=open]:hover (0-2-0)
-const COLLAPSIBLE_ACTIVE_FIX =
-    'data-[active=true]:data-[state=open]:hover:bg-sidebar-primary data-[active=true]:data-[state=open]:hover:text-sidebar-primary-foreground';
+import { useState } from 'react';
 
 // 회사 상세 경로에서 company id 추출
 function extractCompanyId(pathname: string): string | undefined {
@@ -49,7 +42,7 @@ function NavItem({
 }) {
     return (
         <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={isActive} tooltip={title} className={ACTIVE_CLASS}>
+            <SidebarMenuButton asChild isActive={isActive} tooltip={title}>
                 <Link href={href}>
                     <Icon />
                     <span>{title}</span>
@@ -62,10 +55,30 @@ function NavItem({
 // 내비게이션 메뉴 아이템 목록 렌더링
 export function SidebarNav() {
     const pathname = usePathname();
+    const router = useRouter();
+    const { state: sidebarState } = useSidebar();
     const { data: companies } = useCompanies();
 
     const isCompaniesActive = pathname.startsWith(ROUTES.companies);
+    const isExactCompanies = pathname === ROUTES.companies;
     const currentCompanyId = extractCompanyId(pathname);
+
+    // companies 경로 진입 시 목록 자동 확장 (렌더 중 setState로 effect 없이 동기화)
+    const [companiesOpen, setCompaniesOpen] = useState(isCompaniesActive);
+    const [prevIsCompaniesActive, setPrevIsCompaniesActive] = useState(isCompaniesActive);
+    if (prevIsCompaniesActive !== isCompaniesActive) {
+        setPrevIsCompaniesActive(isCompaniesActive);
+        if (isCompaniesActive) {
+            setCompaniesOpen(true);
+        }
+    }
+
+    // 사이드바 축소 상태에서만 아이콘 클릭 시 목록 페이지로 이동, 확장 상태에서는 토글만 수행
+    const handleCompaniesClick = () => {
+        if (sidebarState === 'collapsed') {
+            router.push(ROUTES.companies);
+        }
+    };
 
     return (
         <SidebarGroup>
@@ -92,26 +105,34 @@ export function SidebarNav() {
                         isActive={pathname === ROUTES.risk}
                     />
 
-
-                    {/* 회사 목록 — 접을 수 있는 서브메뉴, 버튼 클릭 시 목록 페이지로 이동 */}
-                    <Collapsible.Root defaultOpen={isCompaniesActive} className="group/collapsible">
+                    {/* 회사 목록 — 접을 수 있는 서브메뉴, 축소 상태에서만 아이콘 클릭 시 목록 페이지 이동 */}
+                    <Collapsible.Root
+                        open={companiesOpen}
+                        onOpenChange={setCompaniesOpen}
+                        className="group/collapsible"
+                    >
                         <SidebarMenuItem>
                             <Collapsible.Trigger asChild>
                                 <SidebarMenuButton
-                                    asChild
-                                    isActive={isCompaniesActive}
                                     tooltip="관리 대상 회사"
-                                    className={`${ACTIVE_CLASS} ${COLLAPSIBLE_ACTIVE_FIX}`}
+                                    onClick={handleCompaniesClick}
                                 >
-                                    <Link href={ROUTES.companies}>
-                                        <Building2 />
-                                        <span>관리 대상 회사</span>
-                                        <ChevronDown className="ml-auto size-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
-                                    </Link>
+                                    <Building2 />
+                                    <span>관리 대상 회사</span>
+                                    <ChevronDown className="ml-auto size-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
                                 </SidebarMenuButton>
                             </Collapsible.Trigger>
                             <Collapsible.Content>
                                 <SidebarMenuSub>
+                                    {/* 전체 목록 항목 */}
+                                    <SidebarMenuSubItem>
+                                        <SidebarMenuSubButton asChild isActive={isExactCompanies}>
+                                            <Link href={ROUTES.companies}>
+                                                <List className="size-3.5" />
+                                                <span>전체 목록</span>
+                                            </Link>
+                                        </SidebarMenuSubButton>
+                                    </SidebarMenuSubItem>
                                     {/* 회사별 서브 항목 */}
                                     {companies?.map((company) => {
                                         const flag = COUNTRY_FLAGS[company.country] ?? '';
