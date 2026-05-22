@@ -1,16 +1,9 @@
 import { sql } from '@/lib/db';
-import type { Country } from '@/types';
+import { rowToCountry } from '@/lib/db-mappers';
+import { apiError } from '@/lib/server/api-response';
 import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
-
-// DB row → Country 타입 변환
-function rowToCountry(row: Record<string, unknown>): Country {
-    return {
-        code: row.code as string,
-        name: row.name as string,
-    };
-}
 
 export async function GET() {
     try {
@@ -21,9 +14,6 @@ export async function GET() {
         `;
         return NextResponse.json(rows.map((row) => rowToCountry(row as Record<string, unknown>)));
     } catch {
-        return NextResponse.json(
-            { error: '국가 목록을 불러오지 못했습니다.' },
-            { status: 500 }
-        );
+        return apiError('국가 목록을 불러오지 못했습니다.');
     }
 }

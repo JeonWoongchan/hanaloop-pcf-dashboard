@@ -1,22 +1,21 @@
 import type { Company, Country, Post } from '@/types';
+async function fetchJson<T>(url: string, errorMessage: string): Promise<T> {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(errorMessage);
+    return res.json() as Promise<T>;
+}
 
 export async function fetchCountries(): Promise<Country[]> {
-    const res = await fetch('/api/countries');
-    if (!res.ok) throw new Error('국가 목록을 불러오지 못했습니다.');
-    return res.json() as Promise<Country[]>;
+    return fetchJson<Country[]>('/api/countries', '국가 목록을 불러오지 못했습니다.');
 }
 
 export async function fetchCompanies(): Promise<Company[]> {
-    const res = await fetch('/api/companies');
-    if (!res.ok) throw new Error('회사 목록을 불러오지 못했습니다.');
-    return res.json() as Promise<Company[]>;
+    return fetchJson<Company[]>('/api/companies', '회사 목록을 불러오지 못했습니다.');
 }
 
 // posts는 Route Handler(/api/posts)를 통해 Postgres에서 관리
 export async function fetchPosts(): Promise<Post[]> {
-    const res = await fetch('/api/posts');
-    if (!res.ok) throw new Error('게시글을 불러오지 못했습니다.');
-    return res.json() as Promise<Post[]>;
+    return fetchJson<Post[]>('/api/posts', '게시글을 불러오지 못했습니다.');
 }
 
 export async function createOrUpdatePost(p: Omit<Post, 'id'> & { id?: string }): Promise<Post> {

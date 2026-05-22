@@ -1,4 +1,5 @@
 import { sql } from '@/lib/db';
+import { apiError } from '@/lib/server/api-response';
 import type { Company, GhgEmission } from '@/types';
 import { NextResponse } from 'next/server';
 
@@ -65,9 +66,6 @@ export async function GET() {
 
         return NextResponse.json(rowsToCompanies(rows as CompanyEmissionRow[]));
     } catch {
-        return NextResponse.json(
-            { error: '회사 목록을 불러오지 못했습니다.' },
-            { status: 500 }
-        );
+        return apiError('회사 목록을 불러오지 못했습니다.');
     }
 }
