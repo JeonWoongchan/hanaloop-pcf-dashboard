@@ -59,9 +59,9 @@ export function formatCompanyName(name: string, maxLength = 14): string {
 }
 
 export const formatTooltipValue = (value: unknown, name: unknown) =>
-  typeof value === 'number'
-    ? [`${formatEmissions(value)} tCO₂e`, String(name)]
-    : ['-', String(name)];
+    typeof value === 'number'
+        ? [`${formatEmissions(value)} tCO₂e`, String(name)]
+        : ['-', String(name)];
 
 export type TrendProps = { label: string; className: string; Icon: LucideIcon | null };
 

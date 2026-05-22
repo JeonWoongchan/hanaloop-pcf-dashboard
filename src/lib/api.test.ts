@@ -75,14 +75,16 @@ describe('fake api', () => {
     it('기존 Action Note를 id 기준으로 수정한다', async () => {
         const api = await importFreshApi();
 
-        const updated = await resolveApiCall(api.createOrUpdatePost({
-            id: 'p1',
-            ...makePost({
-                title: '수정된 대응 기록',
-                content: '기존 메모 내용을 수정했습니다.',
-                author: '검토자',
-            }),
-        }));
+        const updated = await resolveApiCall(
+            api.createOrUpdatePost({
+                id: 'p1',
+                ...makePost({
+                    title: '수정된 대응 기록',
+                    content: '기존 메모 내용을 수정했습니다.',
+                    author: '검토자',
+                }),
+            })
+        );
         const posts = await resolveApiCall(api.fetchPosts());
 
         expect(updated).toMatchObject({
@@ -106,10 +108,7 @@ describe('fake api', () => {
     it('저장 실패 시 Action Note 목록을 변경하지 않는다', async () => {
         const randomSpy = vi.spyOn(Math, 'random');
         randomSpy.mockReset();
-        randomSpy
-            .mockReturnValueOnce(0.5)
-            .mockReturnValueOnce(0.1)
-            .mockReturnValue(0.5);
+        randomSpy.mockReturnValueOnce(0.5).mockReturnValueOnce(0.1).mockReturnValue(0.5);
         const api = await importFreshApi();
         vi.stubGlobal('crypto', { randomUUID: vi.fn(() => NEW_POST_ID) });
 
@@ -125,10 +124,7 @@ describe('fake api', () => {
     it('삭제 실패 시 기존 Action Note를 보존한다', async () => {
         const randomSpy = vi.spyOn(Math, 'random');
         randomSpy.mockReset();
-        randomSpy
-            .mockReturnValueOnce(0.5)
-            .mockReturnValueOnce(0.1)
-            .mockReturnValue(0.5);
+        randomSpy.mockReturnValueOnce(0.5).mockReturnValueOnce(0.1).mockReturnValue(0.5);
         const api = await importFreshApi();
 
         await expect(resolveApiCall(api.deletePost('p1'))).rejects.toThrow(

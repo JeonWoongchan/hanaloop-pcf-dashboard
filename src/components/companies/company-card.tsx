@@ -29,8 +29,8 @@ export function CompanyCard({
                     <div className="flex items-start justify-between gap-2">
                         {/* 회사명 + 국가 코드 */}
                         <div className="min-w-0">
-                            <h3 className="font-semibold leading-tight truncate">{company.name}</h3>
-                            <p className="text-xs text-muted-foreground">{company.country}</p>
+                            <h3 className="truncate leading-tight font-semibold">{company.name}</h3>
+                            <p className="text-muted-foreground text-xs">{company.country}</p>
                         </div>
                         {/* 리스크 뱃지 우측 상단 고정 */}
                         {riskAssessment && (
@@ -40,9 +40,11 @@ export function CompanyCard({
                         )}
                     </div>
                     {riskAssessment && (
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-muted-foreground text-xs">
                             리스크 점수{' '}
-                            <span className="font-medium text-foreground">{riskAssessment.score}점</span>
+                            <span className="text-foreground font-medium">
+                                {riskAssessment.score}점
+                            </span>
                         </p>
                     )}
                 </CardHeader>
@@ -51,7 +53,7 @@ export function CompanyCard({
                     {/* 연간 총 배출량 */}
                     <div>
                         <p className="text-2xl font-bold">{formatEmissions(company.total)}</p>
-                        <p className="text-xs text-muted-foreground">tCO₂e · {year}년 연간</p>
+                        <p className="text-muted-foreground text-xs">tCO₂e · {year}년 연간</p>
                     </div>
 
                     {/* GHG Scope 비중 스택 바 */}

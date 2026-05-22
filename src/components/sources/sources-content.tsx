@@ -5,7 +5,13 @@
 import { ErrorState } from '@/components/shared/error-state';
 import { YearSelector } from '@/components/shared/year-selector';
 import { Skeleton } from '@/components/ui/skeleton';
-import { SCOPE_COLORS, SCOPE_DESCRIPTIONS, SCOPE_LABELS, SCOPES, getScopeSourceColorMap } from '@/constants/ghg-scope';
+import {
+    SCOPE_COLORS,
+    SCOPE_DESCRIPTIONS,
+    SCOPE_LABELS,
+    SCOPES,
+    getScopeSourceColorMap,
+} from '@/constants/ghg-scope';
 import { useCompanies } from '@/hooks/companies/useCompanies';
 import { useSourceMetrics } from '@/hooks/sources/useSourceMetrics';
 import { getAvailableYears, getCompanyScatterPoints, getSelectedYear } from '@/lib/emissions';
@@ -21,7 +27,9 @@ function SourcesSkeleton() {
     return (
         <div className="space-y-6">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                {[1, 2, 3].map((i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
+                {[1, 2, 3].map((i) => (
+                    <Skeleton key={i} className="h-24 rounded-xl" />
+                ))}
             </div>
             <Skeleton className="h-80 rounded-xl" />
             <Skeleton className="h-75 rounded-xl" />
@@ -54,7 +62,7 @@ export function SourcesContent() {
     // 배출원별 색상 맵 단일 산정
     const sourceColorMap = useMemo(() => getScopeSourceColorMap(allSources), [allSources]);
     const activeSourceColor = activeSource
-        ? sourceColorMap[activeSource.source] ?? SCOPE_COLORS[activeSource.scope]
+        ? (sourceColorMap[activeSource.source] ?? SCOPE_COLORS[activeSource.scope])
         : null;
 
     const scatterData = useMemo(
@@ -87,14 +95,14 @@ export function SourcesContent() {
                 {SCOPES.map((scope) => (
                     <div
                         key={scope}
-                        className="rounded-xl border bg-card p-4 space-y-1"
+                        className="bg-card space-y-1 rounded-xl border p-4"
                         style={{ borderLeftWidth: 3, borderLeftColor: SCOPE_COLORS[scope] }}
                     >
                         <p className="text-xs font-medium" style={{ color: SCOPE_COLORS[scope] }}>
                             {SCOPE_LABELS[scope]}
                         </p>
                         <p className="text-2xl font-bold">{formatEmissions(scopeTotals[scope])}</p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-muted-foreground text-xs">
                             tCO₂e · {SCOPE_DESCRIPTIONS[scope]}
                         </p>
                     </div>

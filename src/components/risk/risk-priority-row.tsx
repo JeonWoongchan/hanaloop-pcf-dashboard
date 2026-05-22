@@ -26,13 +26,10 @@ export function RiskPriorityRow({ assessment }: Props) {
     return (
         <TableRow>
             {/* 회사명은 행 헤더(th)로 유지해 스크린 리더 접근성 확보 */}
-            <th
-                scope="row"
-                className="p-2 py-4 pr-4 text-left align-middle font-medium"
-            >
+            <th scope="row" className="p-2 py-4 pr-4 text-left align-middle font-medium">
                 <Link
                     href={ROUTES.companyDetail(assessment.id)}
-                    className="group inline-flex max-w-52 items-center gap-2 text-foreground hover:underline"
+                    className="group text-foreground inline-flex max-w-52 items-center gap-2 hover:underline"
                 >
                     <span>{COUNTRY_FLAGS[assessment.country] ?? ''}</span>
                     <span className="truncate">{assessment.name}</span>
@@ -46,13 +43,17 @@ export function RiskPriorityRow({ assessment }: Props) {
             <TableCell className="py-4 pr-4 text-right">
                 {formatEmissions(assessment.annualEmissions)} tCO₂e
             </TableCell>
-            <TableCell className="py-4 pr-4 text-right">{formatKrw(assessment.estimatedTaxKrw)}</TableCell>
+            <TableCell className="py-4 pr-4 text-right">
+                {formatKrw(assessment.estimatedTaxKrw)}
+            </TableCell>
             <TableCell className={`py-4 pr-4 text-center font-medium ${trend.className}`}>
                 {trend.label}
             </TableCell>
-            <TableCell className="py-4 pr-4 text-center">{getDominantScopeLabel(assessment)}</TableCell>
+            <TableCell className="py-4 pr-4 text-center">
+                {getDominantScopeLabel(assessment)}
+            </TableCell>
             <TableCell className="py-4 whitespace-normal">
-                <ul className="max-w-80 space-y-1 text-muted-foreground">
+                <ul className="text-muted-foreground max-w-80 space-y-1">
                     {assessment.reasons.map((reason, i) => (
                         <li key={i} className="leading-relaxed">
                             {reason}

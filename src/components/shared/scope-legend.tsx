@@ -15,7 +15,7 @@ const SCOPE_ICONS: Record<1 | 2 | 3, LucideIcon> = {
 
 export function ScopeLegend() {
     return (
-        <div className="flex flex-wrap gap-3 rounded-lg border bg-muted/40 px-4 py-3">
+        <div className="bg-muted/40 flex flex-wrap gap-3 rounded-lg border px-4 py-3">
             {([1, 2, 3] as const).map((scope) => {
                 const Icon = SCOPE_ICONS[scope];
                 const color = SCOPE_COLORS[scope];
@@ -33,7 +33,7 @@ export function ScopeLegend() {
                             <span className="font-semibold" style={{ color }}>
                                 {SCOPE_LABELS[scope]}
                             </span>
-                            <span className="ml-1.5 text-muted-foreground">
+                            <span className="text-muted-foreground ml-1.5">
                                 {SCOPE_DESCRIPTIONS[scope]}
                             </span>
                         </span>

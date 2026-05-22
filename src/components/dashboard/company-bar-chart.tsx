@@ -64,16 +64,26 @@ export function CompanyBarChart({ data, year }: Props) {
                         />
                         <Tooltip
                             labelFormatter={(name) => name}
-                            labelStyle={{ fontWeight: 600, color: 'var(--foreground)', marginBottom: 4 }}
+                            labelStyle={{
+                                fontWeight: 600,
+                                color: 'var(--foreground)',
+                                marginBottom: 4,
+                            }}
                             formatter={(value, _name, item) => {
                                 // 막대 색상과 툴팁 텍스트 색상 동기화
-                                const color = (item as { payload?: { fill?: string } }).payload?.fill;
-                                const formatted = typeof value === 'number'
-                                    ? `${formatEmissions(value)} tCO₂e`
-                                    : '-';
+                                const color = (item as { payload?: { fill?: string } }).payload
+                                    ?.fill;
+                                const formatted =
+                                    typeof value === 'number'
+                                        ? `${formatEmissions(value)} tCO₂e`
+                                        : '-';
                                 return [
-                                    <span key="v" style={{ color }}>{formatted}</span>,
-                                    <span key="n" style={{ color }}>연간 총 배출량</span>,
+                                    <span key="v" style={{ color }}>
+                                        {formatted}
+                                    </span>,
+                                    <span key="n" style={{ color }}>
+                                        연간 총 배출량
+                                    </span>,
                                 ];
                             }}
                             contentStyle={CHART_TOOLTIP_STYLE}
@@ -96,7 +106,7 @@ export function CompanyBarChart({ data, year }: Props) {
             <CardFooter className="border-t pt-4">
                 <Link
                     href={ROUTES.companies}
-                    className="flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                    className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-sm transition-colors"
                 >
                     전체 회사 목록 보기
                     <ArrowRight className="size-4" />

@@ -29,14 +29,17 @@ export function ReductionScenarioCard({ sourceId, scope, sourceTotal, totalEmiss
     const color = SCOPE_COLORS[scope];
     const savedTco2e = Math.round((sourceTotal * reductionPct) / 100);
     const savedKrw = savedTco2e * CARBON_TAX_RATE_KRW_PER_TCO2E;
-    const shareOfTotal = totalEmissions > 0 ? ((savedTco2e / totalEmissions) * 100).toFixed(1) : '0';
+    const shareOfTotal =
+        totalEmissions > 0 ? ((savedTco2e / totalEmissions) * 100).toFixed(1) : '0';
 
     return (
         <Card>
             <CardHeader>
                 <CardTitle className="flex items-center">
                     감축 시나리오
-                    <InfoTooltip content={`선택한 배출원(${label})의 감축률을 조정하면 예상 절감량과 탄소세 절감 효과를 확인할 수 있습니다. 가정 세율 ${formatEmissions(CARBON_TAX_RATE_KRW_PER_TCO2E)}원/tCO₂e 기준 시나리오입니다.`} />
+                    <InfoTooltip
+                        content={`선택한 배출원(${label})의 감축률을 조정하면 예상 절감량과 탄소세 절감 효과를 확인할 수 있습니다. 가정 세율 ${formatEmissions(CARBON_TAX_RATE_KRW_PER_TCO2E)}원/tCO₂e 기준 시나리오입니다.`}
+                    />
                 </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -44,8 +47,12 @@ export function ReductionScenarioCard({ sourceId, scope, sourceTotal, totalEmiss
                 <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">현재 배출량</span>
                     <span>
-                        <span className="font-semibold" style={{ color }}>{label}</span>
-                        <span className="ml-2 font-medium">{formatEmissions(sourceTotal)} tCO₂e</span>
+                        <span className="font-semibold" style={{ color }}>
+                            {label}
+                        </span>
+                        <span className="ml-2 font-medium">
+                            {formatEmissions(sourceTotal)} tCO₂e
+                        </span>
                     </span>
                 </div>
 
@@ -53,7 +60,9 @@ export function ReductionScenarioCard({ sourceId, scope, sourceTotal, totalEmiss
                 <div className="space-y-3">
                     <div className="flex items-center justify-between text-sm">
                         <span className="text-muted-foreground">감축 목표</span>
-                        <span className="text-lg font-bold" style={{ color }}>{reductionPct}%</span>
+                        <span className="text-lg font-bold" style={{ color }}>
+                            {reductionPct}%
+                        </span>
                     </div>
                     <input
                         type="range"
@@ -65,28 +74,28 @@ export function ReductionScenarioCard({ sourceId, scope, sourceTotal, totalEmiss
                         className="w-full accent-[var(--chart-1)]"
                         aria-label="감축 목표 비율"
                     />
-                    <div className="flex justify-between text-xs text-muted-foreground">
+                    <div className="text-muted-foreground flex justify-between text-xs">
                         <span>{MIN_PCT}%</span>
                         <span>{MAX_PCT}%</span>
                     </div>
                 </div>
 
                 {/* 절감 효과 */}
-                <div className="grid grid-cols-3 gap-3 rounded-lg bg-muted/40 p-4">
+                <div className="bg-muted/40 grid grid-cols-3 gap-3 rounded-lg p-4">
                     <div className="text-center">
-                        <p className="text-xs text-muted-foreground">절감량</p>
+                        <p className="text-muted-foreground text-xs">절감량</p>
                         <p className="mt-1 text-lg font-bold">{formatEmissions(savedTco2e)}</p>
-                        <p className="text-xs text-muted-foreground">tCO₂e</p>
+                        <p className="text-muted-foreground text-xs">tCO₂e</p>
                     </div>
                     <div className="text-center">
-                        <p className="text-xs text-muted-foreground">탄소세 절감</p>
-                        <p className="mt-1 text-lg font-bold text-success">{formatKrw(savedKrw)}</p>
-                        <p className="text-xs text-muted-foreground">시나리오 기준</p>
+                        <p className="text-muted-foreground text-xs">탄소세 절감</p>
+                        <p className="text-success mt-1 text-lg font-bold">{formatKrw(savedKrw)}</p>
+                        <p className="text-muted-foreground text-xs">시나리오 기준</p>
                     </div>
                     <div className="text-center">
-                        <p className="text-xs text-muted-foreground">전체 대비</p>
+                        <p className="text-muted-foreground text-xs">전체 대비</p>
                         <p className="mt-1 text-lg font-bold">{shareOfTotal}%</p>
-                        <p className="text-xs text-muted-foreground">포트폴리오 기여</p>
+                        <p className="text-muted-foreground text-xs">포트폴리오 기여</p>
                     </div>
                 </div>
             </CardContent>

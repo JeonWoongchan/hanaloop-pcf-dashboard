@@ -27,9 +27,7 @@ export async function fetchPosts(): Promise<Post[]> {
     return _posts;
 }
 
-export async function createOrUpdatePost(
-    p: Omit<Post, 'id'> & { id?: string }
-): Promise<Post> {
+export async function createOrUpdatePost(p: Omit<Post, 'id'> & { id?: string }): Promise<Post> {
     await delay(jitter());
     if (maybeFail()) throw new Error('저장에 실패했습니다. 다시 시도해 주세요.');
 

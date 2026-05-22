@@ -4,7 +4,7 @@ import './globals.css';
 import { DashboardShell } from '@/components/layout/dashboard-shell';
 import { Providers } from '@/components/providers';
 import { Toaster } from '@/components/ui/sonner';
-import {ReactNode} from "react";
+import { ReactNode } from 'react';
 
 const geistSans = Geist({
     variable: '--font-geist-sans',

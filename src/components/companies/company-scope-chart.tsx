@@ -37,7 +37,9 @@ export function CompanyScopeChart({ scopes, totalEmissions }: Props) {
         <Card>
             <CardHeading
                 title="Scope 구분 배출량"
-                tooltip={'GHG Protocol 국제 기준에 따라 배출량을 3가지로 구분합니다.\n\nScope 1 (직접): 직접 연소하는 연료(경유·휘발유·천연가스 등)\nScope 2 (간접): 구매한 전기·열·증기\nScope 3 (가치사슬): 물류·출장·폐기물 등 공급망 전반\n\n막대 오른쪽 비율(%)로 구성 비중을 확인할 수 있습니다.'}
+                tooltip={
+                    'GHG Protocol 국제 기준에 따라 배출량을 3가지로 구분합니다.\n\nScope 1 (직접): 직접 연소하는 연료(경유·휘발유·천연가스 등)\nScope 2 (간접): 구매한 전기·열·증기\nScope 3 (가치사슬): 물류·출장·폐기물 등 공급망 전반\n\n막대 오른쪽 비율(%)로 구성 비중을 확인할 수 있습니다.'
+                }
                 description="GHG Protocol 기준 직접·간접 배출 구분 (tCO₂e)"
             />
             <CardContent>
@@ -58,14 +60,16 @@ export function CompanyScopeChart({ scopes, totalEmissions }: Props) {
                         />
                         <Tooltip
                             formatter={(value) => [
-                                typeof value === 'number'
-                                    ? `${formatEmissions(value)} tCO₂e`
-                                    : '-',
+                                typeof value === 'number' ? `${formatEmissions(value)} tCO₂e` : '-',
                                 '배출량',
                             ]}
                             labelFormatter={(label) => {
-                                const scope = Object.entries(SCOPE_LABELS).find(([, v]) => v === label)?.[0];
-                                return scope ? SCOPE_DESCRIPTIONS[Number(scope) as 1 | 2 | 3] : label;
+                                const scope = Object.entries(SCOPE_LABELS).find(
+                                    ([, v]) => v === label
+                                )?.[0];
+                                return scope
+                                    ? SCOPE_DESCRIPTIONS[Number(scope) as 1 | 2 | 3]
+                                    : label;
                             }}
                             contentStyle={CHART_TOOLTIP_STYLE}
                         />

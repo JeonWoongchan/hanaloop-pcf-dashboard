@@ -16,7 +16,14 @@ type Props = {
     titleClassName?: string;
 };
 
-export function CardHeading({ title, tooltip, description, action, className, titleClassName }: Props) {
+export function CardHeading({
+    title,
+    tooltip,
+    description,
+    action,
+    className,
+    titleClassName,
+}: Props) {
     const titleNode = (
         <CardTitle className={`flex items-center${titleClassName ? ` ${titleClassName}` : ''}`}>
             {title}

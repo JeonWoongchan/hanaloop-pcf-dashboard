@@ -107,8 +107,7 @@ export function useActionNotes(companyId: string) {
         if (!deletingId) return;
         deletePost(deletingId, {
             onSuccess: () => toast.success('삭제됐습니다.'),
-            onError: (e) =>
-                toast.error(e instanceof Error ? e.message : '삭제에 실패했습니다.'),
+            onError: (e) => toast.error(e instanceof Error ? e.message : '삭제에 실패했습니다.'),
             onSettled: () => setDeletingId(null),
         });
     };
@@ -130,11 +129,15 @@ export function useActionNotes(companyId: string) {
 
     return {
         // 상태
-        open, setOpen,
-        content, setContent,
+        open,
+        setOpen,
+        content,
+        setContent,
         author,
-        deletingId, setDeletingId,
-        editingState, setEditingState,
+        deletingId,
+        setDeletingId,
+        editingState,
+        setEditingState,
         // 데이터
         posts,
         isLoading,

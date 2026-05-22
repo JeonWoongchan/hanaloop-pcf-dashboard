@@ -28,11 +28,11 @@ export function PostCard({ post, onEditAction }: Props) {
     };
 
     return (
-        <div className="rounded-lg border bg-card p-4 space-y-2">
+        <div className="bg-card space-y-2 rounded-lg border p-4">
             <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                    <p className="font-medium leading-tight truncate">{post.title}</p>
-                    <p className="mt-0.5 text-xs text-muted-foreground">
+                    <p className="truncate leading-tight font-medium">{post.title}</p>
+                    <p className="text-muted-foreground mt-0.5 text-xs">
                         {formatYearMonth(post.dateTime)}
                     </p>
                 </div>
@@ -50,7 +50,7 @@ export function PostCard({ post, onEditAction }: Props) {
                     <Button
                         size="icon"
                         variant="ghost"
-                        className="size-7 text-destructive hover:text-destructive"
+                        className="text-destructive hover:text-destructive size-7"
                         onClick={handleDelete}
                         disabled={isPending}
                         aria-label="포스트 삭제"
@@ -59,7 +59,7 @@ export function PostCard({ post, onEditAction }: Props) {
                     </Button>
                 </div>
             </div>
-            <p className="text-sm text-muted-foreground line-clamp-2">{post.content}</p>
+            <p className="text-muted-foreground line-clamp-2 text-sm">{post.content}</p>
         </div>
     );
 }

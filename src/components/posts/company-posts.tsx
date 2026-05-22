@@ -43,8 +43,7 @@ export function CompanyPosts({ companyId }: Props) {
             <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">포스트</h3>
                 <Button size="sm" onClick={handleNew}>
-                    <Plus className="mr-1.5 size-4" />
-                    새 포스트
+                    <Plus className="mr-1.5 size-4" />새 포스트
                 </Button>
             </div>
 

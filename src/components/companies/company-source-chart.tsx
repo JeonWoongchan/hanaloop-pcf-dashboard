@@ -35,7 +35,7 @@ export function CompanySourceChart({ sources, year }: Props) {
             />
             <CardContent>
                 {/* Scope 색상 범례 */}
-                <div className="mb-3 flex flex-wrap gap-3 text-xs text-muted-foreground">
+                <div className="text-muted-foreground mb-3 flex flex-wrap gap-3 text-xs">
                     {([1, 2, 3] as const).map((scope) => (
                         <span key={scope} className="flex items-center gap-1">
                             <span
@@ -70,16 +70,12 @@ export function CompanySourceChart({ sources, year }: Props) {
                         />
                         <Tooltip
                             formatter={(value) => [
-                                typeof value === 'number'
-                                    ? `${formatEmissions(value)} tCO₂e`
-                                    : '-',
+                                typeof value === 'number' ? `${formatEmissions(value)} tCO₂e` : '-',
                                 '배출량',
                             ]}
                             labelFormatter={(label) => {
                                 const item = data.find((d) => d.label === label);
-                                return item
-                                    ? `${label} (${SCOPE_LABELS[item.scope]})`
-                                    : label;
+                                return item ? `${label} (${SCOPE_LABELS[item.scope]})` : label;
                             }}
                             contentStyle={CHART_TOOLTIP_STYLE}
                         />

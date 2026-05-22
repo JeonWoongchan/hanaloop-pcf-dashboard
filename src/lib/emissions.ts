@@ -74,9 +74,7 @@ export function getMonthlyTotals(companies: Company[]): MonthlyTotal[] {
 }
 
 // Recharts 라인 차트용 회사별 월별 배출량 (wide format 변환)
-export function getMonthlyByCompany(
-    companies: Company[]
-): Record<string, number | string>[] {
+export function getMonthlyByCompany(companies: Company[]): Record<string, number | string>[] {
     const months = getUniqueMonths(companies);
     return months.map((month) => {
         const row: Record<string, number | string> = { month };
@@ -126,9 +124,7 @@ export function getMergedMonthlyData(
 }
 
 function sumByMonth(emissions: GhgEmission[], month: string): number {
-    return emissions
-        .filter((e) => e.yearMonth === month)
-        .reduce((sum, e) => sum + e.emissions, 0);
+    return emissions.filter((e) => e.yearMonth === month).reduce((sum, e) => sum + e.emissions, 0);
 }
 
 function getUniqueMonthsForCompany(emissions: GhgEmission[]): string[] {
@@ -144,9 +140,7 @@ function getUniqueMonths(companies: Company[]): string[] {
 }
 
 // 회사 월별 Scope 1/2/3 배출량 (스택 에어리어 차트용 wide format)
-export function getMonthlyByScope(
-    emissions: GhgEmission[]
-): Record<string, number | string>[] {
+export function getMonthlyByScope(emissions: GhgEmission[]): Record<string, number | string>[] {
     const months = [...new Set(emissions.map((e) => e.yearMonth))].sort();
     return months.map((month) => {
         const row: Record<string, number | string> = { month };
@@ -180,10 +174,7 @@ export function getTotalBySource(
 }
 
 // 특정 배출원의 월별 합산 — 배출원 드릴다운 추이 차트용
-export function getMonthlyTotalsBySource(
-    emissions: GhgEmission[],
-    source: string
-): MonthlyTotal[] {
+export function getMonthlyTotalsBySource(emissions: GhgEmission[], source: string): MonthlyTotal[] {
     const map = new Map<string, number>();
     for (const e of emissions) {
         if (e.source !== source) continue;
@@ -281,10 +272,7 @@ export type CompanyScatterPoint = {
     topSourcePct: number;
 };
 
-export function getCompanyScatterPoints(
-    companies: Company[],
-    year: number
-): CompanyScatterPoint[] {
+export function getCompanyScatterPoints(companies: Company[], year: number): CompanyScatterPoint[] {
     return companies.flatMap((c) => {
         const filtered = filterByYear(c.emissions, year);
         const total = filtered.reduce((sum, e) => sum + e.emissions, 0);
@@ -296,15 +284,17 @@ export function getCompanyScatterPoints(
         const dominantScope = [...scopes].sort((a, b) => b.pct - a.pct)[0]?.scope ?? 1;
         const pctOf = (s: 1 | 2 | 3) => scopes.find((x) => x.scope === s)?.pct ?? 0;
 
-        return [{
-            id: c.id,
-            name: c.name,
-            total,
-            s1Pct: pctOf(1),
-            s2Pct: pctOf(2),
-            s3Pct: pctOf(3),
-            dominantScope,
-            topSourcePct,
-        }];
+        return [
+            {
+                id: c.id,
+                name: c.name,
+                total,
+                s1Pct: pctOf(1),
+                s2Pct: pctOf(2),
+                s3Pct: pctOf(3),
+                dominantScope,
+                topSourcePct,
+            },
+        ];
     });
 }

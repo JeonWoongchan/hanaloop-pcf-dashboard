@@ -53,9 +53,7 @@ export function YearlyComparisonChart({
                         />
                         <Tooltip
                             formatter={(value) => [
-                                typeof value === 'number'
-                                    ? `${formatEmissions(value)} tCO₂e`
-                                    : '-',
+                                typeof value === 'number' ? `${formatEmissions(value)} tCO₂e` : '-',
                                 '총 배출량',
                             ]}
                             labelFormatter={(label) => `${label}년`}

@@ -6,9 +6,5 @@ type Props = {
 
 // 빈 상태 안내 메시지 렌더링
 export function EmptyState({ message = '데이터가 없습니다.' }: Props) {
-    return (
-        <div className="py-16 text-center text-muted-foreground">
-            {message}
-        </div>
-    );
+    return <div className="text-muted-foreground py-16 text-center">{message}</div>;
 }

@@ -24,12 +24,12 @@ export function AppSidebar() {
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild tooltip="GHG Dashboard">
                             <Link href={ROUTES.dashboard}>
-                                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                                <div className="bg-primary text-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
                                     <BarChart3 className="size-4" />
                                 </div>
                                 <div className="flex flex-col gap-0.5 leading-none">
                                     <span className="font-semibold">GHG Dashboard</span>
-                                    <span className="text-xs text-muted-foreground">HanaLoop</span>
+                                    <span className="text-muted-foreground text-xs">HanaLoop</span>
                                 </div>
                             </Link>
                         </SidebarMenuButton>
@@ -40,10 +40,12 @@ export function AppSidebar() {
                 <SidebarNav />
             </SidebarContent>
             <SidebarFooter className="border-t px-3 py-3">
-                <div className="group-data-[collapsible=icon]:hidden space-y-2">
-                    <p className="text-xs font-medium text-foreground">GHG Emissions Dashboard</p>
-                    <p className="text-xs text-muted-foreground">HanaLoop · PCF 관리 플랫폼</p>
-                    <p className="text-xs text-muted-foreground">© 2026 HanaLoop. All rights reserved.</p>
+                <div className="space-y-2 group-data-[collapsible=icon]:hidden">
+                    <p className="text-foreground text-xs font-medium">GHG Emissions Dashboard</p>
+                    <p className="text-muted-foreground text-xs">HanaLoop · PCF 관리 플랫폼</p>
+                    <p className="text-muted-foreground text-xs">
+                        © 2026 HanaLoop. All rights reserved.
+                    </p>
                 </div>
             </SidebarFooter>
             {/* 접힌 상태에서 마우스오버 시 사이드바를 펼치는 핸들 */}

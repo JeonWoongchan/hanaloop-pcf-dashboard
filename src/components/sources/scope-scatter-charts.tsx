@@ -34,13 +34,16 @@ function PositioningTooltip({ active, payload }: TooltipProps) {
             {SCOPES.map((s) => {
                 const pct = s === 1 ? d.s1Pct : s === 2 ? d.s2Pct : d.s3Pct;
                 return (
-                    <p key={s} className="flex items-center gap-1.5 text-muted-foreground">
-                        <span className="size-1.5 rounded-full" style={{ backgroundColor: SCOPE_COLORS[s] }} />
+                    <p key={s} className="text-muted-foreground flex items-center gap-1.5">
+                        <span
+                            className="size-1.5 rounded-full"
+                            style={{ backgroundColor: SCOPE_COLORS[s] }}
+                        />
                         {SCOPE_LABELS[s]} {pct.toFixed(1)}%
                     </p>
                 );
             })}
-            <p className="mt-1 text-muted-foreground">총 {formatEmissions(d.total)} tCO₂e</p>
+            <p className="text-muted-foreground mt-1">총 {formatEmissions(d.total)} tCO₂e</p>
         </div>
     );
 }
@@ -54,8 +57,11 @@ function ConcentrationTooltip({ active, payload }: TooltipProps) {
             <p className="mb-1.5 font-semibold">{d.name}</p>
             <p className="text-muted-foreground">총 배출량 {formatEmissions(d.total)} tCO₂e</p>
             <p className="text-muted-foreground">최다 배출원 비중 {d.topSourcePct.toFixed(1)}%</p>
-            <p className="flex items-center gap-1.5 text-muted-foreground">
-                <span className="size-1.5 rounded-full" style={{ backgroundColor: SCOPE_COLORS[d.dominantScope] }} />
+            <p className="text-muted-foreground flex items-center gap-1.5">
+                <span
+                    className="size-1.5 rounded-full"
+                    style={{ backgroundColor: SCOPE_COLORS[d.dominantScope] }}
+                />
                 지배적 Scope {SCOPE_LABELS[d.dominantScope]}
             </p>
         </div>
@@ -66,8 +72,11 @@ function ScopeLegend() {
     return (
         <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
             {SCOPES.map((s) => (
-                <span key={s} className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: SCOPE_COLORS[s] }} />
+                <span key={s} className="text-muted-foreground flex items-center gap-1 text-xs">
+                    <span
+                        className="size-2 shrink-0 rounded-full"
+                        style={{ backgroundColor: SCOPE_COLORS[s] }}
+                    />
                     {SCOPE_LABELS[s]}
                 </span>
             ))}
@@ -106,7 +115,12 @@ export function ScopeScatterCharts({ data, year }: Props) {
                                 tick={CHART_AXIS_STYLE}
                                 axisLine={false}
                                 tickLine={false}
-                                label={{ value: 'Scope 1 비중 (%)', position: 'insideBottom', offset: -16, ...CHART_AXIS_STYLE }}
+                                label={{
+                                    value: 'Scope 1 비중 (%)',
+                                    position: 'insideBottom',
+                                    offset: -16,
+                                    ...CHART_AXIS_STYLE,
+                                }}
                             />
                             <YAxis
                                 dataKey="s2Pct"
@@ -117,7 +131,13 @@ export function ScopeScatterCharts({ data, year }: Props) {
                                 tick={CHART_AXIS_STYLE}
                                 axisLine={false}
                                 tickLine={false}
-                                label={{ value: 'Scope 2 비중 (%)', angle: -90, position: 'insideLeft', offset: 16, ...CHART_AXIS_STYLE }}
+                                label={{
+                                    value: 'Scope 2 비중 (%)',
+                                    angle: -90,
+                                    position: 'insideLeft',
+                                    offset: 16,
+                                    ...CHART_AXIS_STYLE,
+                                }}
                             />
                             <ZAxis dataKey="total" range={[40, 400]} />
                             <Tooltip content={<PositioningTooltip />} />
@@ -157,7 +177,12 @@ export function ScopeScatterCharts({ data, year }: Props) {
                                 tick={CHART_AXIS_STYLE}
                                 axisLine={false}
                                 tickLine={false}
-                                label={{ value: '총 배출량 (tCO₂e)', position: 'insideBottom', offset: -16, ...CHART_AXIS_STYLE }}
+                                label={{
+                                    value: '총 배출량 (tCO₂e)',
+                                    position: 'insideBottom',
+                                    offset: -16,
+                                    ...CHART_AXIS_STYLE,
+                                }}
                             />
                             <YAxis
                                 dataKey="topSourcePct"
@@ -168,7 +193,13 @@ export function ScopeScatterCharts({ data, year }: Props) {
                                 tick={CHART_AXIS_STYLE}
                                 axisLine={false}
                                 tickLine={false}
-                                label={{ value: '최다 배출원 비중 (%)', angle: -90, position: 'insideLeft', offset: 16, ...CHART_AXIS_STYLE }}
+                                label={{
+                                    value: '최다 배출원 비중 (%)',
+                                    angle: -90,
+                                    position: 'insideLeft',
+                                    offset: 16,
+                                    ...CHART_AXIS_STYLE,
+                                }}
                             />
                             <ZAxis range={[60, 60]} />
                             <Tooltip content={<ConcentrationTooltip />} />

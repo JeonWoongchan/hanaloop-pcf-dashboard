@@ -30,7 +30,7 @@ export function MetricCard({
     const card = (
         <Card className={href ? 'cursor-pointer transition-shadow hover:shadow-md' : ''}>
             <CardHeader className="pb-2">
-                <CardTitle className="flex items-center text-sm font-medium text-muted-foreground">
+                <CardTitle className="text-muted-foreground flex items-center text-sm font-medium">
                     {title}
                     <InfoTooltip content={tooltip} />
                 </CardTitle>
@@ -45,5 +45,11 @@ export function MetricCard({
         </Card>
     );
 
-    return href ? <Link href={href} className="block">{card}</Link> : card;
+    return href ? (
+        <Link href={href} className="block">
+            {card}
+        </Link>
+    ) : (
+        card
+    );
 }

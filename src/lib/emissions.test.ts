@@ -54,11 +54,13 @@ const companyB: Company = {
 
 describe('emissions utilities', () => {
     it('배출량 합계를 tCO₂e 표시 기준에 맞게 반올림한다', () => {
-        expect(sumEmissions([
-            { yearMonth: '2024-01', source: 'diesel', emissions: 10.4 },
-            { yearMonth: '2024-01', source: 'electricity', emissions: 20.4 },
-            { yearMonth: '2024-01', source: 'shipping', emissions: 0.4 },
-        ])).toBe(31);
+        expect(
+            sumEmissions([
+                { yearMonth: '2024-01', source: 'diesel', emissions: 10.4 },
+                { yearMonth: '2024-01', source: 'electricity', emissions: 20.4 },
+                { yearMonth: '2024-01', source: 'shipping', emissions: 0.4 },
+            ])
+        ).toBe(31);
     });
 
     it('연도 필터와 선택 가능한 연도 목록을 계산한다', () => {
@@ -127,16 +129,18 @@ describe('emissions utilities', () => {
     });
 
     it('월별 회사 데이터와 전체 합산을 month 키 기준으로 병합한다', () => {
-        expect(getMergedMonthlyData(
-            [
-                { month: '2024-02', 'Alpha Manufacturing': 30 },
-                { month: '2024-01', 'Alpha Manufacturing': 31 },
-            ],
-            [
-                { month: '2024-01', total: 40 },
-                { month: '2024-02', total: 30 },
-            ]
-        )).toEqual([
+        expect(
+            getMergedMonthlyData(
+                [
+                    { month: '2024-02', 'Alpha Manufacturing': 30 },
+                    { month: '2024-01', 'Alpha Manufacturing': 31 },
+                ],
+                [
+                    { month: '2024-01', total: 40 },
+                    { month: '2024-02', total: 30 },
+                ]
+            )
+        ).toEqual([
             { month: '2024-02', 'Alpha Manufacturing': 30, [TOTAL_EMISSIONS_KEY]: 30 },
             { month: '2024-01', 'Alpha Manufacturing': 31, [TOTAL_EMISSIONS_KEY]: 40 },
         ]);

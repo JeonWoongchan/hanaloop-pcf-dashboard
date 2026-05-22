@@ -25,11 +25,15 @@ type Props = {
 
 export function ActionNotesPanel({ companyId }: Props) {
     const {
-        open, setOpen,
-        content, setContent,
+        open,
+        setOpen,
+        content,
+        setContent,
         author,
-        deletingId, setDeletingId,
-        editingState, setEditingState,
+        deletingId,
+        setDeletingId,
+        editingState,
+        setEditingState,
         posts,
         isLoading,
         sortedPosts,
@@ -63,7 +67,7 @@ export function ActionNotesPanel({ companyId }: Props) {
                         <AlertDialogAction
                             onClick={confirmDelete}
                             disabled={isDeleting}
-                            className="bg-destructive text-white hover:bg-destructive/90"
+                            className="bg-destructive hover:bg-destructive/90 text-white"
                         >
                             {isDeleting ? '삭제 중...' : '삭제'}
                         </AlertDialogAction>
@@ -75,13 +79,13 @@ export function ActionNotesPanel({ companyId }: Props) {
             {!open && (
                 <Button
                     onClick={() => setOpen(true)}
-                    className="cursor-pointer fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full bg-primary px-5 py-6 text-primary-foreground shadow-lg transition-all hover:scale-105 hover:shadow-xl"
+                    className="bg-primary text-primary-foreground fixed right-6 bottom-6 z-50 flex cursor-pointer items-center gap-2 rounded-full px-5 py-6 shadow-lg transition-all hover:scale-105 hover:shadow-xl"
                     aria-label="Action Notes 열기"
                 >
                     <MessageCircle className="size-5 shrink-0" />
-                    <span className="text-sm font-medium leading-none">Action Notes</span>
+                    <span className="text-sm leading-none font-medium">Action Notes</span>
                     {posts && posts.length > 0 && (
-                        <span className="flex size-5 items-center justify-center rounded-full bg-destructive text-xs text-white">
+                        <span className="bg-destructive flex size-5 items-center justify-center rounded-full text-xs text-white">
                             {posts.length}
                         </span>
                     )}
@@ -90,18 +94,18 @@ export function ActionNotesPanel({ companyId }: Props) {
 
             {/* 패널 */}
             {open && (
-                <div className="fixed bottom-6 right-6 z-50 flex w-80 lg:w-140 h-140 flex-col rounded-2xl border bg-card shadow-2xl">
+                <div className="bg-card fixed right-6 bottom-6 z-50 flex h-140 w-80 flex-col rounded-2xl border shadow-2xl lg:w-140">
                     {/* 헤더 */}
                     <div className="flex items-center justify-between border-b px-4 py-3">
                         <div>
                             <p className="font-semibold">Action Notes</p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-muted-foreground text-xs">
                                 대응 기록 및 감축 조치 메모
                             </p>
                         </div>
                         <button
                             onClick={() => setOpen(false)}
-                            className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                            className="text-muted-foreground hover:bg-accent hover:text-foreground rounded-md p-1 transition-colors"
                             aria-label="닫기"
                         >
                             <X className="size-4" />
@@ -109,26 +113,31 @@ export function ActionNotesPanel({ companyId }: Props) {
                     </div>
 
                     {/* 메모 목록 */}
-                    <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
+                    <div className="flex-1 space-y-3 overflow-y-auto px-4 py-3">
                         {isLoading && (
-                            <p className="py-8 text-center text-sm text-muted-foreground">
+                            <p className="text-muted-foreground py-8 text-center text-sm">
                                 불러오는 중...
                             </p>
                         )}
                         {!isLoading && sortedPosts.length === 0 && (
-                            <p className="py-8 text-center text-sm text-muted-foreground">
+                            <p className="text-muted-foreground py-8 text-center text-sm">
                                 아직 작성된 Action Notes가 없습니다.
                             </p>
                         )}
                         {sortedPosts.map((post) => {
                             const isEditing = editingState?.id === post.id;
                             return (
-                                <div key={post.id} className="rounded-lg border bg-card p-3 space-y-1.5">
+                                <div
+                                    key={post.id}
+                                    className="bg-card space-y-1.5 rounded-lg border p-3"
+                                >
                                     {/* 작성자·날짜 + 수정·삭제 버튼 */}
                                     <div className="flex items-start justify-between gap-2">
                                         <div className="min-w-0">
-                                            <span className="text-xs font-medium">{post.author}</span>
-                                            <p className="text-xs text-muted-foreground">
+                                            <span className="text-xs font-medium">
+                                                {post.author}
+                                            </span>
+                                            <p className="text-muted-foreground text-xs">
                                                 {formatDateTime(post.dateTime)}
                                             </p>
                                         </div>
@@ -136,14 +145,14 @@ export function ActionNotesPanel({ companyId }: Props) {
                                             <div className="flex shrink-0 items-center gap-0.5">
                                                 <button
                                                     onClick={() => startEdit(post)}
-                                                    className="rounded p-0.5 text-muted-foreground transition-colors hover:text-foreground"
+                                                    className="text-muted-foreground hover:text-foreground rounded p-0.5 transition-colors"
                                                     aria-label="수정"
                                                 >
                                                     <Pencil className="size-3.5" />
                                                 </button>
                                                 <button
                                                     onClick={() => setDeletingId(post.id)}
-                                                    className="rounded p-0.5 text-muted-foreground transition-colors hover:text-destructive"
+                                                    className="text-muted-foreground hover:text-destructive rounded p-0.5 transition-colors"
                                                     aria-label="삭제"
                                                 >
                                                     <Trash2 className="size-3.5" />
@@ -159,7 +168,9 @@ export function ActionNotesPanel({ companyId }: Props) {
                                                 value={editingState.content}
                                                 onChange={(e) =>
                                                     setEditingState((prev) =>
-                                                        prev ? { ...prev, content: e.target.value } : null
+                                                        prev
+                                                            ? { ...prev, content: e.target.value }
+                                                            : null
                                                     )
                                                 }
                                                 onKeyDown={handleEditKeyDown}
@@ -182,7 +193,9 @@ export function ActionNotesPanel({ companyId }: Props) {
                                                     size="sm"
                                                     className="h-7 px-2 text-xs"
                                                     onClick={handleSaveEdit}
-                                                    disabled={isUpdating || !editingState.content.trim()}
+                                                    disabled={
+                                                        isUpdating || !editingState.content.trim()
+                                                    }
                                                 >
                                                     <Check className="mr-1 size-3" />
                                                     저장
@@ -190,7 +203,7 @@ export function ActionNotesPanel({ companyId }: Props) {
                                             </div>
                                         </div>
                                     ) : (
-                                        <p className="text-sm leading-relaxed text-foreground whitespace-pre-wrap break-words">
+                                        <p className="text-foreground text-sm leading-relaxed break-words whitespace-pre-wrap">
                                             {post.content}
                                         </p>
                                     )}
@@ -201,7 +214,7 @@ export function ActionNotesPanel({ companyId }: Props) {
                     </div>
 
                     {/* 입력 영역 */}
-                    <div className="border-t p-3 space-y-2">
+                    <div className="space-y-2 border-t p-3">
                         <Input
                             value={author}
                             onChange={(e) => handleAuthorChange(e.target.value)}
@@ -229,7 +242,7 @@ export function ActionNotesPanel({ companyId }: Props) {
                                 <Send className="size-4" />
                             </Button>
                         </div>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-muted-foreground text-xs">
                             Enter 전송 · Shift+Enter 줄바꿈
                         </p>
                     </div>

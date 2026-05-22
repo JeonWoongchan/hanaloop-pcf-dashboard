@@ -43,7 +43,12 @@ export function CompanyMonthlyChart({ data, year }: Props) {
                             axisLine={false}
                             tickLine={false}
                         />
-                        <YAxis tick={CHART_AXIS_STYLE} axisLine={false} tickLine={false} width={44} />
+                        <YAxis
+                            tick={CHART_AXIS_STYLE}
+                            axisLine={false}
+                            tickLine={false}
+                            width={44}
+                        />
                         <Tooltip
                             labelFormatter={(label) =>
                                 typeof label === 'string' ? formatYearMonth(label) : ''

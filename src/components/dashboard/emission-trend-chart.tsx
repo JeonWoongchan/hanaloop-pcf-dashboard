@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MultiSelectPopover } from '@/components/shared/multi-select-popover';
 import { CHART_AXIS_STYLE, CHART_COLORS, CHART_TOOLTIP_STYLE } from '@/constants/chart';
 import { TOTAL_EMISSIONS_KEY } from '@/lib/emissions';
-import {formatMonthShort, formatTooltipValue, formatYearMonth} from '@/lib/format';
+import { formatMonthShort, formatTooltipValue, formatYearMonth } from '@/lib/format';
 import type { Company } from '@/types';
 import { X } from 'lucide-react';
 import { parseAsArrayOf, parseAsString, useQueryState } from 'nuqs';
@@ -58,7 +58,9 @@ function ChartAxes({ yDomain }: { yDomain?: [number, (dataMax: number) => number
                 domain={yDomain}
             />
             <Tooltip
-                labelFormatter={(label) => (typeof label === 'string' ? formatYearMonth(label) : '')}
+                labelFormatter={(label) =>
+                    typeof label === 'string' ? formatYearMonth(label) : ''
+                }
                 formatter={formatTooltipValue}
                 contentStyle={CHART_TOOLTIP_STYLE}
             />
@@ -69,7 +71,6 @@ function ChartAxes({ yDomain }: { yDomain?: [number, (dataMax: number) => number
         </>
     );
 }
-
 
 type CompanyBadgeListProps = {
     companies: Company[];
@@ -93,7 +94,7 @@ function CompanyBadgeList({ companies, onRemove, colorOffset = 0 }: CompanyBadge
                     {company.name}
                     <button
                         onClick={() => onRemove(company.id)}
-                        className="ml-0.5 rounded hover:text-foreground"
+                        className="hover:text-foreground ml-0.5 rounded"
                     >
                         <X className="size-3" />
                     </button>
@@ -241,7 +242,9 @@ export function EmissionTrendChart({ data, companies, year }: Props) {
         <Card>
             <CardHeading
                 title="월간 배출량 추이"
-                tooltip={'전체 기업 합산 또는 기업별 월간 배출량을 차트로 표시합니다.\n\n전체 합산 탭: 합산 추이를 에어리어 차트로 표시하며, 특정 기업을 최대 5개까지 점선으로 오버레이 비교할 수 있습니다.\n\n회사별 비교 탭: 원하는 기업만 선택해 라인 차트로 비교합니다.'}
+                tooltip={
+                    '전체 기업 합산 또는 기업별 월간 배출량을 차트로 표시합니다.\n\n전체 합산 탭: 합산 추이를 에어리어 차트로 표시하며, 특정 기업을 최대 5개까지 점선으로 오버레이 비교할 수 있습니다.\n\n회사별 비교 탭: 원하는 기업만 선택해 라인 차트로 비교합니다.'
+                }
                 description={`${year}년 월간 온실가스 배출량 (tCO₂e)`}
             />
             <CardContent>

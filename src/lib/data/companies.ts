@@ -15,7 +15,10 @@ function scaleToYear(
     return base.map((e) => ({
         ...e,
         yearMonth: `${year}-${e.yearMonth.slice(5)}`,
-        emissions: Math.max(1, Math.round((sourceScales?.[e.source] ?? defaultScale) * e.emissions)),
+        emissions: Math.max(
+            1,
+            Math.round((sourceScales?.[e.source] ?? defaultScale) * e.emissions)
+        ),
     }));
 }
 
@@ -459,7 +462,7 @@ export const companies: Company[] = [
         emissions: [
             ...scaleToYear(ACME_2024, '2023', 1.12),
             ...ACME_2024,
-            ...scaleToYear(ACME_2024, '2025', 0.90),
+            ...scaleToYear(ACME_2024, '2025', 0.9),
             ...upTo(scaleToYear(ACME_2024, '2026', 0.82)),
         ],
     },
@@ -468,7 +471,7 @@ export const companies: Company[] = [
         name: 'GreenLogistics GmbH',
         country: 'DE',
         emissions: [
-            ...scaleToYear(GREEN_2024, '2023', 0.90),
+            ...scaleToYear(GREEN_2024, '2023', 0.9),
             ...GREEN_2024,
             ...scaleToYear(GREEN_2024, '2025', 1.08),
             ...upTo(scaleToYear(GREEN_2024, '2026', 1.05)),
@@ -493,19 +496,21 @@ export const companies: Company[] = [
             // 2023: 태양광 설치 전 — 전기 사용량이 높고 출장도 잦음
             ...scaleToYear(TOKYO_2024, '2023', 1.0, {
                 electricity: 1.15,
-                businessTravel: 1.10,
+                businessTravel: 1.1,
             }),
             ...TOKYO_2024,
             // 2025: 태양광 풀 효과 — 전기 배출 대폭 감소
             ...scaleToYear(TOKYO_2024, '2025', 1.0, {
                 electricity: 0.45,
-                businessTravel: 0.90,
+                businessTravel: 0.9,
             }),
             // 2026: 추가 에너지 효율화
-            ...upTo(scaleToYear(TOKYO_2024, '2026', 1.0, {
-                electricity: 0.40,
-                businessTravel: 0.85,
-            })),
+            ...upTo(
+                scaleToYear(TOKYO_2024, '2026', 1.0, {
+                    electricity: 0.4,
+                    businessTravel: 0.85,
+                })
+            ),
         ],
     },
     {
@@ -524,7 +529,7 @@ export const companies: Company[] = [
         name: 'London Pharma Ltd.',
         country: 'GB',
         emissions: [
-            ...scaleToYear(LONDON_2024, '2023', 1.10),
+            ...scaleToYear(LONDON_2024, '2023', 1.1),
             ...LONDON_2024,
             ...scaleToYear(LONDON_2024, '2025', 0.93),
             ...upTo(scaleToYear(LONDON_2024, '2026', 0.88)),
@@ -538,7 +543,7 @@ export const companies: Company[] = [
             ...scaleToYear(RENAULT_2024, '2023', 1.15),
             ...RENAULT_2024,
             ...scaleToYear(RENAULT_2024, '2025', 0.88),
-            ...upTo(scaleToYear(RENAULT_2024, '2026', 0.80)),
+            ...upTo(scaleToYear(RENAULT_2024, '2026', 0.8)),
         ],
     },
     {
@@ -549,7 +554,7 @@ export const companies: Company[] = [
             ...scaleToYear(OUTBACK_2024, '2023', 0.92),
             ...OUTBACK_2024,
             ...scaleToYear(OUTBACK_2024, '2025', 1.06),
-            ...upTo(scaleToYear(OUTBACK_2024, '2026', 1.10)),
+            ...upTo(scaleToYear(OUTBACK_2024, '2026', 1.1)),
         ],
     },
     {

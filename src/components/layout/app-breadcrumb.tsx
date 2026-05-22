@@ -16,19 +16,19 @@ export function AppBreadcrumb() {
     const currentCompany = companies?.find((c) => c.id === companyId);
 
     if (pathname === ROUTES.dashboard) {
-        return <span className="text-sm font-medium text-foreground">대시보드</span>;
+        return <span className="text-foreground text-sm font-medium">대시보드</span>;
     }
 
     if (pathname === ROUTES.companies) {
-        return <span className="text-sm font-medium text-foreground">관리 대상 회사</span>;
+        return <span className="text-foreground text-sm font-medium">관리 대상 회사</span>;
     }
 
     if (pathname === ROUTES.sources) {
-        return <span className="text-sm font-medium text-foreground">배출원 분석</span>;
+        return <span className="text-foreground text-sm font-medium">배출원 분석</span>;
     }
 
     if (pathname === ROUTES.risk) {
-        return <span className="text-sm font-medium text-foreground">리스크 관리</span>;
+        return <span className="text-foreground text-sm font-medium">리스크 관리</span>;
     }
 
     if (isCompanyDetail) {
@@ -41,7 +41,7 @@ export function AppBreadcrumb() {
                     관리 대상 회사
                 </Link>
                 <span className="text-muted-foreground">/</span>
-                <span className="font-medium text-foreground">
+                <span className="text-foreground font-medium">
                     {currentCompany?.name ?? '회사 상세'}
                 </span>
             </div>

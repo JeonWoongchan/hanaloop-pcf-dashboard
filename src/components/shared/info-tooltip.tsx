@@ -10,13 +10,13 @@ export function InfoTooltip({ content }: { content: string }) {
             <TooltipTrigger asChild>
                 <button
                     type="button"
-                    className="ml-1.5 inline-flex shrink-0 items-center text-muted-foreground transition-colors hover:text-foreground"
+                    className="text-muted-foreground hover:text-foreground ml-1.5 inline-flex shrink-0 items-center transition-colors"
                     aria-label="도움말"
                 >
                     <Info className="size-3.5" />
                 </button>
             </TooltipTrigger>
-            <TooltipContent side="top" className="max-w-64 whitespace-pre-line leading-relaxed">
+            <TooltipContent side="top" className="max-w-64 leading-relaxed whitespace-pre-line">
                 {content}
             </TooltipContent>
         </Tooltip>

@@ -56,9 +56,13 @@ function MonthlyEmissionsCard({
                 latest ? (
                     <>
                         {formatEmissions(latest.total)}
-                        <span className="ml-1 text-sm font-normal text-muted-foreground">(tCO₂e)</span>
+                        <span className="text-muted-foreground ml-1 text-sm font-normal">
+                            (tCO₂e)
+                        </span>
                     </>
-                ) : '-'
+                ) : (
+                    '-'
+                )
             }
             helper={
                 latest
@@ -81,7 +85,7 @@ function ScopeBreakdownCard({ scopeTotals }: { scopeTotals: Record<1 | 2 | 3, nu
 
     return (
         <Link href={ROUTES.sources} className="block">
-            <Card className="cursor-pointer transition-shadow hover:shadow-md gap-0">
+            <Card className="cursor-pointer gap-0 transition-shadow hover:shadow-md">
                 <CardHeading
                     title="Scope별 배출 구성"
                     tooltip="관리 대상 전체의 Scope 1(직접 배출) · Scope 2(전기·열) · Scope 3(가치사슬) 비율입니다. 배출원 분석 페이지에서 배출원별 상세 현황을 확인할 수 있습니다."
@@ -103,7 +107,9 @@ function TaxExposureCard({ summary }: { summary: RiskSummary }) {
             value={formatKrw(summary.totalTaxKrw)}
             helper={`고위험 ${summary.highRiskCount}개사 · 시나리오 기준`}
             icon={Banknote}
-            helperClassName={summary.highRiskCount > 0 ? 'text-destructive' : 'text-muted-foreground'}
+            helperClassName={
+                summary.highRiskCount > 0 ? 'text-destructive' : 'text-muted-foreground'
+            }
             href={ROUTES.risk}
         />
     );
@@ -120,8 +126,15 @@ type Props = {
 };
 
 // KPI 카드 4종 조합 렌더링
-export function KpiCards({ year, annualTotal, latestMonth, momYoyChange, scopeTotals, yoyChange, riskSummary }: Props) {
-
+export function KpiCards({
+    year,
+    annualTotal,
+    latestMonth,
+    momYoyChange,
+    scopeTotals,
+    yoyChange,
+    riskSummary,
+}: Props) {
     return (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <AnnualEmissionsCard total={annualTotal} year={year} yoyChange={yoyChange} />

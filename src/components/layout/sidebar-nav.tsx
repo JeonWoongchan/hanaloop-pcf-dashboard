@@ -16,7 +16,14 @@ import { COUNTRY_FLAGS } from '@/constants/countries';
 import { ROUTES } from '@/constants/navigation';
 import { useCompanies } from '@/hooks/companies/useCompanies';
 import type { LucideIcon } from 'lucide-react';
-import { Building2, ChevronDown, FlameKindling, LayoutDashboard, List, ShieldAlert } from 'lucide-react';
+import {
+    Building2,
+    ChevronDown,
+    FlameKindling,
+    LayoutDashboard,
+    List,
+    ShieldAlert,
+} from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Collapsible } from 'radix-ui';
@@ -144,7 +151,9 @@ export function SidebarNav() {
                                                 >
                                                     <Link href={ROUTES.companyDetail(company.id)}>
                                                         <span>{flag}</span>
-                                                        <span className="truncate">{company.name}</span>
+                                                        <span className="truncate">
+                                                            {company.name}
+                                                        </span>
                                                     </Link>
                                                 </SidebarMenuSubButton>
                                             </SidebarMenuSubItem>

@@ -13,7 +13,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
         <SidebarProvider>
             <AppSidebar />
             <SidebarInset>
-                <header className="flex h-14 shrink-0 items-center gap-2 border-b bg-background px-4">
+                <header className="bg-background flex h-14 shrink-0 items-center gap-2 border-b px-4">
                     <SidebarTrigger className="-ml-1 cursor-pointer" />
                     <Separator orientation="vertical" className="mx-2 h-4" />
                     <AppBreadcrumb />

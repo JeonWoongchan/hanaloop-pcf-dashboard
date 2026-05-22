@@ -20,9 +20,7 @@ import { z } from 'zod';
 
 const postSchema = z.object({
     title: z.string().min(1, '제목을 입력해 주세요.'),
-    dateTime: z
-        .string()
-        .regex(/^\d{4}-(0[1-9]|1[0-2])$/, 'YYYY-MM 형식으로 입력해 주세요.'),
+    dateTime: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, 'YYYY-MM 형식으로 입력해 주세요.'),
     author: z.string().min(1, '작성자를 입력해 주세요.'),
     content: z.string().min(1, '내용을 입력해 주세요.'),
 });
@@ -50,7 +48,7 @@ function FormField({
         <div className="space-y-1.5">
             <label className="text-sm font-medium">{label}</label>
             {children}
-            {error && <p className="text-xs text-destructive">{error}</p>}
+            {error && <p className="text-destructive text-xs">{error}</p>}
         </div>
     );
 }
@@ -75,11 +73,11 @@ export function PostFormDialog({ companyId, post, open, onCloseAction }: Props) 
             setForm(
                 post
                     ? {
-                        title: post.title,
-                        dateTime: toMonthValue(post.dateTime),
-                        author: post.author,
-                        content: post.content,
-                    }
+                          title: post.title,
+                          dateTime: toMonthValue(post.dateTime),
+                          author: post.author,
+                          content: post.content,
+                      }
                     : EMPTY
             );
             setErrors({});

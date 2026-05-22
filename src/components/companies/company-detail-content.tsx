@@ -64,7 +64,11 @@ export function CompanyDetailContent({ id }: { id: string }) {
     );
     const selectedYear = getSelectedYear(yearParam, availableYears);
     // Rules of Hooks: 조건부 반환 전에 호출 — company 미로드 시 null 반환
-    const { assessment: riskAssessment, rank: riskRank, total: riskTotal } = useCompanyRisk(company?.id ?? '', selectedYear);
+    const {
+        assessment: riskAssessment,
+        rank: riskRank,
+        total: riskTotal,
+    } = useCompanyRisk(company?.id ?? '', selectedYear);
 
     if (isLoading) return <CompanyDetailSkeleton />;
     if (error || !company) return <ErrorState onRetry={refetch} />;
@@ -93,7 +97,7 @@ export function CompanyDetailContent({ id }: { id: string }) {
                     </div>
                     <p className="text-muted-foreground">
                         {selectedYear}년 연간 총 배출량:{' '}
-                        <span className="font-semibold text-foreground">
+                        <span className="text-foreground font-semibold">
                             {formatEmissions(annualTotal)} tCO₂e
                         </span>
                     </p>

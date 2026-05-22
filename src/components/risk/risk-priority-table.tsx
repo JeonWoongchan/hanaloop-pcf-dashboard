@@ -1,4 +1,4 @@
-"use client"
+'use client';
 
 // 회사별 리스크 우선순위 테이블 렌더링 (정렬 기능 포함)
 
@@ -20,7 +20,13 @@ import { formatEmissions } from '@/lib/format';
 import type { RiskAssessment, RiskLevel } from '@/lib/risk';
 import { RiskPriorityRow } from './risk-priority-row';
 
-type SortKey = 'name' | 'score' | 'annualEmissions' | 'estimatedTaxKrw' | 'recentTrendPct' | 'level';
+type SortKey =
+    | 'name'
+    | 'score'
+    | 'annualEmissions'
+    | 'estimatedTaxKrw'
+    | 'recentTrendPct'
+    | 'level';
 type SortDir = 'asc' | 'desc';
 
 // RiskLevel 정렬 순서 매핑 (내림차순 기준: high가 가장 높음)
@@ -62,13 +68,13 @@ function SortableHead({
         <TableHead
             scope="col"
             aria-sort={ariaSort}
-            className={`py-3 pr-4 text-muted-foreground ${head}`}
+            className={`text-muted-foreground py-3 pr-4 ${head}`}
         >
             <span className={`inline-flex w-full items-center gap-0.5 ${flex}`}>
                 <button
                     type="button"
                     onClick={() => onSort(sortKey)}
-                    className="inline-flex cursor-pointer items-center gap-1 transition-colors hover:text-foreground"
+                    className="hover:text-foreground inline-flex cursor-pointer items-center gap-1 transition-colors"
                 >
                     {children}
                     <Icon className="size-3.5 shrink-0" aria-hidden />
@@ -203,13 +209,18 @@ export function RiskPriorityTable({ assessments, year }: Props) {
                             >
                                 최근 추세
                             </SortableHead>
-                            <TableHead scope="col" className="py-3 pr-4 text-center text-muted-foreground">
+                            <TableHead
+                                scope="col"
+                                className="text-muted-foreground py-3 pr-4 text-center"
+                            >
                                 <span className="inline-flex items-center gap-0.5">
                                     주요 Scope
                                     <InfoTooltip content="Scope 3(공급망·운송·출장)은 자사가 직접 통제할 수 없는 배출이라 감축 난이도가 가장 높습니다. 리스크 점수의 Scope 구성 항목(20점)은 Scope 3 비중이 높을수록 높게 산정됩니다." />
                                 </span>
                             </TableHead>
-                            <TableHead scope="col" className="py-3 text-muted-foreground">주요 정보</TableHead>
+                            <TableHead scope="col" className="text-muted-foreground py-3">
+                                주요 정보
+                            </TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>

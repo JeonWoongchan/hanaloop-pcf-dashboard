@@ -14,7 +14,9 @@ type Props = {
 export function ScopeStackedBar({ scopes, showBackground = false, isKpiCard = false }: Props) {
     return (
         <div className="space-y-2">
-            <div className={`flex w-full overflow-hidden ${!isKpiCard ? 'h-2 rounded-full' : 'h-7 rounded-xl'} ${showBackground ? 'bg-muted' : ''}`}>
+            <div
+                className={`flex w-full overflow-hidden ${!isKpiCard ? 'h-2 rounded-full' : 'h-7 rounded-xl'} ${showBackground ? 'bg-muted' : ''}`}
+            >
                 {scopes.map(({ scope, pct }) => (
                     <div
                         key={scope}
@@ -25,8 +27,14 @@ export function ScopeStackedBar({ scopes, showBackground = false, isKpiCard = fa
             <div className="flex flex-wrap gap-x-3 gap-y-1">
                 {scopes.map(({ scope, pct }) =>
                     pct > 0 ? (
-                        <span key={scope} className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <span className="size-2 shrink-0 rounded-sm" style={{ backgroundColor: SCOPE_COLORS[scope] }} />
+                        <span
+                            key={scope}
+                            className="text-muted-foreground flex items-center gap-1 text-xs"
+                        >
+                            <span
+                                className="size-2 shrink-0 rounded-sm"
+                                style={{ backgroundColor: SCOPE_COLORS[scope] }}
+                            />
                             S{scope} {Math.round(pct)}%
                         </span>
                     ) : null

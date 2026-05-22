@@ -15,10 +15,7 @@ import {
 } from '@/constants/ghg-scope';
 import { formatEmissions, formatKilo } from '@/lib/format';
 import type { SourceItem } from '@/hooks/sources/useSourceMetrics';
-import {
-    Bar, BarChart, Pie, PieChart,
-    ResponsiveContainer, Tooltip, XAxis, YAxis,
-} from 'recharts';
+import { Bar, BarChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { useMemo, useState } from 'react';
 
 type Props = {
@@ -59,9 +56,12 @@ function ScopeDonut({
         <div className="flex flex-col items-center gap-2">
             {/* Scope 제목 */}
             <div className="flex items-center gap-1.5">
-                <span className="size-2.5 shrink-0 rounded-sm" style={{ backgroundColor: SCOPE_COLORS[scope] }} />
+                <span
+                    className="size-2.5 shrink-0 rounded-sm"
+                    style={{ backgroundColor: SCOPE_COLORS[scope] }}
+                />
                 <span className="text-sm font-semibold">{SCOPE_LABELS[scope]}</span>
-                <span className="text-xs text-muted-foreground">{SCOPE_DESCRIPTIONS[scope]}</span>
+                <span className="text-muted-foreground text-xs">{SCOPE_DESCRIPTIONS[scope]}</span>
             </div>
 
             {/* 도넛 */}
@@ -97,11 +97,14 @@ function ScopeDonut({
                         <button
                             key={d.source}
                             onClick={() => onSourceSelectAction(d.source)}
-                            className="flex items-center gap-1.5 rounded px-1 py-0.5 text-left transition-colors hover:bg-accent"
+                            className="hover:bg-accent flex items-center gap-1.5 rounded px-1 py-0.5 text-left transition-colors"
                         >
-                            <span className="size-2 shrink-0 rounded-sm" style={{ backgroundColor: d.fill }} />
+                            <span
+                                className="size-2 shrink-0 rounded-sm"
+                                style={{ backgroundColor: d.fill }}
+                            />
                             <span className="flex-1 truncate text-xs">{d.name}</span>
-                            <span className="shrink-0 text-xs text-muted-foreground">{pct}%</span>
+                            <span className="text-muted-foreground shrink-0 text-xs">{pct}%</span>
                         </button>
                     );
                 })}
@@ -179,9 +182,15 @@ export function SourceRankingChart({
                                 />
                                 <Tooltip
                                     labelFormatter={(label) => label}
-                                    labelStyle={{ fontWeight: 600, color: 'var(--foreground)', marginBottom: 4 }}
+                                    labelStyle={{
+                                        fontWeight: 600,
+                                        color: 'var(--foreground)',
+                                        marginBottom: 4,
+                                    }}
                                     formatter={(value) => [
-                                        typeof value === 'number' ? `${formatEmissions(value)} tCO₂e` : '-',
+                                        typeof value === 'number'
+                                            ? `${formatEmissions(value)} tCO₂e`
+                                            : '-',
                                         '배출량',
                                     ]}
                                     contentStyle={CHART_TOOLTIP_STYLE}
@@ -191,18 +200,26 @@ export function SourceRankingChart({
                                     cursor="pointer"
                                     onClick={(d: unknown) => {
                                         const source = (d as { source?: string })?.source;
-                                        if (typeof source === 'string') onSourceSelectAction(source);
+                                        if (typeof source === 'string')
+                                            onSourceSelectAction(source);
                                     }}
                                     shape={(props: unknown) => {
                                         const { x, y, width, height, index } = props as {
-                                            x: number; y: number; width: number; height: number; index: number;
+                                            x: number;
+                                            y: number;
+                                            width: number;
+                                            height: number;
+                                            index: number;
                                         };
                                         const entry = barData[index];
-                                        const isActive = !activeSourceId || activeSourceId === entry?.source;
+                                        const isActive =
+                                            !activeSourceId || activeSourceId === entry?.source;
                                         return (
                                             <rect
-                                                x={x} y={y}
-                                                width={Math.max(0, width)} height={height}
+                                                x={x}
+                                                y={y}
+                                                width={Math.max(0, width)}
+                                                height={height}
                                                 fill={entry?.fill ?? 'var(--muted)'}
                                                 fillOpacity={isActive ? 1 : 0.35}
                                                 rx={4}
@@ -212,7 +229,9 @@ export function SourceRankingChart({
                                 />
                             </BarChart>
                         </ResponsiveContainer>
-                        <p className="mt-2 text-xs text-muted-foreground">막대를 클릭하면 상세 분석을 확인합니다.</p>
+                        <p className="text-muted-foreground mt-2 text-xs">
+                            막대를 클릭하면 상세 분석을 확인합니다.
+                        </p>
                     </>
                 ) : (
                     /* Scope별 탭 — S1 / S2 / S3 도넛 3개 나란히 */

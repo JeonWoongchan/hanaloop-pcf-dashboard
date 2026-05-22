@@ -21,9 +21,7 @@ const riskCompaniesFixture: Company[] = [
         id: 'medium-scope2',
         name: 'Medium Scope 2 Factory',
         country: 'KR',
-        emissions: [
-            { yearMonth: '2024-01', source: 'electricity', emissions: 500 },
-        ],
+        emissions: [{ yearMonth: '2024-01', source: 'electricity', emissions: 500 }],
     },
     {
         id: 'low-balanced',
@@ -111,15 +109,18 @@ describe('risk utilities', () => {
     });
 
     it('선택 연도 이후의 배출 데이터는 해당 연도 최근 추세 계산에서 제외한다', () => {
-        const [assessment] = getRiskAssessments([
-            {
-                ...riskCompaniesFixture[0],
-                emissions: [
-                    ...riskCompaniesFixture[0].emissions,
-                    { yearMonth: '2025-01', source: 'shipping', emissions: 10 },
-                ],
-            },
-        ], 2024);
+        const [assessment] = getRiskAssessments(
+            [
+                {
+                    ...riskCompaniesFixture[0],
+                    emissions: [
+                        ...riskCompaniesFixture[0].emissions,
+                        { yearMonth: '2025-01', source: 'shipping', emissions: 10 },
+                    ],
+                },
+            ],
+            2024
+        );
 
         expect(assessment.recentTrendPct).toBeCloseTo(30, 2);
         expect(assessment.level).toBe('high');

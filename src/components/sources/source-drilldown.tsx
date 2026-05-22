@@ -7,7 +7,14 @@ import { Card, CardContent } from '@/components/ui/card';
 import { CHART_AXIS_STYLE, CHART_TOOLTIP_STYLE } from '@/constants/chart';
 import { SCOPE_COLORS, SOURCE_LABELS } from '@/constants/ghg-scope';
 import { ROUTES } from '@/constants/navigation';
-import { formatCompanyName, formatEmissions, formatKilo, formatMonthShort, formatTooltipValue, formatYearMonth } from '@/lib/format';
+import {
+    formatCompanyName,
+    formatEmissions,
+    formatKilo,
+    formatMonthShort,
+    formatTooltipValue,
+    formatYearMonth,
+} from '@/lib/format';
 import type { CompanyTotal, MonthlyTotal } from '@/lib/emissions';
 import { useRouter } from 'next/navigation';
 import {
@@ -32,7 +39,14 @@ type Props = {
 };
 
 // 선택 배출원 상세 분석 카드 렌더링
-export function SourceDrilldown({ sourceId, scope, color: colorProp, companyBreakdown, monthlyTrend, year }: Props) {
+export function SourceDrilldown({
+    sourceId,
+    scope,
+    color: colorProp,
+    companyBreakdown,
+    monthlyTrend,
+    year,
+}: Props) {
     const router = useRouter();
     const label = SOURCE_LABELS[sourceId] ?? sourceId;
     // 도넛 shade 색상 우선, 없으면 Scope 기본색 폴백
@@ -42,7 +56,11 @@ export function SourceDrilldown({ sourceId, scope, color: colorProp, companyBrea
     return (
         <Card>
             <CardHeading
-                title={<span><span style={{ color }}>{label}</span> 상세 분석</span>}
+                title={
+                    <span>
+                        <span style={{ color }}>{label}</span> 상세 분석
+                    </span>
+                }
                 tooltip="위 배출원 랭킹 차트에서 항목을 클릭하면 해당 배출원의 상세 분석을 확인할 수 있습니다. 전체 탭의 막대, 또는 Scope별 탭의 도넛 슬라이스와 목록 항목을 클릭하세요."
                 description={`${year}년 · 회사별 배출량 및 월별 추이`}
             />
@@ -52,7 +70,9 @@ export function SourceDrilldown({ sourceId, scope, color: colorProp, companyBrea
                     <div>
                         <p className="mb-3 text-sm font-medium">회사별 배출량</p>
                         {companyBreakdown.length === 0 ? (
-                            <p className="text-sm text-muted-foreground">해당 배출원 데이터가 없습니다.</p>
+                            <p className="text-muted-foreground text-sm">
+                                해당 배출원 데이터가 없습니다.
+                            </p>
                         ) : (
                             <ResponsiveContainer width="100%" height={chartHeight}>
                                 <BarChart
@@ -78,9 +98,15 @@ export function SourceDrilldown({ sourceId, scope, color: colorProp, companyBrea
                                     />
                                     <Tooltip
                                         labelFormatter={(name) => name}
-                                        labelStyle={{ fontWeight: 600, color: 'var(--foreground)', marginBottom: 4 }}
+                                        labelStyle={{
+                                            fontWeight: 600,
+                                            color: 'var(--foreground)',
+                                            marginBottom: 4,
+                                        }}
                                         formatter={(value) => [
-                                            typeof value === 'number' ? `${formatEmissions(value)} tCO₂e` : '-',
+                                            typeof value === 'number'
+                                                ? `${formatEmissions(value)} tCO₂e`
+                                                : '-',
                                             label,
                                         ]}
                                         contentStyle={CHART_TOOLTIP_STYLE}
@@ -117,7 +143,12 @@ export function SourceDrilldown({ sourceId, scope, color: colorProp, companyBrea
                                     axisLine={false}
                                     tickLine={false}
                                 />
-                                <YAxis tick={CHART_AXIS_STYLE} axisLine={false} tickLine={false} width={44} />
+                                <YAxis
+                                    tick={CHART_AXIS_STYLE}
+                                    axisLine={false}
+                                    tickLine={false}
+                                    width={44}
+                                />
                                 <Tooltip
                                     labelFormatter={(label) =>
                                         typeof label === 'string' ? formatYearMonth(label) : ''

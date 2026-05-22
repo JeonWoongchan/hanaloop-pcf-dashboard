@@ -32,7 +32,7 @@ export function CompanyRiskCard({ assessment, rank, total }: Props) {
                     </div>
                     <Link
                         href={ROUTES.risk}
-                        className="flex shrink-0 items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                        className="text-muted-foreground hover:text-foreground flex shrink-0 items-center gap-1 text-sm transition-colors"
                     >
                         전체 비교
                         <ArrowRight className="size-3.5" />
@@ -41,19 +41,19 @@ export function CompanyRiskCard({ assessment, rank, total }: Props) {
 
                 {/* 리스크 점수 프로그레스 바 */}
                 <div className="mt-2 space-y-1.5">
-                    <div className="flex justify-between text-xs text-muted-foreground">
+                    <div className="text-muted-foreground flex justify-between text-xs">
                         <span>리스크 점수</span>
                         <div className="flex items-center gap-2">
                             {rank !== null && (
                                 <span>
                                     전체 {total}개사 중{' '}
-                                    <span className="font-medium text-foreground">{rank}위</span>
+                                    <span className="text-foreground font-medium">{rank}위</span>
                                 </span>
                             )}
-                            <span className="font-medium text-foreground">{score}점 / 100점</span>
+                            <span className="text-foreground font-medium">{score}점 / 100점</span>
                         </div>
                     </div>
-                    <div className="h-2 overflow-hidden rounded-full bg-muted">
+                    <div className="bg-muted h-2 overflow-hidden rounded-full">
                         <div
                             className="h-full rounded-full transition-all"
                             style={{ width: `${score}%`, backgroundColor: RISK_BAR_COLORS[level] }}
@@ -67,27 +67,31 @@ export function CompanyRiskCard({ assessment, rank, total }: Props) {
                     {/* 수치 정보 */}
                     <div className="space-y-4">
                         <div>
-                            <p className="text-xs text-muted-foreground">탄소세 예상 노출액</p>
+                            <p className="text-muted-foreground text-xs">탄소세 예상 노출액</p>
                             <p className="text-xl font-semibold">{formatKrw(estimatedTaxKrw)}</p>
-                            <p className="text-xs text-muted-foreground">시나리오 기준 (tCO₂e당 5만 원)</p>
+                            <p className="text-muted-foreground text-xs">
+                                시나리오 기준 (tCO₂e당 5만 원)
+                            </p>
                         </div>
                         <div>
-                            <p className="text-xs text-muted-foreground">최근 배출 추세</p>
-                            <p className={`flex items-center gap-1 text-xl font-semibold ${trend.className}`}>
+                            <p className="text-muted-foreground text-xs">최근 배출 추세</p>
+                            <p
+                                className={`flex items-center gap-1 text-xl font-semibold ${trend.className}`}
+                            >
                                 {trend.Icon && <trend.Icon className="size-4" />}
                                 {trend.label}
                             </p>
-                            <p className="text-xs text-muted-foreground">최근 3개월 평균 대비</p>
+                            <p className="text-muted-foreground text-xs">최근 3개월 평균 대비</p>
                         </div>
                     </div>
 
                     {/* 주요 사유 */}
                     <div>
-                        <p className="mb-2 text-xs text-muted-foreground">주요 정보</p>
+                        <p className="text-muted-foreground mb-2 text-xs">주요 정보</p>
                         <ul className="space-y-2">
                             {reasons.map((reason, i) => (
                                 <li key={i} className="flex items-start gap-2 text-sm">
-                                    <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-muted-foreground" />
+                                    <span className="bg-muted-foreground mt-1.5 size-1.5 shrink-0 rounded-full" />
                                     {reason}
                                 </li>
                             ))}

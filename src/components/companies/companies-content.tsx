@@ -107,7 +107,7 @@ export function CompaniesContent() {
                     </SelectContent>
                 </Select>
 
-                <p className="text-sm text-muted-foreground">{displayedCompanies.length}개 회사</p>
+                <p className="text-muted-foreground text-sm">{displayedCompanies.length}개 회사</p>
             </div>
 
             {/* Scope 범례 — 카드 바 색상과 SCOPE_COLORS로 연동 */}

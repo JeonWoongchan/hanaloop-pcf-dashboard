@@ -6,7 +6,13 @@ import { filterByYear, getAvailableYears, getSelectedYear, sumEmissions } from '
 import { getRiskAssessments } from '@/lib/risk';
 import type { RiskAssessment } from '@/lib/risk';
 import type { CompanyWithTotal } from '@/types';
-import { parseAsArrayOf, parseAsInteger, parseAsString, parseAsStringLiteral, useQueryState } from 'nuqs';
+import {
+    parseAsArrayOf,
+    parseAsInteger,
+    parseAsString,
+    parseAsStringLiteral,
+    useQueryState,
+} from 'nuqs';
 import { useCallback, useMemo } from 'react';
 
 export const SORT_OPTIONS = [
@@ -120,7 +126,12 @@ export function useCompaniesFilter() {
         setSortOrder,
         selectedYear,
         availableYears,
-        setSelectedYear: useCallback((y: number) => { void setYearParam(y); }, [setYearParam]),
+        setSelectedYear: useCallback(
+            (y: number) => {
+                void setYearParam(y);
+            },
+            [setYearParam]
+        ),
         riskMap,
     };
 }

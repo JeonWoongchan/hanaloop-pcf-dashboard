@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-    SCOPE_MAP,
-    SOURCE_LABELS,
-    getScopeSourceColorMap,
-} from './ghg-scope';
+import { SCOPE_MAP, SOURCE_LABELS, getScopeSourceColorMap } from './ghg-scope';
 
 describe('ghg scope constants', () => {
     it('주요 배출원을 Scope 1/2/3 기준으로 분류한다', () => {
@@ -26,12 +22,14 @@ describe('ghg scope constants', () => {
     });
 
     it('Scope 내부 순위에 따라 배출원 shade 색상을 배정한다', () => {
-        expect(getScopeSourceColorMap([
-            { source: 'diesel', scope: 1 },
-            { source: 'gasoline', scope: 1 },
-            { source: 'electricity', scope: 2 },
-            { source: 'shipping', scope: 3 },
-        ])).toEqual({
+        expect(
+            getScopeSourceColorMap([
+                { source: 'diesel', scope: 1 },
+                { source: 'gasoline', scope: 1 },
+                { source: 'electricity', scope: 2 },
+                { source: 'shipping', scope: 3 },
+            ])
+        ).toEqual({
             diesel: 'var(--scope-1-shade-1)',
             gasoline: 'var(--scope-1-shade-2)',
             electricity: 'var(--scope-2-shade-1)',

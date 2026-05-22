@@ -57,11 +57,7 @@ export function RiskContent() {
                 />
             </div>
 
-            <RiskKpiCards
-                summary={summary}
-                year={selectedYear}
-                totalCompanies={companies.length}
-            />
+            <RiskKpiCards summary={summary} year={selectedYear} totalCompanies={companies.length} />
 
             <TaxScenarioCard />
 

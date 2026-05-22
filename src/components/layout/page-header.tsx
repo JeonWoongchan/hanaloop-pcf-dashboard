@@ -14,5 +14,5 @@ function getTitle(pathname: string): string {
 // 헤더 영역 페이지 타이틀 텍스트 렌더링
 export function PageHeader() {
     const pathname = usePathname();
-    return <span className="text-sm font-medium text-foreground">{getTitle(pathname)}</span>;
+    return <span className="text-foreground text-sm font-medium">{getTitle(pathname)}</span>;
 }

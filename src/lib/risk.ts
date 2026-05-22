@@ -82,7 +82,13 @@ export function getRiskAssessments(
                 (emission) => emission.yearMonth <= `${year}-12`
             );
             // 추세 계산은 기준 연도 이전 범위에서 연도 경계를 넘어 최근 N개월을 사용
-            return assessCompanyRisk(company, emissions, trendEmissions, maxAnnualEmissions, taxRate);
+            return assessCompanyRisk(
+                company,
+                emissions,
+                trendEmissions,
+                maxAnnualEmissions,
+                taxRate
+            );
         })
         .sort((a, b) => b.score - a.score || b.annualEmissions - a.annualEmissions);
 }
@@ -117,8 +123,8 @@ export function getRiskSummary(assessments: RiskAssessment[]): RiskSummary {
 // 개별 회사 리스크 산정
 function assessCompanyRisk(
     company: Company,
-    emissions: GhgEmission[],      // 선택 연도 배출량 — 연간·Scope 계산용
-    allEmissions: GhgEmission[],   // 전체 배출량 — 연도 경계를 넘는 추세 계산용
+    emissions: GhgEmission[], // 선택 연도 배출량 — 연간·Scope 계산용
+    allEmissions: GhgEmission[], // 전체 배출량 — 연도 경계를 넘는 추세 계산용
     maxAnnualEmissions: number,
     taxRate: number
 ): RiskAssessment {
@@ -130,9 +136,8 @@ function assessCompanyRisk(
         (current, item) => (!current || item.pct > current.pct ? item : current),
         undefined
     );
-    const dominantScope = dominantScopeItem && dominantScopeItem.pct > 0
-        ? dominantScopeItem.scope
-        : null;
+    const dominantScope =
+        dominantScopeItem && dominantScopeItem.pct > 0 ? dominantScopeItem.scope : null;
     const dominantScopePct = dominantScopeItem ? dominantScopeItem.pct : 0;
     // 최근 N개월 추세 — 연도 경계를 넘어 계산하도록 전체 데이터 사용
     const recentTrendPct = getRecentTrendPct(getMonthlyTotals(allEmissions));
@@ -186,9 +191,12 @@ function getScopeScore(scopeBreakdown: Array<{ scope: 1 | 2 | 3; pct: number }>)
     const scope2Pct = scopeBreakdown.find((item) => item.scope === 2)?.pct ?? 0;
     const scope1Pct = scopeBreakdown.find((item) => item.scope === 1)?.pct ?? 0;
 
-    if (scope3Pct >= HIGH_SCOPE_SHARE_PCT) return RISK_SCORE_WEIGHTS.scope * SCOPE3_SCORE_MULTIPLIER;
-    if (scope2Pct >= HIGH_SCOPE_SHARE_PCT) return RISK_SCORE_WEIGHTS.scope * SCOPE2_SCORE_MULTIPLIER;
-    if (scope1Pct >= HIGH_SCOPE_SHARE_PCT) return RISK_SCORE_WEIGHTS.scope * SCOPE1_SCORE_MULTIPLIER;
+    if (scope3Pct >= HIGH_SCOPE_SHARE_PCT)
+        return RISK_SCORE_WEIGHTS.scope * SCOPE3_SCORE_MULTIPLIER;
+    if (scope2Pct >= HIGH_SCOPE_SHARE_PCT)
+        return RISK_SCORE_WEIGHTS.scope * SCOPE2_SCORE_MULTIPLIER;
+    if (scope1Pct >= HIGH_SCOPE_SHARE_PCT)
+        return RISK_SCORE_WEIGHTS.scope * SCOPE1_SCORE_MULTIPLIER;
 
     return (Math.max(scope1Pct, scope2Pct, scope3Pct) / 100) * RISK_SCORE_WEIGHTS.scope;
 }
@@ -221,7 +229,8 @@ function getRiskReasons(input: RiskReasonInput): string[] {
     // 조건별 사유 규칙 목록 구성
     const rules: RiskReasonRule[] = [
         {
-            matches: () => emissionScore >= RISK_SCORE_WEIGHTS.emissions * HIGH_EMISSION_SCORE_RATIO,
+            matches: () =>
+                emissionScore >= RISK_SCORE_WEIGHTS.emissions * HIGH_EMISSION_SCORE_RATIO,
             message: () => '연간 배출량이 관리 대상 중 상위권입니다.',
         },
         {
@@ -238,9 +247,7 @@ function getRiskReasons(input: RiskReasonInput): string[] {
     ];
 
     // 매칭된 규칙 기반 사유 문장 추출
-    const reasons = rules
-        .filter((rule) => rule.matches())
-        .map((rule) => rule.message());
+    const reasons = rules.filter((rule) => rule.matches()).map((rule) => rule.message());
 
     return reasons.length > 0
         ? reasons.slice(0, 3)
@@ -291,10 +298,7 @@ function getRecentTrendPct(monthlyTotals: MonthlyTotal[]): number | null {
     if (monthlyTotals.length < RECENT_TREND_MONTH_COUNT * 2) return null;
 
     const recent = monthlyTotals.slice(-RECENT_TREND_MONTH_COUNT);
-    const previous = monthlyTotals.slice(
-        -RECENT_TREND_MONTH_COUNT * 2,
-        -RECENT_TREND_MONTH_COUNT
-    );
+    const previous = monthlyTotals.slice(-RECENT_TREND_MONTH_COUNT * 2, -RECENT_TREND_MONTH_COUNT);
     const previousAverage = average(previous.map((item) => item.total));
     if (previousAverage === 0) return null;
 
