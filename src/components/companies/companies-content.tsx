@@ -2,8 +2,11 @@
 
 // 회사 목록 필터·정렬 UI 및 카드 그리드 렌더링
 
+import { useState } from 'react';
+import { Upload } from 'lucide-react';
 import { EmptyState } from '@/components/shared/empty-state';
 import { AsyncStateBoundary } from '@/components/shared/async-state-boundary';
+import { ExcelImportDialog } from '@/components/import/excel-import-dialog';
 import { CardGridSkeleton } from '@/components/shared/loading-skeletons';
 import { MultiSelectPopover } from '@/components/shared/multi-select-popover';
 import { ScopeLegend } from '@/components/shared/scope-legend';
@@ -16,8 +19,9 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 import { SORT_OPTIONS, useCompaniesFilter } from '@/hooks/companies/useCompaniesFilter';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { toast } from 'sonner';
 import { CompanyCard } from './company-card';
 
@@ -36,6 +40,8 @@ function CompaniesGridSkeleton() {
 
 // 회사 목록 컨텐츠 렌더링
 export function CompaniesContent() {
+    const [importOpen, setImportOpen] = useState(false);
+
     const {
         isLoading,
         error,
@@ -65,6 +71,8 @@ export function CompaniesContent() {
 
     // isEmpty: DB에 회사가 아예 없는 경우 / 필터 후 결과 없음은 내부 EmptyState로 별도 처리
     return (
+        <>
+        <ExcelImportDialog open={importOpen} onOpenChangeAction={setImportOpen} />
         <AsyncStateBoundary
             isLoading={isLoading}
             error={error}
@@ -76,6 +84,15 @@ export function CompaniesContent() {
             <div className="space-y-4">
                 {/* 필터·정렬 컨트롤 */}
                 <div className="flex flex-wrap items-center gap-3">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="ml-auto"
+                        onClick={() => setImportOpen(true)}
+                    >
+                        <Upload className="mr-2 h-4 w-4" />
+                        Excel 임포트
+                    </Button>
                     {/* 국가 선택 */}
                     <MultiSelectPopover
                         items={countryOptions.map((c) => ({ id: c.code, label: c.name }))}
@@ -143,5 +160,6 @@ export function CompaniesContent() {
                 )}
             </div>
         </AsyncStateBoundary>
+        </>
     );
 }

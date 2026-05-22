@@ -8,10 +8,12 @@ export const SCOPE_MAP: Record<string, 1 | 2 | 3> = {
     electricity: 2,
     heat: 2,
     steam: 2,
-    // Scope 3 — 가치사슬 배출 (공급망·운송)
+    // Scope 3 — 가치사슬 배출 (공급망·운송·원소재)
     shipping: 3,
     businessTravel: 3,
     waste: 3,
+    plastic1: 3,
+    plastic2: 3,
 };
 
 export const SCOPES = [1, 2, 3] as const;
@@ -116,4 +118,6 @@ export const SOURCE_LABELS: Record<string, string> = {
     shipping: '해운',
     businessTravel: '출장',
     waste: '폐기물',
+    plastic1: '플라스틱 1',
+    plastic2: '플라스틱 2',
 };
