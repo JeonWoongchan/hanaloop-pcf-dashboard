@@ -1,5 +1,6 @@
 // 리스크 우선순위 테이블 행 렌더링
 
+import { TableCell, TableRow } from '@/components/ui/table';
 import { COUNTRY_FLAGS } from '@/constants/countries';
 import { SCOPE_LABELS } from '@/constants/ghg-scope';
 import { ROUTES } from '@/constants/navigation';
@@ -23,30 +24,34 @@ export function RiskPriorityRow({ assessment }: Props) {
     const trend = getTrendProps(assessment.recentTrendPct);
 
     return (
-        <tr className="border-b last:border-0">
-            <th scope="row" className="py-4 pr-4 text-left">
+        <TableRow>
+            {/* 회사명은 행 헤더(th)로 유지해 스크린 리더 접근성 확보 */}
+            <th
+                scope="row"
+                className="p-2 py-4 pr-4 text-left align-middle font-medium"
+            >
                 <Link
                     href={ROUTES.companyDetail(assessment.id)}
-                    className="group inline-flex max-w-52 items-center gap-2 font-medium text-foreground hover:underline"
+                    className="group inline-flex max-w-52 items-center gap-2 text-foreground hover:underline"
                 >
                     <span>{COUNTRY_FLAGS[assessment.country] ?? ''}</span>
                     <span className="truncate">{assessment.name}</span>
                     <ArrowRight className="size-3 opacity-0 transition-opacity group-hover:opacity-100" />
                 </Link>
             </th>
-            <td className="py-4 pr-4 text-center">
+            <TableCell className="py-4 pr-4 text-center">
                 <RiskLevelBadge level={assessment.level} />
-            </td>
-            <td className="py-4 pr-4 text-center font-medium">{assessment.score}</td>
-            <td className="py-4 pr-4 text-right">
+            </TableCell>
+            <TableCell className="py-4 pr-4 text-center font-medium">{assessment.score}</TableCell>
+            <TableCell className="py-4 pr-4 text-right">
                 {formatEmissions(assessment.annualEmissions)} tCO₂e
-            </td>
-            <td className="py-4 pr-4 text-right">{formatKrw(assessment.estimatedTaxKrw)}</td>
-            <td className={`py-4 pr-4 text-center font-medium ${trend.className}`}>
+            </TableCell>
+            <TableCell className="py-4 pr-4 text-right">{formatKrw(assessment.estimatedTaxKrw)}</TableCell>
+            <TableCell className={`py-4 pr-4 text-center font-medium ${trend.className}`}>
                 {trend.label}
-            </td>
-            <td className="py-4 pr-4 text-center">{getDominantScopeLabel(assessment)}</td>
-            <td className="py-4">
+            </TableCell>
+            <TableCell className="py-4 pr-4 text-center">{getDominantScopeLabel(assessment)}</TableCell>
+            <TableCell className="py-4 whitespace-normal">
                 <ul className="max-w-80 space-y-1 text-muted-foreground">
                     {assessment.reasons.map((reason) => (
                         <li key={reason} className="leading-relaxed">
@@ -54,7 +59,7 @@ export function RiskPriorityRow({ assessment }: Props) {
                         </li>
                     ))}
                 </ul>
-            </td>
-        </tr>
+            </TableCell>
+        </TableRow>
     );
 }
