@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     try {
         // 과제 스펙: 쓰기 요청 200~800ms 지연 + 15% 실패 시뮬레이션
         await simulateDelay();
-        if (shouldFail()) return apiError('저장에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+        if (shouldFail()) return apiError('저장에 실패했습니다. 의도적인 실패입니다.(15%)');
 
         const { title, resourceUid, dateTime, content, author } = (await request.json()) as Post;
         const [row] = await sql`
