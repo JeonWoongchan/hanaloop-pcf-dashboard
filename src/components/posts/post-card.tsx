@@ -4,6 +4,7 @@
 
 import { Button } from '@/components/ui/button';
 import { useDeletePost } from '@/hooks/posts/usePosts';
+import { getErrorMessage } from '@/lib/errors';
 import { formatYearMonth } from '@/lib/format';
 import type { Post } from '@/types';
 import { Pencil, Trash2 } from 'lucide-react';
@@ -22,8 +23,7 @@ export function PostCard({ post, onEditAction }: Props) {
         deletePost(post.id, {
             onSuccess: () => toast.success('삭제됐습니다.'),
             // 훅의 onError가 롤백 처리, 여기서는 토스트만 표시
-            onError: (error) =>
-                toast.error(error instanceof Error ? error.message : '삭제에 실패했습니다.'),
+            onError: (error) => toast.error(getErrorMessage(error, '삭제에 실패했습니다.')),
         });
     };
 

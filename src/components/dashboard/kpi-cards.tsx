@@ -1,15 +1,18 @@
 // 대시보드 상단 KPI 요약 카드 4종 렌더링
 
 import { CardHeading } from '@/components/shared/card-heading';
+import { ChartSkeleton } from '@/components/shared/loading-skeletons';
 import { MetricCard } from '@/components/shared/metric-card';
 import { Card } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
 import dynamic from 'next/dynamic';
 
 // recharts 번들을 초기 JS에서 분리하기 위한 동적 임포트
 const ScopeDonutChart = dynamic(
-    () => import('@/components/shared/scope-donut-chart').then((m) => ({ default: m.ScopeDonutChart })),
-    { loading: () => <Skeleton className="h-36 rounded-lg" />, ssr: false }
+    () =>
+        import('@/components/shared/scope-donut-chart').then((m) => ({
+            default: m.ScopeDonutChart,
+        })),
+    { loading: () => <ChartSkeleton className="h-36 rounded-lg" />, ssr: false }
 );
 import { SCOPES } from '@/constants/ghg-scope';
 import { ROUTES } from '@/constants/navigation';

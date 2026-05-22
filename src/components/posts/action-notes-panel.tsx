@@ -12,6 +12,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { CompactState } from '@/components/shared/compact-state';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -116,28 +117,16 @@ export function ActionNotesPanel({ companyId }: Props) {
 
                     {/* 메모 목록 */}
                     <div className="flex-1 space-y-3 overflow-y-auto px-4 py-3">
-                        {isLoading && (
-                            <p className="text-muted-foreground py-8 text-center text-sm">
-                                불러오는 중...
-                            </p>
-                        )}
+                        {isLoading && <CompactState message="불러오는 중..." />}
                         {!isLoading && error && (
-                            <div className="flex flex-col items-center gap-3 py-8 text-center">
-                                <p className="text-muted-foreground text-sm">
-                                    게시글을 불러오지 못했습니다.
-                                </p>
-                                <button
-                                    onClick={() => void refetch()}
-                                    className="text-primary hover:text-primary/80 text-xs underline underline-offset-2 transition-colors"
-                                >
-                                    다시 시도
-                                </button>
-                            </div>
+                            <CompactState
+                                message="Action Notes를 불러오지 못했습니다."
+                                actionLabel="다시 시도"
+                                onAction={() => void refetch()}
+                            />
                         )}
                         {!isLoading && !error && sortedPosts.length === 0 && (
-                            <p className="text-muted-foreground py-8 text-center text-sm">
-                                아직 작성된 Action Notes가 없습니다.
-                            </p>
+                            <CompactState message="아직 작성된 Action Notes가 없습니다." />
                         )}
                         {sortedPosts.map((post) => {
                             const isEditing = editingState?.id === post.id;

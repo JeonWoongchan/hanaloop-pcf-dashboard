@@ -3,7 +3,8 @@
 // 회사 목록 필터·정렬 UI 및 카드 그리드 렌더링
 
 import { EmptyState } from '@/components/shared/empty-state';
-import { ErrorState } from '@/components/shared/error-state';
+import { AsyncStateBoundary } from '@/components/shared/async-state-boundary';
+import { CardGridSkeleton } from '@/components/shared/loading-skeletons';
 import { MultiSelectPopover } from '@/components/shared/multi-select-popover';
 import { ScopeLegend } from '@/components/shared/scope-legend';
 import { YearSelector } from '@/components/shared/year-selector';
@@ -28,11 +29,7 @@ function CompaniesGridSkeleton() {
                 <Skeleton className="h-10 w-48 rounded-md" />
                 <Skeleton className="h-10 w-44 rounded-md" />
             </div>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {Array.from({ length: 6 }).map((_, i) => (
-                    <Skeleton key={i} className="h-52 rounded-xl" />
-                ))}
-            </div>
+            <CardGridSkeleton />
         </div>
     );
 }
@@ -44,6 +41,7 @@ export function CompaniesContent() {
         error,
         refetch,
         countriesError,
+        totalCompanyCount,
         displayedCompanies,
         countryOptions,
         isCountryChecked,
@@ -65,76 +63,85 @@ export function CompaniesContent() {
         }
     }, [countriesError]);
 
-    if (isLoading) return <CompaniesGridSkeleton />;
-    if (error) return <ErrorState onRetry={refetch} />;
-
+    // isEmpty: DB에 회사가 아예 없는 경우 / 필터 후 결과 없음은 내부 EmptyState로 별도 처리
     return (
-        <div className="space-y-4">
-            {/* 필터·정렬 컨트롤 */}
-            <div className="flex flex-wrap items-center gap-3">
-                {/* 국가 선택 */}
-                <MultiSelectPopover
-                    items={countryOptions.map((c) => ({ id: c.code, label: c.name }))}
-                    label={
-                        selectedCountries.length === 0
-                            ? '전체 국가'
-                            : `${selectedCountries.length}개국 선택됨`
-                    }
-                    open={countryOpen}
-                    onOpenChangeAction={setCountryOpen}
-                    isSelectedAction={isCountryChecked}
-                    onToggleAction={toggleCountry}
-                    searchPlaceholder="국가 검색..."
-                    width="w-48"
-                    side="bottom"
-                />
+        <AsyncStateBoundary
+            isLoading={isLoading}
+            error={error}
+            isEmpty={totalCompanyCount === 0}
+            loadingFallback={<CompaniesGridSkeleton />}
+            emptyMessage="등록된 관리 대상 회사가 없습니다."
+            onRetry={refetch}
+        >
+            <div className="space-y-4">
+                {/* 필터·정렬 컨트롤 */}
+                <div className="flex flex-wrap items-center gap-3">
+                    {/* 국가 선택 */}
+                    <MultiSelectPopover
+                        items={countryOptions.map((c) => ({ id: c.code, label: c.name }))}
+                        label={
+                            selectedCountries.length === 0
+                                ? '전체 국가'
+                                : `${selectedCountries.length}개국 선택됨`
+                        }
+                        open={countryOpen}
+                        onOpenChangeAction={setCountryOpen}
+                        isSelectedAction={isCountryChecked}
+                        onToggleAction={toggleCountry}
+                        searchPlaceholder="국가 검색..."
+                        width="w-48"
+                        side="bottom"
+                    />
 
-                {/* 연도 선택 */}
-                <YearSelector
-                    years={availableYears}
-                    value={selectedYear}
-                    onChangeAction={setSelectedYear}
-                />
+                    {/* 연도 선택 */}
+                    <YearSelector
+                        years={availableYears}
+                        value={selectedYear}
+                        onChangeAction={setSelectedYear}
+                    />
 
-                {/* 정렬 */}
-                <Select
-                    value={sortOrder}
-                    onValueChange={(v) =>
-                        void setSortOrder(v as (typeof SORT_OPTIONS)[number]['value'])
-                    }
-                >
-                    <SelectTrigger className="w-44">
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent side="bottom">
-                        {SORT_OPTIONS.map(({ value, label }) => (
-                            <SelectItem key={value} value={value}>
-                                {label}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
+                    {/* 정렬 */}
+                    <Select
+                        value={sortOrder}
+                        onValueChange={(v) =>
+                            void setSortOrder(v as (typeof SORT_OPTIONS)[number]['value'])
+                        }
+                    >
+                        <SelectTrigger className="w-44">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent side="bottom">
+                            {SORT_OPTIONS.map(({ value, label }) => (
+                                <SelectItem key={value} value={value}>
+                                    {label}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
 
-                <p className="text-muted-foreground text-sm">{displayedCompanies.length}개 회사</p>
-            </div>
-
-            {/* Scope 범례 — 카드 바 색상과 SCOPE_COLORS로 연동 */}
-            <ScopeLegend />
-
-            {displayedCompanies.length === 0 ? (
-                <EmptyState message="해당 조건의 회사가 없습니다." />
-            ) : (
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {displayedCompanies.map((company) => (
-                        <CompanyCard
-                            key={company.id}
-                            company={company}
-                            year={selectedYear}
-                            riskAssessment={riskMap.get(company.id)}
-                        />
-                    ))}
+                    <p className="text-muted-foreground text-sm">
+                        {displayedCompanies.length}개 회사
+                    </p>
                 </div>
-            )}
-        </div>
+
+                {/* Scope 범례 — 카드 바 색상과 SCOPE_COLORS로 연동 */}
+                <ScopeLegend />
+
+                {displayedCompanies.length === 0 ? (
+                    <EmptyState message="해당 조건의 회사가 없습니다." />
+                ) : (
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        {displayedCompanies.map((company) => (
+                            <CompanyCard
+                                key={company.id}
+                                company={company}
+                                year={selectedYear}
+                                riskAssessment={riskMap.get(company.id)}
+                            />
+                        ))}
+                    </div>
+                )}
+            </div>
+        </AsyncStateBoundary>
     );
 }

@@ -13,6 +13,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useSavePost } from '@/hooks/posts/usePosts';
+import { getErrorMessage } from '@/lib/errors';
 import type { Post } from '@/types';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -110,8 +111,7 @@ export function PostFormDialog({ companyId, post, open, onCloseAction }: Props) 
                     onCloseAction();
                 },
                 // 훅의 onError가 낙관적 업데이트 롤백, 여기서는 토스트만 표시
-                onError: (error) =>
-                    toast.error(error instanceof Error ? error.message : '저장에 실패했습니다.'),
+                onError: (error) => toast.error(getErrorMessage(error, '저장에 실패했습니다.')),
             }
         );
     };

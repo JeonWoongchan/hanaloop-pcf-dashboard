@@ -2,10 +2,9 @@
 
 // 회사별 포스트 목록 및 CRUD 인터랙션 구성
 
-import { EmptyState } from '@/components/shared/empty-state';
-import { ErrorState } from '@/components/shared/error-state';
+import { AsyncStateBoundary } from '@/components/shared/async-state-boundary';
+import { ListSkeleton } from '@/components/shared/loading-skeletons';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
 import { usePostsByCompany } from '@/hooks/posts/usePosts';
 import type { Post } from '@/types';
 import { Plus } from 'lucide-react';
@@ -47,23 +46,21 @@ export function CompanyPosts({ companyId }: Props) {
                 </Button>
             </div>
 
-            {isLoading ? (
+            <AsyncStateBoundary
+                isLoading={isLoading}
+                error={error}
+                isEmpty={!posts?.length}
+                loadingFallback={<ListSkeleton />}
+                errorMessage="포스트를 불러오지 못했습니다."
+                emptyMessage="아직 포스트가 없습니다."
+                onRetry={refetch}
+            >
                 <div className="space-y-3">
-                    {[1, 2].map((i) => (
-                        <Skeleton key={i} className="h-24 rounded-lg" />
-                    ))}
-                </div>
-            ) : error ? (
-                <ErrorState onRetry={refetch} message="포스트를 불러오지 못했습니다." />
-            ) : !posts?.length ? (
-                <EmptyState message="아직 포스트가 없습니다." />
-            ) : (
-                <div className="space-y-3">
-                    {posts.map((post) => (
+                    {(posts ?? []).map((post) => (
                         <PostCard key={post.id} post={post} onEditAction={handleEdit} />
                     ))}
                 </div>
-            )}
+            </AsyncStateBoundary>
 
             <PostFormDialog
                 companyId={companyId}

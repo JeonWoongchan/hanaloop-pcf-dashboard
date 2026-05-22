@@ -2,6 +2,7 @@
 
 import { AUTHOR_STORAGE_KEY, POST_TITLE_MAX_LENGTH } from '@/constants/posts';
 import { useDeletePost, usePostsByCompany, useSavePost } from '@/hooks/posts/usePosts';
+import { getErrorMessage } from '@/lib/errors';
 import { formatNowToDateTime } from '@/lib/format';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
@@ -71,8 +72,7 @@ export function useActionNotes(companyId: string) {
                     setContent('');
                     toast.success('메모를 작성했습니다.');
                 },
-                onError: (e) =>
-                    toast.error(e instanceof Error ? e.message : '저장에 실패했습니다.'),
+                onError: (e) => toast.error(getErrorMessage(e, '저장에 실패했습니다.')),
             }
         );
     };
@@ -97,8 +97,7 @@ export function useActionNotes(companyId: string) {
                     cancelEdit();
                     toast.success('수정됐습니다.');
                 },
-                onError: (e) =>
-                    toast.error(e instanceof Error ? e.message : '저장에 실패했습니다.'),
+                onError: (e) => toast.error(getErrorMessage(e, '저장에 실패했습니다.')),
             }
         );
     };
@@ -107,7 +106,7 @@ export function useActionNotes(companyId: string) {
         if (!deletingId) return;
         deletePost(deletingId, {
             onSuccess: () => toast.success('삭제됐습니다.'),
-            onError: (e) => toast.error(e instanceof Error ? e.message : '삭제에 실패했습니다.'),
+            onError: (e) => toast.error(getErrorMessage(e, '삭제에 실패했습니다.')),
             onSettled: () => setDeletingId(null),
         });
     };

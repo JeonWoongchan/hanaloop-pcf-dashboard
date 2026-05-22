@@ -118,6 +118,7 @@ export function useCompaniesFilter() {
         error,
         refetch,
         countriesError,
+        totalCompanyCount: companies?.length ?? 0,
         displayedCompanies,
         countryOptions,
         isCountryChecked,

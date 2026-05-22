@@ -2,6 +2,7 @@
 
 // 회사 상세 데이터 패칭 및 차트 레이아웃 구성
 
+import { ChartSkeleton, ListSkeleton } from '@/components/shared/loading-skeletons';
 import { ErrorState } from '@/components/shared/error-state';
 import { YearSelector } from '@/components/shared/year-selector';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -31,22 +32,22 @@ import { CompanyRiskCard } from './company-risk-card';
 // recharts 번들을 초기 JS에서 분리하기 위한 동적 임포트
 const CompanyMonthlyChart = dynamic(
     () => import('./company-monthly-chart').then((m) => ({ default: m.CompanyMonthlyChart })),
-    { loading: () => <Skeleton className="h-70 rounded-xl" />, ssr: false }
+    { loading: () => <ChartSkeleton className="h-70" />, ssr: false }
 );
 const YearlyComparisonChart = dynamic(
     () =>
         import('@/components/shared/yearly-comparison-chart').then((m) => ({
             default: m.YearlyComparisonChart,
         })),
-    { loading: () => <Skeleton className="h-[200px] rounded-xl" />, ssr: false }
+    { loading: () => <ChartSkeleton className="h-[200px]" />, ssr: false }
 );
 const CompanyScopeChart = dynamic(
     () => import('./company-scope-chart').then((m) => ({ default: m.CompanyScopeChart })),
-    { loading: () => <Skeleton className="h-65 rounded-xl" />, ssr: false }
+    { loading: () => <ChartSkeleton className="h-65" />, ssr: false }
 );
 const CompanySourceChart = dynamic(
     () => import('./company-source-chart').then((m) => ({ default: m.CompanySourceChart })),
-    { loading: () => <Skeleton className="h-65 rounded-xl" />, ssr: false }
+    { loading: () => <ChartSkeleton className="h-65" />, ssr: false }
 );
 
 // 회사 상세 로딩 중 스켈레톤
@@ -55,17 +56,15 @@ function CompanyDetailSkeleton() {
         <div className="space-y-6">
             <Skeleton className="h-16 w-64 rounded-xl" />
             <Skeleton className="h-40 rounded-xl" />
-            <Skeleton className="h-70 rounded-xl" />
-            <Skeleton className="h-50 rounded-xl" />
+            <ChartSkeleton className="h-70" />
+            <ChartSkeleton className="h-50" />
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <Skeleton className="h-65 rounded-xl" />
-                <Skeleton className="h-65 rounded-xl" />
+                <ChartSkeleton className="h-65" />
+                <ChartSkeleton className="h-65" />
             </div>
             <div className="space-y-3">
                 <Skeleton className="h-8 w-32 rounded-md" />
-                {[1, 2].map((i) => (
-                    <Skeleton key={i} className="h-24 rounded-lg" />
-                ))}
+                <ListSkeleton />
             </div>
         </div>
     );
@@ -89,7 +88,8 @@ export function CompanyDetailContent({ id }: { id: string }) {
     } = useCompanyRisk(company?.id ?? '', selectedYear);
 
     if (isLoading) return <CompanyDetailSkeleton />;
-    if (error || !company) return <ErrorState onRetry={refetch} />;
+    if (error) return <ErrorState onRetry={refetch} />;
+    if (!company) return <ErrorState message="해당 회사를 찾을 수 없습니다." />;
 
     const filteredEmissions = filterByYear(company.emissions, selectedYear);
     const annualTotal = sumEmissions(filteredEmissions);
