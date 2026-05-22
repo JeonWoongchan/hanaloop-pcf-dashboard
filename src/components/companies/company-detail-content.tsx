@@ -15,7 +15,9 @@ import {
     getMonthlyByScope,
     getScopeBreakdown,
     getSelectedYear,
+    getScopeTotals,
     getTotalBySource,
+    sumEmissions,
 } from '@/lib/emissions';
 import { formatEmissions } from '@/lib/format';
 import { parseAsInteger, useQueryState } from 'nuqs';
@@ -28,7 +30,6 @@ import { CompanyPosts } from '@/components/posts/company-posts';
 import { RiskLevelBadge } from '@/components/risk/risk-level-badge';
 import { useCompanyRisk } from '@/hooks/risk/useCompanyRisk';
 import { CompanyReductionScenario } from './company-reduction-scenario';
-import { SCOPE_MAP } from '@/constants/ghg-scope';
 
 // 회사 상세 로딩 중 스켈레톤
 function CompanyDetailSkeleton() {
@@ -69,17 +70,11 @@ export function CompanyDetailContent({ id }: { id: string }) {
     if (error || !company) return <ErrorState onRetry={refetch} />;
 
     const filteredEmissions = filterByYear(company.emissions, selectedYear);
-    const annualTotal = Math.round(filteredEmissions.reduce((sum, e) => sum + e.emissions, 0));
+    const annualTotal = sumEmissions(filteredEmissions);
     const monthlyByScope = getMonthlyByScope(filteredEmissions);
     const scopes = getScopeBreakdown(filteredEmissions);
     const totalBySource = getTotalBySource(filteredEmissions);
-
-    // Scope별 절댓값 집계 — 감축 시나리오 입력값
-    const scopeEmissions: Record<1 | 2 | 3, number> = { 1: 0, 2: 0, 3: 0 };
-    filteredEmissions.forEach((e) => {
-        const scope = SCOPE_MAP[e.source];
-        if (scope) scopeEmissions[scope] += e.emissions;
-    });
+    const scopeEmissions = getScopeTotals(filteredEmissions);
     // 연도 필터 전 전체 데이터로 연도별 비교 차트 생성
     const yearlyTotals = getAnnualTotals(company.emissions);
     const flag = COUNTRY_FLAGS[company.country] ?? '';

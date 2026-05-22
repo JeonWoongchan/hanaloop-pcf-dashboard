@@ -8,11 +8,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { SCOPE_COLORS, SCOPE_DESCRIPTIONS, SCOPE_LABELS, SCOPES, getScopeSourceColorMap } from '@/constants/ghg-scope';
 import { useCompanies } from '@/hooks/companies/useCompanies';
 import { useSourceMetrics } from '@/hooks/sources/useSourceMetrics';
-import { filterByYear, getAvailableYears, getScopeBreakdown, getSelectedYear, getTotalBySource } from '@/lib/emissions';
+import { getAvailableYears, getCompanyScatterPoints, getSelectedYear } from '@/lib/emissions';
 import { formatEmissions } from '@/lib/format';
 import { parseAsInteger, parseAsString, useQueryState } from 'nuqs';
 import { useMemo } from 'react';
-import { ScopeScatterCharts, type CompanyScatterPoint } from './scope-scatter-charts';
+import { ScopeScatterCharts } from './scope-scatter-charts';
 import { SourceDrilldown } from './source-drilldown';
 import { SourceRankingChart } from './source-ranking-chart';
 
@@ -57,32 +57,10 @@ export function SourcesContent() {
         ? sourceColorMap[activeSource.source] ?? SCOPE_COLORS[activeSource.scope]
         : null;
 
-    // 회사별 산포도 데이터 — Scope 구성 포지셔닝 · 규모×집중도 차트 입력값
-    const scatterData = useMemo<CompanyScatterPoint[]>(() => {
-        if (!companies) return [];
-        return companies.flatMap((c) => {
-            const filtered = filterByYear(c.emissions, selectedYear);
-            const total = filtered.reduce((sum, e) => sum + e.emissions, 0);
-            if (total === 0) return [];
-
-            const scopes = getScopeBreakdown(filtered);
-            const sources = getTotalBySource(filtered);
-            const topSourcePct = sources[0] ? (sources[0].total / total) * 100 : 0;
-            const dominantScope = [...scopes].sort((a, b) => b.pct - a.pct)[0]?.scope ?? 1;
-            const pctOf = (s: 1 | 2 | 3) => scopes.find((x) => x.scope === s)?.pct ?? 0;
-
-            return [{
-                id: c.id,
-                name: c.name,
-                total,
-                s1Pct: pctOf(1),
-                s2Pct: pctOf(2),
-                s3Pct: pctOf(3),
-                dominantScope,
-                topSourcePct,
-            }];
-        });
-    }, [companies, selectedYear]);
+    const scatterData = useMemo(
+        () => getCompanyScatterPoints(companies ?? [], selectedYear),
+        [companies, selectedYear]
+    );
 
     if (isLoading) return <SourcesSkeleton />;
     if (error || !companies?.length) return <ErrorState onRetry={refetch} />;

@@ -11,6 +11,43 @@ export type ScopeBreakdownItem = { scope: 1 | 2 | 3; pct: number };
 // 병합 데이터에서 전체 합산 열을 식별하는 키
 export const TOTAL_EMISSIONS_KEY = '전체 합산' as const;
 
+// 배출량 배열 합산 (반올림 정수)
+export function sumEmissions(emissions: GhgEmission[]): number {
+    return Math.round(emissions.reduce((sum, e) => sum + e.emissions, 0));
+}
+
+// 작년 같은 기간 대비 변화율 — 현재 연도 최신 월까지만 비교
+export function getYoyChange(
+    allEmissions: GhgEmission[],
+    monthlyTotals: MonthlyTotal[]
+): number | null {
+    const currentTotal = monthlyTotals.reduce((sum, m) => sum + m.total, 0);
+    const prevYearMonths = new Set(
+        monthlyTotals.map((m) => `${parseInt(m.month.slice(0, 4)) - 1}${m.month.slice(4)}`)
+    );
+    const prevTotal = Math.round(
+        allEmissions
+            .filter((e) => prevYearMonths.has(e.yearMonth))
+            .reduce((sum, e) => sum + e.emissions, 0)
+    );
+    return prevTotal > 0 ? ((currentTotal - prevTotal) / prevTotal) * 100 : null;
+}
+
+// 최신 월의 전년 동월 대비 변화율
+export function getMomYoyChange(
+    allEmissions: GhgEmission[],
+    latestMonth: MonthlyTotal | null
+): number | null {
+    if (!latestMonth) return null;
+    const prevYearSameMonth = `${parseInt(latestMonth.month.slice(0, 4)) - 1}${latestMonth.month.slice(4)}`;
+    const prevTotal = Math.round(
+        allEmissions
+            .filter((e) => e.yearMonth === prevYearSameMonth)
+            .reduce((sum, e) => sum + e.emissions, 0)
+    );
+    return prevTotal > 0 ? ((latestMonth.total - prevTotal) / prevTotal) * 100 : null;
+}
+
 // 회사별 연간 총 배출량 집계 (총합 내림차순 정렬)
 export function getTotalByCompany(companies: Company[]): CompanyTotal[] {
     return companies
@@ -230,4 +267,44 @@ export function getScopeBreakdown(emissions: GhgEmission[]): ScopeBreakdownItem[
         scope,
         pct: total > 0 ? (totals[scope] / total) * 100 : 0,
     }));
+}
+
+// 회사별 Scope 구성·배출 규모·배출원 집중도 산포도 포인트 생성
+export type CompanyScatterPoint = {
+    id: string;
+    name: string;
+    total: number;
+    s1Pct: number;
+    s2Pct: number;
+    s3Pct: number;
+    dominantScope: 1 | 2 | 3;
+    topSourcePct: number;
+};
+
+export function getCompanyScatterPoints(
+    companies: Company[],
+    year: number
+): CompanyScatterPoint[] {
+    return companies.flatMap((c) => {
+        const filtered = filterByYear(c.emissions, year);
+        const total = filtered.reduce((sum, e) => sum + e.emissions, 0);
+        if (total === 0) return [];
+
+        const scopes = getScopeBreakdown(filtered);
+        const sources = getTotalBySource(filtered);
+        const topSourcePct = sources[0] ? (sources[0].total / total) * 100 : 0;
+        const dominantScope = [...scopes].sort((a, b) => b.pct - a.pct)[0]?.scope ?? 1;
+        const pctOf = (s: 1 | 2 | 3) => scopes.find((x) => x.scope === s)?.pct ?? 0;
+
+        return [{
+            id: c.id,
+            name: c.name,
+            total,
+            s1Pct: pctOf(1),
+            s2Pct: pctOf(2),
+            s3Pct: pctOf(3),
+            dominantScope,
+            topSourcePct,
+        }];
+    });
 }

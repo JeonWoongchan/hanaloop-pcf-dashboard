@@ -34,7 +34,7 @@ export function DashboardContent() {
     const { data: companies, isLoading, error, refetch } = useCompanies();
     const [yearParam, setYearParam] = useQueryState('year', parseAsInteger);
 
-    const { selectedYear, availableYears, yearlyTotals, monthlyTotals, totalByCompany, mergedMonthlyData, riskSummary, scopeTotals, yoyChange, momYoyChange } =
+    const { selectedYear, availableYears, yearlyTotals, annualTotal, latestMonth, totalByCompany, mergedMonthlyData, riskSummary, scopeTotals, yoyChange, momYoyChange } =
         useDashboardMetrics(companies ?? [], yearParam);
 
     if (isLoading) return <DashboardSkeleton />;
@@ -56,7 +56,8 @@ export function DashboardContent() {
 
             <KpiCards
                 year={selectedYear}
-                monthlyTotals={monthlyTotals}
+                annualTotal={annualTotal}
+                latestMonth={latestMonth}
                 momYoyChange={momYoyChange}
                 scopeTotals={scopeTotals}
                 yoyChange={yoyChange}

@@ -2,7 +2,7 @@
 
 import { useCompanies } from '@/hooks/companies/useCompanies';
 import { useCountries } from '@/hooks/countries/useCountries';
-import { filterByYear, getAvailableYears, getSelectedYear } from '@/lib/emissions';
+import { filterByYear, getAvailableYears, getSelectedYear, sumEmissions } from '@/lib/emissions';
 import { getRiskAssessments } from '@/lib/risk';
 import type { RiskAssessment } from '@/lib/risk';
 import type { CompanyWithTotal } from '@/types';
@@ -87,9 +87,7 @@ export function useCompaniesFilter() {
         // 선택 연도 배출량만 집계
         const withTotals = companies.map((c) => ({
             ...c,
-            total: Math.round(
-                filterByYear(c.emissions, selectedYear).reduce((sum, e) => sum + e.emissions, 0)
-            ),
+            total: sumEmissions(filterByYear(c.emissions, selectedYear)),
         }));
 
         const filtered =

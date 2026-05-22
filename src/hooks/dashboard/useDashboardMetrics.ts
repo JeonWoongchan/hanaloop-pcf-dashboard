@@ -5,11 +5,14 @@ import {
     getAnnualTotals,
     getAvailableYears,
     getMergedMonthlyData,
+    getMomYoyChange,
     getMonthlyByCompany,
     getMonthlyTotals,
     getSelectedYear,
     getScopeTotals,
     getTotalByCompany,
+    getYoyChange,
+    sumEmissions,
 } from '@/lib/emissions';
 import { getRiskAssessments, getRiskSummary } from '@/lib/risk';
 import type { Company } from '@/types';
@@ -35,47 +38,20 @@ export function useDashboardMetrics(companies: Company[], year?: number | null) 
         const assessments = getRiskAssessments(companies, selectedYear);
         const riskSummary = getRiskSummary(assessments);
 
-        const scopeTotals = getScopeTotals(filtered.flatMap((c) => c.emissions));
-
-        // 작년 같은 기간 대비 변화율 — 현재 연도의 최신 월까지만 비교
-        const currentPeriodTotal = monthlyTotals.reduce((sum, m) => sum + m.total, 0);
-        const prevYearMonths = monthlyTotals.map((m) =>
-            `${parseInt(m.month.slice(0, 4)) - 1}${m.month.slice(4)}`
-        );
-        const prevPeriodTotal = Math.round(
-            companies
-                .flatMap((c) => c.emissions)
-                .filter((e) => prevYearMonths.includes(e.yearMonth))
-                .reduce((sum, e) => sum + e.emissions, 0)
-        );
-        const yoyChange =
-            prevPeriodTotal > 0
-                ? ((currentPeriodTotal - prevPeriodTotal) / prevPeriodTotal) * 100
-                : null;
-
-        // 최신 월의 전년 동월 대비 변화율
+        const filteredEmissions = filtered.flatMap((c) => c.emissions);
+        const scopeTotals = getScopeTotals(filteredEmissions);
+        const annualTotal = sumEmissions(filteredEmissions);
         const latestMonth = monthlyTotals[monthlyTotals.length - 1] ?? null;
-        const prevYearSameMonth = latestMonth
-            ? `${parseInt(latestMonth.month.slice(0, 4)) - 1}${latestMonth.month.slice(4)}`
-            : null;
-        const prevYearSameMonthTotal = prevYearSameMonth
-            ? Math.round(
-                  companies
-                      .flatMap((c) => c.emissions)
-                      .filter((e) => e.yearMonth === prevYearSameMonth)
-                      .reduce((sum, e) => sum + e.emissions, 0)
-              )
-            : null;
-        const momYoyChange =
-            latestMonth && prevYearSameMonthTotal && prevYearSameMonthTotal > 0
-                ? ((latestMonth.total - prevYearSameMonthTotal) / prevYearSameMonthTotal) * 100
-                : null;
+        const yoyChange = getYoyChange(allEmissions, monthlyTotals);
+        const momYoyChange = getMomYoyChange(allEmissions, latestMonth);
 
         return {
             selectedYear,
             availableYears,
             yearlyTotals,
             monthlyTotals,
+            annualTotal,
+            latestMonth,
             totalByCompany,
             mergedMonthlyData: getMergedMonthlyData(monthlyByCompany, monthlyTotals),
             riskSummary,

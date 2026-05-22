@@ -6,6 +6,7 @@ import { CardHeading } from '@/components/shared/card-heading';
 import { Card, CardContent } from '@/components/ui/card';
 import { CHART_AXIS_STYLE, CHART_TOOLTIP_STYLE } from '@/constants/chart';
 import { SCOPE_COLORS, SCOPE_LABELS, SCOPES } from '@/constants/ghg-scope';
+import type { CompanyScatterPoint } from '@/lib/emissions';
 import { formatEmissions, formatKilo } from '@/lib/format';
 import {
     ReferenceLine,
@@ -17,17 +18,6 @@ import {
     YAxis,
     ZAxis,
 } from 'recharts';
-
-export type CompanyScatterPoint = {
-    id: string;
-    name: string;
-    total: number;
-    s1Pct: number;
-    s2Pct: number;
-    s3Pct: number;
-    dominantScope: 1 | 2 | 3;
-    topSourcePct: number;
-};
 
 type TooltipProps = {
     active?: boolean;

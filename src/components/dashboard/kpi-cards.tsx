@@ -113,7 +113,8 @@ function TaxExposureCard({ summary }: { summary: RiskSummary }) {
 
 type Props = {
     year: number;
-    monthlyTotals: MonthlyTotal[];
+    annualTotal: number;
+    latestMonth: MonthlyTotal | null;
     momYoyChange: number | null;
     scopeTotals: Record<1 | 2 | 3, number>;
     yoyChange: number | null;
@@ -121,9 +122,7 @@ type Props = {
 };
 
 // KPI 카드 4종 조합 렌더링
-export function KpiCards({ year, monthlyTotals, momYoyChange, scopeTotals, yoyChange, riskSummary }: Props) {
-    const annualTotal = monthlyTotals.reduce((sum, m) => sum + m.total, 0);
-    const latestMonth = monthlyTotals[monthlyTotals.length - 1];
+export function KpiCards({ year, annualTotal, latestMonth, momYoyChange, scopeTotals, yoyChange, riskSummary }: Props) {
 
     return (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
