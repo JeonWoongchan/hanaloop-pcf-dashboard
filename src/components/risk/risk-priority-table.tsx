@@ -204,7 +204,7 @@ export function RiskPriorityTable({ assessments, year }: Props) {
                                 onSort={handleSort}
                                 align="center"
                                 extra={
-                                    <InfoTooltip content="최근 3개월 평균 배출량과 그 직전 3개월 평균을 비교한 증감률입니다. 연간 성과가 아닌 지금 이 순간의 배출 모멘텀을 나타내며, 대시보드의 전년 동기 비교와 기준이 다릅니다." />
+                                    <InfoTooltip content="선택 연도 기준 최신 3개월 평균 배출량과 그 직전 3개월 평균을 비교한 증감률입니다. 연간 성과가 아닌 최근 배출 모멘텀을 나타내며, 대시보드의 전년 동기 비교와 기준이 다릅니다." />
                                 }
                             >
                                 최근 추세
@@ -215,7 +215,7 @@ export function RiskPriorityTable({ assessments, year }: Props) {
                             >
                                 <span className="inline-flex items-center gap-0.5">
                                     주요 Scope
-                                    <InfoTooltip content="Scope 3(공급망·운송·출장)은 자사가 직접 통제할 수 없는 배출이라 감축 난이도가 가장 높습니다. 리스크 점수의 Scope 구성 항목(20점)은 Scope 3 비중이 높을수록 높게 산정됩니다." />
+                                    <InfoTooltip content="이 리스크 모델에서는 Scope 3 비중이 높을수록 외부 가치사슬 협업이 필요하다고 보고 Scope 구성 점수를 높게 산정합니다." />
                                 </span>
                             </TableHead>
                             <TableHead scope="col" className="text-muted-foreground py-3">

@@ -98,7 +98,7 @@ function ScopeBreakdownCard({ scopeTotals }: { scopeTotals: Record<1 | 2 | 3, nu
             <Card className="cursor-pointer gap-0 transition-shadow hover:shadow-md">
                 <CardHeading
                     title="Scope별 배출 구성"
-                    tooltip="관리 대상 전체의 Scope 1(직접 배출) · Scope 2(전기·열) · Scope 3(가치사슬) 비율입니다. 배출원 분석 페이지에서 배출원별 상세 현황을 확인할 수 있습니다."
+                    tooltip="관리 대상 전체의 Scope 1(직접 배출) · Scope 2(전기·열·증기) · Scope 3(가치사슬) 비율입니다. 배출원 분석 페이지에서 배출원별 상세 현황을 확인할 수 있습니다."
                     className="pb-2"
                     titleClassName="text-sm font-medium text-muted-foreground"
                 />

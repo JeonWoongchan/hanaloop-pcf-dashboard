@@ -100,7 +100,7 @@ export function ScopeScatterCharts({ data, year }: Props) {
             <Card>
                 <CardHeading
                     title="Scope 구성 포지셔닝"
-                    tooltip="각 회사의 Scope 1(직접 배출)과 Scope 2(전기·열) 비중을 X·Y축에 배치합니다. 버블이 클수록 총 배출량이 많습니다. 오른쪽 하단은 직접 연소 중심, 왼쪽 상단은 전기·열 의존형, 왼쪽 하단은 Scope 3(공급망) 비중이 큰 회사입니다. 점선은 각 축 33% 기준선입니다."
+                    tooltip="각 회사의 Scope 1(직접 배출)과 Scope 2(전기·열·증기) 비중을 X·Y축에 배치합니다. 버블이 클수록 총 배출량이 많습니다. 오른쪽 하단은 직접 연소 중심, 왼쪽 상단은 전기·열·증기 의존형, 왼쪽 하단은 Scope 3(공급망) 비중이 큰 회사입니다. 점선은 각 축 33% 기준선입니다."
                     description={`${year}년 · Scope 1 vs Scope 2 비중 · 버블 크기 = 총 배출량`}
                 />
                 <CardContent>

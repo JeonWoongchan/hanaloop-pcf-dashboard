@@ -4,7 +4,7 @@ import { RiskLevelBadge } from '@/components/risk/risk-level-badge';
 import { ScopeStackedBar } from '@/components/shared/scope-stacked-bar';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ROUTES } from '@/constants/navigation';
-import { getScopeBreakdown } from '@/lib/emissions';
+import { filterByYear, getScopeBreakdown } from '@/lib/emissions';
 import { formatEmissions } from '@/lib/format';
 import type { RiskAssessment } from '@/lib/risk';
 import type { CompanyWithTotal } from '@/types';
@@ -20,7 +20,8 @@ export function CompanyCard({
     year: number;
     riskAssessment?: RiskAssessment;
 }) {
-    const scopes = getScopeBreakdown(company.emissions);
+    // Scope 비중도 총 배출량과 동일하게 선택 연도 기준으로 산정
+    const scopes = getScopeBreakdown(filterByYear(company.emissions, year));
 
     return (
         <Link href={ROUTES.companyDetail(company.id)} className="block">
