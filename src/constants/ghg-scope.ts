@@ -23,9 +23,9 @@ export const SCOPE_LABELS: Record<1 | 2 | 3, string> = {
 };
 
 export const SCOPE_DESCRIPTIONS: Record<1 | 2 | 3, string> = {
-    1: '직접 배출',
-    2: '간접 배출 (전기·열)',
-    3: '가치사슬 배출',
+    1: '직접 배출 (경우·천연가스·휘발유 등)',
+    2: '간접 배출 (전기·열·증기 등)',
+    3: '가치사슬 배출 (해운·출장·폐기물 등)',
 };
 
 // Scope별 차트 색상 — globals.css chart 토큰에서 의미 기반 배정
