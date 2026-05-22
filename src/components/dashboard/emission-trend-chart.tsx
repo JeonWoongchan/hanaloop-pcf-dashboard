@@ -179,7 +179,7 @@ export function EmissionTrendChart({ emissionsData, pcfData, companies, year }: 
                                     axisLine={false}
                                     tickLine={false}
                                     width={44}
-                                    domain={[0, (dataMax: number) => dataMax * 2]}
+                                    domain={[0, (dataMax: number) => Math.round(dataMax * 1.2)]}
                                 />
                                 <Tooltip
                                     labelFormatter={(label) =>

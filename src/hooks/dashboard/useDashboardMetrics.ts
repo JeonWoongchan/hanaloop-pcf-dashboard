@@ -7,6 +7,7 @@ import {
     getAvailableYears,
     getCombinedAvailableYears,
     getMergedMonthlyData,
+    getMomYoyChange,
     getMonthlyByCompany,
     getMonthlyTotals,
     getPcfAnnualTotals,
@@ -18,6 +19,8 @@ import {
     getScopeTotals,
     getSelectedYear,
     getTotalByCompany,
+    getYoyChange,
+    sumEmissions,
     sumPcf,
     type MonthlyTotal,
 } from '@/lib/emissions';
@@ -32,6 +35,30 @@ export type DashboardPcfSummary = {
     momYoyChange: number | null;
     recordCount: number;
 };
+
+export type DashboardEmissionsSummary = {
+    annualTotal: number;
+    latestMonth: MonthlyTotal | null;
+    yoyChange: number | null;
+    momYoyChange: number | null;
+    recordCount: number;
+};
+
+function getDashboardEmissionsSummary(
+    allEmissions: Company['emissions'],
+    selectedYearEmissions: Company['emissions'],
+    monthlyTotals: MonthlyTotal[]
+): DashboardEmissionsSummary {
+    const latestMonth = monthlyTotals[monthlyTotals.length - 1] ?? null;
+
+    return {
+        annualTotal: sumEmissions(selectedYearEmissions),
+        latestMonth,
+        yoyChange: getYoyChange(allEmissions, monthlyTotals),
+        momYoyChange: getMomYoyChange(allEmissions, latestMonth),
+        recordCount: selectedYearEmissions.length,
+    };
+}
 
 function getDashboardPcfSummary(
     allActivityRecords: ActivityRecord[],
@@ -87,6 +114,11 @@ export function useDashboardMetrics(
         const riskSummary = getRiskSummary(assessments);
 
         const filteredEmissions = filtered.flatMap((c) => c.emissions);
+        const emissionsSummary = getDashboardEmissionsSummary(
+            allEmissions,
+            filteredEmissions,
+            monthlyTotals
+        );
         const scopeTotals = getScopeTotals(filteredEmissions);
 
         return {
@@ -94,6 +126,7 @@ export function useDashboardMetrics(
             availableYears,
             yearlyTotals,
             pcfYearlyTotals,
+            emissionsSummary,
             pcfSummary,
             totalByCompany,
             pcfByCompany,

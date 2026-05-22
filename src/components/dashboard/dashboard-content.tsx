@@ -52,6 +52,7 @@ export function DashboardContent() {
         availableYears,
         yearlyTotals,
         pcfYearlyTotals,
+        emissionsSummary,
         pcfSummary,
         totalByCompany,
         pcfByCompany,
@@ -90,6 +91,7 @@ export function DashboardContent() {
 
                 <KpiCards
                     year={selectedYear}
+                    emissionsSummary={emissionsSummary}
                     pcfSummary={pcfSummary}
                     scopeTotals={scopeTotals}
                     riskSummary={riskSummary}

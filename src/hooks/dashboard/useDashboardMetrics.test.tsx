@@ -120,6 +120,14 @@ describe('useDashboardMetrics', () => {
             recordCount: 2,
         });
         expect(metrics.pcfSummary.yoyChange).toBeCloseTo(253.51, 2);
+        expect(metrics.emissionsSummary).toEqual({
+            annualTotal: 400,
+            latestMonth: { month: '2024-02', total: 175 },
+            yoyChange: expect.any(Number),
+            momYoyChange: null,
+            recordCount: 5,
+        });
+        expect(metrics.emissionsSummary.yoyChange).toBeCloseTo(433.33, 2);
         expect(metrics.totalByCompany).toEqual([
             { id: 'a', name: 'Alpha', country: 'KR', total: 300 },
             { id: 'b', name: 'Beta', country: 'US', total: 100 },
