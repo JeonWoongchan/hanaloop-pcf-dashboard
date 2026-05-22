@@ -6,16 +6,58 @@ import { apiError } from '@/lib/server/api-response';
 
 export const dynamic = 'force-dynamic';
 
+const MISSING_FILE_MESSAGE = '파일이 없습니다.';
+const MISSING_COMPANY_MESSAGE = '회사를 선택하거나 새 회사 정보를 입력해 주세요.';
+const EMPTY_FILE_NAME_MESSAGE = '파일명이 비어 있습니다.';
+const IMPORT_ERROR_MESSAGE = '임포트에 실패했습니다. 잠시 후 다시 시도해 주세요.';
+
+type ImportTarget =
+    | { companyId: string; shouldCreateCompany: false }
+    | {
+          companyId: string;
+          shouldCreateCompany: true;
+          companyName: string;
+          countryCode: string;
+      };
+
+type ImportTargetResult = { ok: true; target: ImportTarget } | { ok: false; message: string };
+
+function getFormText(formData: FormData, key: string): string {
+    const value = formData.get(key);
+    return typeof value === 'string' ? value.trim() : '';
+}
+
+function resolveImportTarget(
+    existingCompanyId: string,
+    newCompanyName: string,
+    newCompanyCountry: string
+): ImportTargetResult {
+    if (existingCompanyId) {
+        return { ok: true, target: { companyId: existingCompanyId, shouldCreateCompany: false } };
+    }
+
+    if (newCompanyName && newCompanyCountry) {
+        return {
+            ok: true,
+            target: {
+                companyId: randomUUID(),
+                shouldCreateCompany: true,
+                companyName: newCompanyName,
+                countryCode: newCompanyCountry,
+            },
+        };
+    }
+
+    return { ok: false, message: MISSING_COMPANY_MESSAGE };
+}
+
 export async function POST(request: Request) {
     try {
         const formData = await request.formData();
         const file = formData.get('file');
-        const companyId = formData.get('companyId');
-        const newCompanyName = formData.get('newCompanyName');
-        const newCompanyCountry = formData.get('newCompanyCountry');
 
         if (!(file instanceof File)) {
-            return apiError('파일이 없습니다.', 400);
+            return apiError(MISSING_FILE_MESSAGE, 400);
         }
 
         const buffer = Buffer.from(await file.arrayBuffer());
@@ -23,42 +65,37 @@ export async function POST(request: Request) {
 
         if (!result.ok) return apiError(result.error, 400);
 
-        const existingCompanyId = typeof companyId === 'string' ? companyId.trim() : '';
-        const trimmedCompanyName = typeof newCompanyName === 'string' ? newCompanyName.trim() : '';
-        const trimmedCompanyCountry =
-            typeof newCompanyCountry === 'string' ? newCompanyCountry.trim() : '';
+        const targetResult = resolveImportTarget(
+            getFormText(formData, 'companyId'),
+            getFormText(formData, 'newCompanyName'),
+            getFormText(formData, 'newCompanyCountry')
+        );
 
-        let targetCompanyId: string;
-        let shouldCreateCompany = false;
-
-        if (existingCompanyId) {
-            targetCompanyId = existingCompanyId;
-        } else if (trimmedCompanyName && trimmedCompanyCountry) {
-            targetCompanyId = randomUUID();
-            shouldCreateCompany = true;
-        } else {
-            return apiError('회사를 선택하거나 새 회사 정보를 입력해 주세요.', 400);
-        }
+        if (!targetResult.ok) return apiError(targetResult.message, 400);
 
         const fileName = file.name.trim();
-        if (!fileName) return apiError('파일명이 비어 있습니다.', 400);
+        if (!fileName) return apiError(EMPTY_FILE_NAME_MESSAGE, 400);
+
+        const { target } = targetResult;
 
         await sql.transaction(
-            (tx) => [
-                ...(shouldCreateCompany
+            (tx) => {
+                const createCompanyQueries = target.shouldCreateCompany
                     ? [
                           tx`
                               INSERT INTO companies (id, name, country_code)
-                              VALUES (${targetCompanyId}, ${trimmedCompanyName}, ${trimmedCompanyCountry})
+                              VALUES (${target.companyId}, ${target.companyName}, ${target.countryCode})
                           `,
                       ]
-                    : []),
-                tx`
+                    : [];
+
+                const deletePreviousImportQuery = tx`
                     DELETE FROM activity_records
-                    WHERE company_id = ${targetCompanyId}
+                    WHERE company_id = ${target.companyId}
                       AND import_file_name = ${fileName}
-                `,
-                ...result.rows.map(
+                `;
+
+                const insertActivityRecordQueries = result.rows.map(
                     (row) => tx`
                         INSERT INTO activity_records (
                             company_id,
@@ -68,7 +105,7 @@ export async function POST(request: Request) {
                             emission_factor_kg, emissions_kg, emissions_tco2e,
                             import_file_name, import_row_number
                         ) VALUES (
-                            ${targetCompanyId},
+                            ${target.companyId},
                             ${row.originalDate}, ${row.yearMonth},
                             ${row.activityType}, ${row.description}, ${row.quantity}, ${row.unit},
                             ${row.source}, ${row.scope},
@@ -76,17 +113,23 @@ export async function POST(request: Request) {
                             ${fileName}, ${row.rowNumber}
                         )
                     `
-                ),
-            ],
+                );
+
+                return [
+                    ...createCompanyQueries,
+                    deletePreviousImportQuery,
+                    ...insertActivityRecordQueries,
+                ];
+            },
             { isolationLevel: 'Serializable' }
         );
 
         return NextResponse.json(
-            { inserted: result.rows.length, companyId: targetCompanyId },
+            { inserted: result.rows.length, companyId: target.companyId },
             { status: 201 }
         );
     } catch (error) {
         console.error('[/api/import]', error);
-        return apiError('임포트에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+        return apiError(IMPORT_ERROR_MESSAGE);
     }
 }

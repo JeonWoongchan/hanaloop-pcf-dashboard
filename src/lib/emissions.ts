@@ -1,11 +1,12 @@
 // 배출량 데이터 집계 유틸리티 — 순수 함수로 구성하여 단위 테스트 용이
 
 import { SCOPE_MAP } from '@/constants/ghg-scope';
-import type { Company, GhgEmission } from '@/types';
+import type { ActivityRecord, Company, GhgEmission } from '@/types';
 
 export type MonthlyTotal = { month: string; total: number };
 export type AnnualTotal = { year: number; total: number };
 export type CompanyTotal = { id: string; name: string; country: string; total: number };
+export type CompanyPcfTotal = Company & { total: number; activityRecords: ActivityRecord[] };
 export type ScopeBreakdownItem = { scope: 1 | 2 | 3; pct: number };
 
 // 병합 데이터에서 전체 합산 열을 식별하는 키
@@ -14,6 +15,25 @@ export const TOTAL_EMISSIONS_KEY = '전체 합산' as const;
 // 배출량 배열 합산 (반올림 정수)
 export function sumEmissions(emissions: GhgEmission[]): number {
     return Math.round(emissions.reduce((sum, e) => sum + e.emissions, 0));
+}
+
+function roundPcf(value: number): number {
+    return Number(value.toFixed(4));
+}
+
+// PCF 계산 기준은 activity_records.emissions_kg 하나로 고정한다.
+// emissionsTco2e는 표시/검증용 파생값이므로 합산 기준으로 사용하지 않는다.
+function getActivityRecordEmissionsKg(record: ActivityRecord): number {
+    return record.emissionsKg;
+}
+
+function sumPcfEmissionsKg(records: ActivityRecord[]): number {
+    return records.reduce((sum, record) => sum + getActivityRecordEmissionsKg(record), 0);
+}
+
+// PCF 합계는 배출계수 원 단위에 맞춰 activity_records.emissions_kg 스냅샷을 기준으로 계산한다.
+export function sumPcf(records: ActivityRecord[]): number {
+    return roundPcf(sumPcfEmissionsKg(records));
 }
 
 // 작년 같은 기간 대비 변화율 — 현재 연도 최신 월까지만 비교
@@ -57,6 +77,102 @@ export function getTotalByCompany(companies: Company[]): CompanyTotal[] {
             country: c.country,
             total: Math.round(c.emissions.reduce((sum, e) => sum + e.emissions, 0)),
         }))
+        .sort((a, b) => b.total - a.total);
+}
+
+export function filterActivityRecordsByYear(
+    records: ActivityRecord[],
+    year: number
+): ActivityRecord[] {
+    const prefix = `${year}-`;
+    return records.filter((record) => record.yearMonth.startsWith(prefix));
+}
+
+export function getAvailablePcfYears(records: ActivityRecord[]): number[] {
+    const years = new Set(records.map((record) => parseInt(record.yearMonth.slice(0, 4), 10)));
+    return Array.from(years).sort((a, b) => b - a);
+}
+
+export function getCombinedAvailableYears(...yearLists: number[][]): number[] {
+    return Array.from(new Set(yearLists.flat())).sort((a, b) => b - a);
+}
+
+export function getPcfMonthlyTotals(records: ActivityRecord[]): MonthlyTotal[] {
+    const map = new Map<string, number>();
+    for (const record of records) {
+        map.set(
+            record.yearMonth,
+            (map.get(record.yearMonth) ?? 0) + getActivityRecordEmissionsKg(record)
+        );
+    }
+    return Array.from(map.entries())
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([month, total]) => ({ month, total: roundPcf(total) }));
+}
+
+export function getPcfAnnualTotals(records: ActivityRecord[]): AnnualTotal[] {
+    const map = new Map<number, number>();
+    for (const record of records) {
+        const year = parseInt(record.yearMonth.slice(0, 4), 10);
+        map.set(year, (map.get(year) ?? 0) + getActivityRecordEmissionsKg(record));
+    }
+    return Array.from(map.entries())
+        .sort(([a], [b]) => a - b)
+        .map(([year, total]) => ({ year, total: roundPcf(total) }));
+}
+
+export function getPcfYoyChange(
+    allRecords: ActivityRecord[],
+    monthlyTotals: MonthlyTotal[]
+): number | null {
+    const currentTotal = monthlyTotals.reduce((sum, month) => sum + month.total, 0);
+    const prevYearMonths = new Set(
+        monthlyTotals.map(
+            (month) => `${parseInt(month.month.slice(0, 4), 10) - 1}${month.month.slice(4)}`
+        )
+    );
+    const prevTotal = sumPcfEmissionsKg(
+        allRecords.filter((record) => prevYearMonths.has(record.yearMonth))
+    );
+
+    return prevTotal > 0 ? ((currentTotal - prevTotal) / prevTotal) * 100 : null;
+}
+
+export function getPcfMomYoyChange(
+    allRecords: ActivityRecord[],
+    latestMonth: MonthlyTotal | null
+): number | null {
+    if (!latestMonth) return null;
+    const prevYearSameMonth = `${parseInt(latestMonth.month.slice(0, 4), 10) - 1}${latestMonth.month.slice(4)}`;
+    const prevTotal = sumPcfEmissionsKg(
+        allRecords.filter((record) => record.yearMonth === prevYearSameMonth)
+    );
+
+    return prevTotal > 0 ? ((latestMonth.total - prevTotal) / prevTotal) * 100 : null;
+}
+
+export function getPcfByCompany(
+    companies: Company[],
+    records: ActivityRecord[],
+    year: number
+): CompanyPcfTotal[] {
+    const recordsByCompany = new Map<string, ActivityRecord[]>();
+
+    for (const record of filterActivityRecordsByYear(records, year)) {
+        const companyRecords = recordsByCompany.get(record.companyId) ?? [];
+        companyRecords.push(record);
+        recordsByCompany.set(record.companyId, companyRecords);
+    }
+
+    return companies
+        .map((company) => {
+            const activityRecords = recordsByCompany.get(company.id) ?? [];
+            return {
+                ...company,
+                total: sumPcf(activityRecords),
+                activityRecords,
+            };
+        })
         .sort((a, b) => b.total - a.total);
 }
 
@@ -253,6 +369,27 @@ export function getScopeTotals(emissions: GhgEmission[]): Record<1 | 2 | 3, numb
 
 export function getScopeBreakdown(emissions: GhgEmission[]): ScopeBreakdownItem[] {
     const totals = getScopeTotals(emissions);
+    const total = totals[1] + totals[2] + totals[3];
+    return ([1, 2, 3] as const).map((scope) => ({
+        scope,
+        pct: total > 0 ? (totals[scope] / total) * 100 : 0,
+    }));
+}
+
+export function getPcfScopeTotals(records: ActivityRecord[]): Record<1 | 2 | 3, number> {
+    const totals: Record<1 | 2 | 3, number> = { 1: 0, 2: 0, 3: 0 };
+    for (const record of records) {
+        totals[record.scope] += getActivityRecordEmissionsKg(record);
+    }
+    return {
+        1: roundPcf(totals[1]),
+        2: roundPcf(totals[2]),
+        3: roundPcf(totals[3]),
+    };
+}
+
+export function getPcfScopeBreakdown(records: ActivityRecord[]): ScopeBreakdownItem[] {
+    const totals = getPcfScopeTotals(records);
     const total = totals[1] + totals[2] + totals[3];
     return ([1, 2, 3] as const).map((scope) => ({
         scope,

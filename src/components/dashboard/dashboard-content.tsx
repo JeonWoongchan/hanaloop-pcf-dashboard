@@ -5,6 +5,7 @@
 import { AsyncStateBoundary } from '@/components/shared/async-state-boundary';
 import { ChartSkeleton, MetricGridSkeleton } from '@/components/shared/loading-skeletons';
 import { YearSelector } from '@/components/shared/year-selector';
+import { useAllActivityRecords } from '@/hooks/activity-records/useActivityRecords';
 import { useCompanies } from '@/hooks/companies/useCompanies';
 import { useDashboardMetrics } from '@/hooks/dashboard/useDashboardMetrics';
 import dynamic from 'next/dynamic';
@@ -43,37 +44,43 @@ function DashboardSkeleton() {
 // 대시보드 전체 컨텐츠 렌더링
 export function DashboardContent() {
     const { data: companies, isLoading, error, refetch } = useCompanies();
+    const {
+        data: activityRecords,
+        isLoading: isActivityRecordsLoading,
+        error: activityRecordsError,
+        refetch: refetchActivityRecords,
+    } = useAllActivityRecords();
     const [yearParam, setYearParam] = useQueryState('year', parseAsInteger);
 
     const {
         selectedYear,
         availableYears,
         yearlyTotals,
-        annualTotal,
-        latestMonth,
+        pcfSummary,
         totalByCompany,
         mergedMonthlyData,
         riskSummary,
         scopeTotals,
-        yoyChange,
-        momYoyChange,
-    } = useDashboardMetrics(companies ?? [], yearParam);
+    } = useDashboardMetrics(companies ?? [], yearParam, activityRecords ?? []);
 
     return (
         <AsyncStateBoundary
-            isLoading={isLoading}
-            error={error}
+            isLoading={isLoading || isActivityRecordsLoading}
+            error={error ?? activityRecordsError}
             isEmpty={!companies?.length}
             loadingFallback={<DashboardSkeleton />}
             emptyMessage="등록된 관리 대상 회사가 없습니다."
-            onRetry={refetch}
+            onRetry={() => {
+                void refetch();
+                void refetchActivityRecords();
+            }}
         >
             <div className="space-y-6">
                 <div className="flex items-start justify-between gap-4">
                     <div>
                         <h2 className="text-2xl font-bold tracking-tight">대시보드</h2>
                         <p className="text-muted-foreground">
-                            {selectedYear}년 온실가스 배출 현황 요약
+                            {selectedYear}년 온실가스 및 PCF 현황 요약
                         </p>
                     </div>
                     <YearSelector
@@ -85,11 +92,8 @@ export function DashboardContent() {
 
                 <KpiCards
                     year={selectedYear}
-                    annualTotal={annualTotal}
-                    latestMonth={latestMonth}
-                    momYoyChange={momYoyChange}
+                    pcfSummary={pcfSummary}
                     scopeTotals={scopeTotals}
-                    yoyChange={yoyChange}
                     riskSummary={riskSummary}
                 />
 

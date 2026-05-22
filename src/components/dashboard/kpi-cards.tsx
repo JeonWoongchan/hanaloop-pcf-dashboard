@@ -16,58 +16,26 @@ const ScopeDonutChart = dynamic(
 );
 import { SCOPES } from '@/constants/ghg-scope';
 import { ROUTES } from '@/constants/navigation';
-import type { MonthlyTotal } from '@/lib/emissions';
-import { formatEmissions, formatKrw, formatYearMonth, getTrendProps } from '@/lib/format';
+import type { DashboardPcfSummary } from '@/hooks/dashboard/useDashboardMetrics';
+import { formatKrw, formatPcfEmissions, formatYearMonth, getTrendProps } from '@/lib/format';
 import type { RiskSummary } from '@/lib/risk';
 import { Banknote } from 'lucide-react';
 import Link from 'next/link';
 
-// 연간 총 배출량 + 전년 대비 변화율 카드
-function AnnualEmissionsCard({
-    total,
-    year,
-    yoyChange,
-}: {
-    total: number;
-    year: number;
-    yoyChange: number | null;
-}) {
-    const trend = getTrendProps(yoyChange);
+// 활동 데이터 기반 연간 총 PCF + 전년 대비 변화율 카드
+function AnnualPcfCard({ summary, year }: { summary: DashboardPcfSummary; year: number }) {
+    const hasRecords = summary.recordCount > 0;
+    const trend = getTrendProps(summary.yoyChange);
     return (
         <MetricCard
-            title="연간 총 배출량"
-            tooltip="선택한 연도의 관리 대상 전체 온실가스 배출량 합산입니다. 변화율은 작년 같은 기간(1월~최신 월) 대비 증감률이며, 상단 연도 선택기로 연도를 변경할 수 있습니다."
-            value={formatEmissions(total)}
-            helper={
-                yoyChange !== null
-                    ? `${trend.label} 작년 같은 기간 대비`
-                    : `${year}년 관리 대상 전체`
-            }
-            icon={yoyChange !== null ? trend.Icon : undefined}
-            helperClassName={yoyChange !== null ? trend.className : 'text-muted-foreground'}
-        />
-    );
-}
-
-// 최근 월 배출량 및 전년 동월 대비 변화율 카드
-function MonthlyEmissionsCard({
-    latest,
-    momYoyChange,
-}: {
-    latest: MonthlyTotal | null;
-    momYoyChange: number | null;
-}) {
-    const trend = getTrendProps(momYoyChange);
-    return (
-        <MetricCard
-            title="최근 월 배출량"
-            tooltip="선택 연도의 마지막 월(최신 데이터) 배출량입니다. 변화율은 전년 같은 달 대비 증감률이며, 초록색은 감소(개선), 빨간색은 증가(악화)를 나타냅니다."
+            title="연간 총 PCF"
+            tooltip="선택한 연도에 업로드된 원본 활동 데이터의 PCF 산정 배출량 합산입니다. 변화율은 작년 같은 기간(1월~최신 월) 대비 증감률입니다."
             value={
-                latest ? (
+                hasRecords ? (
                     <>
-                        {formatEmissions(latest.total)}
+                        {formatPcfEmissions(summary.annualTotal)}
                         <span className="text-muted-foreground ml-1 text-sm font-normal">
-                            (tCO₂e)
+                            kgCO₂e
                         </span>
                     </>
                 ) : (
@@ -75,14 +43,50 @@ function MonthlyEmissionsCard({
                 )
             }
             helper={
-                latest
-                    ? momYoyChange !== null
-                        ? `${trend.label} 전년 동월 대비 · ${formatYearMonth(latest.month)}`
-                        : formatYearMonth(latest.month)
-                    : '-'
+                !hasRecords
+                    ? `${year}년 PCF 데이터 없음`
+                    : summary.yoyChange !== null
+                      ? `${trend.label} 작년 같은 기간 대비`
+                      : `${year}년 활동 데이터 기준`
             }
-            icon={momYoyChange !== null ? trend.Icon : undefined}
-            helperClassName={momYoyChange !== null ? trend.className : 'text-muted-foreground'}
+            icon={hasRecords && summary.yoyChange !== null ? trend.Icon : undefined}
+            helperClassName={
+                hasRecords && summary.yoyChange !== null ? trend.className : 'text-muted-foreground'
+            }
+        />
+    );
+}
+
+// 최근 월 PCF 및 전년 동월 대비 변화율 카드
+function MonthlyPcfCard({ summary, year }: { summary: DashboardPcfSummary; year: number }) {
+    const trend = getTrendProps(summary.momYoyChange);
+    return (
+        <MetricCard
+            title="최근 월 PCF"
+            tooltip="선택 연도에 업로드된 원본 활동 데이터 중 마지막 월의 PCF 산정 배출량입니다. 변화율은 전년 같은 달 대비 증감률입니다."
+            value={
+                summary.latestMonth ? (
+                    <>
+                        {formatPcfEmissions(summary.latestMonth.total)}
+                        <span className="text-muted-foreground ml-1 text-sm font-normal">
+                            kgCO₂e
+                        </span>
+                    </>
+                ) : (
+                    '-'
+                )
+            }
+            helper={
+                summary.latestMonth
+                    ? summary.momYoyChange !== null
+                        ? `${trend.label} 전년 동월 대비 · ${formatYearMonth(summary.latestMonth.month)}`
+                        : formatYearMonth(summary.latestMonth.month)
+                    : `${year}년 PCF 데이터 없음`
+            }
+            icon={summary.momYoyChange !== null ? trend.Icon : undefined}
+            helperClassName={
+                summary.momYoyChange !== null ? trend.className : 'text-muted-foreground'
+            }
         />
     );
 }
@@ -127,28 +131,17 @@ function TaxExposureCard({ summary }: { summary: RiskSummary }) {
 
 type Props = {
     year: number;
-    annualTotal: number;
-    latestMonth: MonthlyTotal | null;
-    momYoyChange: number | null;
+    pcfSummary: DashboardPcfSummary;
     scopeTotals: Record<1 | 2 | 3, number>;
-    yoyChange: number | null;
     riskSummary: RiskSummary;
 };
 
 // KPI 카드 4종 조합 렌더링
-export function KpiCards({
-    year,
-    annualTotal,
-    latestMonth,
-    momYoyChange,
-    scopeTotals,
-    yoyChange,
-    riskSummary,
-}: Props) {
+export function KpiCards({ year, pcfSummary, scopeTotals, riskSummary }: Props) {
     return (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <AnnualEmissionsCard total={annualTotal} year={year} yoyChange={yoyChange} />
-            <MonthlyEmissionsCard latest={latestMonth} momYoyChange={momYoyChange} />
+            <AnnualPcfCard summary={pcfSummary} year={year} />
+            <MonthlyPcfCard summary={pcfSummary} year={year} />
             <ScopeBreakdownCard scopeTotals={scopeTotals} />
             <TaxExposureCard summary={riskSummary} />
         </div>

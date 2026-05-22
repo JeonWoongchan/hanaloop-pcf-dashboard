@@ -1,11 +1,18 @@
 // 회사 목록 필터·정렬 상태 관리 훅
 
+import { useAllActivityRecords } from '@/hooks/activity-records/useActivityRecords';
 import { useCompanies } from '@/hooks/companies/useCompanies';
 import { useCountries } from '@/hooks/countries/useCountries';
-import { filterByYear, getAvailableYears, getSelectedYear, sumEmissions } from '@/lib/emissions';
+import {
+    type CompanyPcfTotal,
+    getAvailablePcfYears,
+    getAvailableYears,
+    getCombinedAvailableYears,
+    getPcfByCompany,
+    getSelectedYear,
+} from '@/lib/emissions';
 import { getRiskAssessments } from '@/lib/risk';
 import type { RiskAssessment } from '@/lib/risk';
-import type { CompanyWithTotal } from '@/types';
 import {
     parseAsArrayOf,
     parseAsInteger,
@@ -16,8 +23,8 @@ import {
 import { useCallback, useMemo } from 'react';
 
 export const SORT_OPTIONS = [
-    { value: 'desc', label: '배출량 많은 순' },
-    { value: 'asc', label: '배출량 적은 순' },
+    { value: 'desc', label: 'PCF 높은 순' },
+    { value: 'asc', label: 'PCF 낮은 순' },
     { value: 'name', label: '회사명 순' },
 ] as const;
 
@@ -33,6 +40,12 @@ const countryParser = parseAsArrayOf(parseAsString).withDefault([]);
 // 국가 필터·정렬이 적용된 회사 목록과 필터 컨트롤 상태 반환
 export function useCompaniesFilter() {
     const { data: companies, isLoading, error, refetch } = useCompanies();
+    const {
+        data: activityRecords,
+        isLoading: isActivityRecordsLoading,
+        error: activityRecordsError,
+        refetch: refetchActivityRecords,
+    } = useAllActivityRecords();
     const { data: countries, error: countriesError } = useCountries();
 
     const [yearParam, setYearParam] = useQueryState('year', parseAsInteger);
@@ -47,8 +60,12 @@ export function useCompaniesFilter() {
 
     // 데이터에서 사용 가능한 연도 목록
     const availableYears = useMemo(
-        () => (companies ? getAvailableYears(companies.flatMap((c) => c.emissions)) : []),
-        [companies]
+        () =>
+            getCombinedAvailableYears(
+                companies ? getAvailableYears(companies.flatMap((c) => c.emissions)) : [],
+                getAvailablePcfYears(activityRecords ?? [])
+            ),
+        [activityRecords, companies]
     );
     const selectedYear = getSelectedYear(yearParam, availableYears);
 
@@ -87,14 +104,10 @@ export function useCompaniesFilter() {
     );
 
     // 필터·정렬 적용된 회사 목록 — total 필드 포함
-    const displayedCompanies = useMemo((): CompanyWithTotal[] => {
+    const displayedCompanies = useMemo((): CompanyPcfTotal[] => {
         if (!companies) return [];
 
-        // 선택 연도 배출량만 집계
-        const withTotals = companies.map((c) => ({
-            ...c,
-            total: sumEmissions(filterByYear(c.emissions, selectedYear)),
-        }));
+        const withTotals = getPcfByCompany(companies, activityRecords ?? [], selectedYear);
 
         const filtered =
             selectedCountries.length === 0
@@ -104,7 +117,7 @@ export function useCompaniesFilter() {
         if (sortOrder === 'asc') return [...filtered].sort((a, b) => a.total - b.total);
         if (sortOrder === 'name') return [...filtered].sort((a, b) => a.name.localeCompare(b.name));
         return [...filtered].sort((a, b) => b.total - a.total);
-    }, [companies, selectedCountries, sortOrder, selectedYear]);
+    }, [activityRecords, companies, selectedCountries, sortOrder, selectedYear]);
 
     // 전체 회사 기준 상대 점수 산정 후 id → assessment Map으로 O(1) 조회
     const riskMap = useMemo((): Map<string, RiskAssessment> => {
@@ -113,10 +126,22 @@ export function useCompaniesFilter() {
         return new Map(assessments.map((a) => [a.id, a]));
     }, [companies, selectedYear]);
 
+    const refetchAll = useCallback(() => {
+        void refetch();
+        void refetchActivityRecords();
+    }, [refetch, refetchActivityRecords]);
+
+    const setSelectedYear = useCallback(
+        (y: number) => {
+            void setYearParam(y);
+        },
+        [setYearParam]
+    );
+
     return {
-        isLoading,
-        error,
-        refetch,
+        isLoading: isLoading || isActivityRecordsLoading,
+        error: error ?? activityRecordsError,
+        refetch: refetchAll,
         countriesError,
         totalCompanyCount: companies?.length ?? 0,
         displayedCompanies,
@@ -128,12 +153,7 @@ export function useCompaniesFilter() {
         setSortOrder,
         selectedYear,
         availableYears,
-        setSelectedYear: useCallback(
-            (y: number) => {
-                void setYearParam(y);
-            },
-            [setYearParam]
-        ),
+        setSelectedYear,
         riskMap,
     };
 }

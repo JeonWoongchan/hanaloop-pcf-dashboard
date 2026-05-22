@@ -2,27 +2,64 @@
 
 import {
     filterByYear,
+    filterActivityRecordsByYear,
     getAnnualTotals,
     getAvailableYears,
+    getAvailablePcfYears,
+    getCombinedAvailableYears,
     getMergedMonthlyData,
-    getMomYoyChange,
     getMonthlyByCompany,
     getMonthlyTotals,
+    getPcfMomYoyChange,
+    getPcfMonthlyTotals,
+    getPcfYoyChange,
     getSelectedYear,
     getScopeTotals,
     getTotalByCompany,
-    getYoyChange,
-    sumEmissions,
+    sumPcf,
+    type MonthlyTotal,
 } from '@/lib/emissions';
 import { getRiskAssessments, getRiskSummary } from '@/lib/risk';
-import type { Company } from '@/types';
+import type { ActivityRecord, Company } from '@/types';
 import { useMemo } from 'react';
 
+export type DashboardPcfSummary = {
+    annualTotal: number;
+    latestMonth: MonthlyTotal | null;
+    yoyChange: number | null;
+    momYoyChange: number | null;
+    recordCount: number;
+};
+
+function getDashboardPcfSummary(
+    activityRecords: ActivityRecord[],
+    selectedYear: number
+): DashboardPcfSummary {
+    const selectedYearRecords = filterActivityRecordsByYear(activityRecords, selectedYear);
+    const monthlyTotals = getPcfMonthlyTotals(selectedYearRecords);
+    const latestMonth = monthlyTotals[monthlyTotals.length - 1] ?? null;
+
+    return {
+        annualTotal: sumPcf(selectedYearRecords),
+        latestMonth,
+        yoyChange: getPcfYoyChange(activityRecords, monthlyTotals),
+        momYoyChange: getPcfMomYoyChange(activityRecords, latestMonth),
+        recordCount: selectedYearRecords.length,
+    };
+}
+
 // 대시보드 표시에 필요한 집계 지표 일괄 계산 및 메모이제이션
-export function useDashboardMetrics(companies: Company[], year?: number | null) {
+export function useDashboardMetrics(
+    companies: Company[],
+    year?: number | null,
+    activityRecords: ActivityRecord[] = []
+) {
     return useMemo(() => {
         const allEmissions = companies.flatMap((c) => c.emissions);
-        const availableYears = getAvailableYears(allEmissions);
+        const availableYears = getCombinedAvailableYears(
+            getAvailableYears(allEmissions),
+            getAvailablePcfYears(activityRecords)
+        );
         const selectedYear = getSelectedYear(year, availableYears);
 
         const filtered = companies.map((c) => ({
@@ -40,24 +77,17 @@ export function useDashboardMetrics(companies: Company[], year?: number | null) 
 
         const filteredEmissions = filtered.flatMap((c) => c.emissions);
         const scopeTotals = getScopeTotals(filteredEmissions);
-        const annualTotal = sumEmissions(filteredEmissions);
-        const latestMonth = monthlyTotals[monthlyTotals.length - 1] ?? null;
-        const yoyChange = getYoyChange(allEmissions, monthlyTotals);
-        const momYoyChange = getMomYoyChange(allEmissions, latestMonth);
+        const pcfSummary = getDashboardPcfSummary(activityRecords, selectedYear);
 
         return {
             selectedYear,
             availableYears,
             yearlyTotals,
-            monthlyTotals,
-            annualTotal,
-            latestMonth,
+            pcfSummary,
             totalByCompany,
             mergedMonthlyData: getMergedMonthlyData(monthlyByCompany, monthlyTotals),
             riskSummary,
             scopeTotals,
-            yoyChange,
-            momYoyChange,
         };
-    }, [companies, year]);
+    }, [activityRecords, companies, year]);
 }

@@ -1,5 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
+    GHG_EMISSIONS_UNIT,
+    PCF_EMISSIONS_UNIT,
     formatCompanyName,
     formatDateTime,
     formatEmissions,
@@ -7,6 +9,8 @@ import {
     formatKrw,
     formatMonthShort,
     formatNowToDateTime,
+    formatPcfEmissions,
+    formatPcfTooltipValue,
     formatTooltipValue,
     formatYearMonth,
     getTrendProps,
@@ -33,6 +37,8 @@ describe('format utilities', () => {
 
     it('배출량·금액·천 단위 숫자를 대시보드 표시용으로 변환한다', () => {
         expect(formatEmissions(1234567)).toBe('1,234,567');
+        expect(formatPcfEmissions(0.0502)).toBe('0.0502');
+        expect(formatPcfEmissions(1234.56789)).toBe('1,234.5679');
         expect(formatKrw(123456789)).toBe('1.2억 원');
         expect(formatKrw(45000)).toBe('5만 원');
         expect(formatKrw(9999)).toBe('9,999원');
@@ -45,9 +51,13 @@ describe('format utilities', () => {
         expect(formatCompanyName('Acme', 8)).toBe('Acme');
     });
 
-    it('Recharts tooltip 값을 tCO₂e 단위와 함께 반환한다', () => {
+    it('GHG와 PCF tooltip 값을 각각의 기준 단위와 함께 반환한다', () => {
+        expect(GHG_EMISSIONS_UNIT).toBe('tCO₂e');
+        expect(PCF_EMISSIONS_UNIT).toBe('kgCO₂e');
         expect(formatTooltipValue(1234, 'Scope 1')).toEqual(['1,234 tCO₂e', 'Scope 1']);
+        expect(formatPcfTooltipValue(1234.56789, 'PCF')).toEqual(['1,234.5679 kgCO₂e', 'PCF']);
         expect(formatTooltipValue(null, 'Scope 1')).toEqual(['-', 'Scope 1']);
+        expect(formatPcfTooltipValue(null, 'PCF')).toEqual(['-', 'PCF']);
     });
 
     it('증감률을 라벨·색상·아이콘 정책으로 변환한다', () => {

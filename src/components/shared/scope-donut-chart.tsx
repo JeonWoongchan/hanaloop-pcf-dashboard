@@ -81,8 +81,8 @@ export function ScopeDonutChart({ scopes }: Props) {
 
     if (data.length === 0) {
         return (
-            <div className="flex h-13 items-center justify-center">
-                <span className="text-muted-foreground text-xs">배출 데이터 없음</span>
+            <div className="flex h-17 items-center justify-center">
+                <span className="text-muted-foreground text-xs">Scope 데이터 없음</span>
             </div>
         );
     }

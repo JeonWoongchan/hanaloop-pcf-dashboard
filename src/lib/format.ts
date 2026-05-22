@@ -3,6 +3,9 @@
 import type { LucideIcon } from 'lucide-react';
 import { TrendingDown, TrendingUp } from 'lucide-react';
 
+export const GHG_EMISSIONS_UNIT = 'tCO₂e' as const;
+export const PCF_EMISSIONS_UNIT = 'kgCO₂e' as const;
+
 // "2024-01" → "2024년 1월"
 export function formatYearMonth(ym: string): string {
     const [year, month] = ym.split('-');
@@ -34,6 +37,11 @@ export function formatEmissions(value: number): string {
     return value.toLocaleString('ko-KR');
 }
 
+// PCF는 kgCO₂e 기준 소수값을 보존한다.
+export function formatPcfEmissions(value: number): string {
+    return value.toLocaleString('ko-KR', { maximumFractionDigits: 4 });
+}
+
 // 원화 금액을 대시보드 표시용으로 축약
 export function formatKrw(value: number): string {
     const abs = Math.abs(value);
@@ -60,7 +68,12 @@ export function formatCompanyName(name: string, maxLength = 14): string {
 
 export const formatTooltipValue = (value: unknown, name: unknown) =>
     typeof value === 'number'
-        ? [`${formatEmissions(value)} tCO₂e`, String(name)]
+        ? [`${formatEmissions(value)} ${GHG_EMISSIONS_UNIT}`, String(name)]
+        : ['-', String(name)];
+
+export const formatPcfTooltipValue = (value: unknown, name: unknown) =>
+    typeof value === 'number'
+        ? [`${formatPcfEmissions(value)} ${PCF_EMISSIONS_UNIT}`, String(name)]
         : ['-', String(name)];
 
 export type TrendProps = { label: string; className: string; Icon: LucideIcon | null };

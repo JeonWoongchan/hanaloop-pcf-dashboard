@@ -7,19 +7,24 @@ import { ErrorState } from '@/components/shared/error-state';
 import { YearSelector } from '@/components/shared/year-selector';
 import { Skeleton } from '@/components/ui/skeleton';
 import { COUNTRY_FLAGS } from '@/constants/countries';
+import { useActivityRecords } from '@/hooks/activity-records/useActivityRecords';
 import { useCompany } from '@/hooks/companies/useCompanies';
 import {
+    filterActivityRecordsByYear,
     filterByYear,
     getAnnualTotals,
+    getAvailablePcfYears,
     getAvailableYears,
+    getCombinedAvailableYears,
     getMonthlyByScope,
     getScopeBreakdown,
     getSelectedYear,
     getScopeTotals,
     getTotalBySource,
     sumEmissions,
+    sumPcf,
 } from '@/lib/emissions';
-import { formatEmissions } from '@/lib/format';
+import { formatEmissions, formatPcfEmissions } from '@/lib/format';
 import { ActionNotesPanel } from '@/components/posts/action-notes-panel';
 import { RiskLevelBadge } from '@/components/risk/risk-level-badge';
 import { useCompanyRisk } from '@/hooks/risk/useCompanyRisk';
@@ -27,6 +32,7 @@ import dynamic from 'next/dynamic';
 import { parseAsInteger, useQueryState } from 'nuqs';
 import { useMemo } from 'react';
 import { ActivityRecordsTable } from '@/components/activity/activity-records-table';
+import type { ActivityRecord, Company } from '@/types';
 import { CompanyReductionScenario } from './company-reduction-scenario';
 import { CompanyRiskCard } from './company-risk-card';
 
@@ -71,14 +77,45 @@ function CompanyDetailSkeleton() {
     );
 }
 
+function getCompanyDetailMetrics(
+    company: Company,
+    activityRecords: ActivityRecord[],
+    selectedYear: number
+) {
+    const filteredEmissions = filterByYear(company.emissions, selectedYear);
+    const filteredActivityRecords = filterActivityRecordsByYear(activityRecords, selectedYear);
+    const annualGhgTotal = sumEmissions(filteredEmissions);
+
+    return {
+        annualGhgTotal,
+        annualPcfTotal: sumPcf(filteredActivityRecords),
+        pcfRecordCount: filteredActivityRecords.length,
+        monthlyByScope: getMonthlyByScope(filteredEmissions),
+        scopes: getScopeBreakdown(filteredEmissions),
+        totalBySource: getTotalBySource(filteredEmissions),
+        scopeEmissions: getScopeTotals(filteredEmissions),
+        yearlyTotals: getAnnualTotals(company.emissions),
+    };
+}
+
 // 회사 상세 컨텐츠 렌더링
 export function CompanyDetailContent({ id }: { id: string }) {
     const { data: company, isLoading, error, refetch } = useCompany(id);
+    const {
+        data: activityRecords,
+        isLoading: isActivityRecordsLoading,
+        error: activityRecordsError,
+        refetch: refetchActivityRecords,
+    } = useActivityRecords(company?.id ?? '');
     const [yearParam, setYearParam] = useQueryState('year', parseAsInteger);
 
     const availableYears = useMemo(
-        () => (company ? getAvailableYears(company.emissions) : []),
-        [company]
+        () =>
+            getCombinedAvailableYears(
+                company ? getAvailableYears(company.emissions) : [],
+                getAvailablePcfYears(activityRecords ?? [])
+            ),
+        [activityRecords, company]
     );
     const selectedYear = getSelectedYear(yearParam, availableYears);
     // Rules of Hooks: 조건부 반환 전에 호출 — company 미로드 시 null 반환
@@ -88,18 +125,21 @@ export function CompanyDetailContent({ id }: { id: string }) {
         total: riskTotal,
     } = useCompanyRisk(company?.id ?? '', selectedYear);
 
-    if (isLoading) return <CompanyDetailSkeleton />;
-    if (error) return <ErrorState onRetry={refetch} />;
+    if (isLoading || isActivityRecordsLoading) return <CompanyDetailSkeleton />;
+    if (error || activityRecordsError) {
+        return (
+            <ErrorState
+                message="회사 상세 데이터와 PCF 활동 데이터를 불러오지 못했습니다."
+                onRetry={() => {
+                    void refetch();
+                    void refetchActivityRecords();
+                }}
+            />
+        );
+    }
     if (!company) return <ErrorState message="해당 회사를 찾을 수 없습니다." />;
 
-    const filteredEmissions = filterByYear(company.emissions, selectedYear);
-    const annualTotal = sumEmissions(filteredEmissions);
-    const monthlyByScope = getMonthlyByScope(filteredEmissions);
-    const scopes = getScopeBreakdown(filteredEmissions);
-    const totalBySource = getTotalBySource(filteredEmissions);
-    const scopeEmissions = getScopeTotals(filteredEmissions);
-    // 연도 필터 전 전체 데이터로 연도별 비교 차트 생성
-    const yearlyTotals = getAnnualTotals(company.emissions);
+    const metrics = getCompanyDetailMetrics(company, activityRecords ?? [], selectedYear);
     const flag = COUNTRY_FLAGS[company.country] ?? '';
 
     return (
@@ -115,10 +155,17 @@ export function CompanyDetailContent({ id }: { id: string }) {
                         {riskAssessment && <RiskLevelBadge level={riskAssessment.level} />}
                     </div>
                     <p className="text-muted-foreground">
-                        {selectedYear}년 연간 총 배출량:{' '}
+                        {selectedYear}년 연간 총 PCF:{' '}
                         <span className="text-foreground font-semibold">
-                            {formatEmissions(annualTotal)} tCO₂e
+                            {metrics.pcfRecordCount > 0
+                                ? `${formatPcfEmissions(metrics.annualPcfTotal)} kgCO₂e`
+                                : '-'}
                         </span>
+                    </p>
+                    <p className="text-muted-foreground text-sm">
+                        {metrics.pcfRecordCount > 0
+                            ? `GHG 집계 배출량 ${formatEmissions(metrics.annualGhgTotal)} tCO₂e`
+                            : `${selectedYear}년 PCF 활동 데이터 없음 · GHG 집계 배출량 ${formatEmissions(metrics.annualGhgTotal)} tCO₂e`}
                     </p>
                 </div>
                 <YearSelector
@@ -137,17 +184,17 @@ export function CompanyDetailContent({ id }: { id: string }) {
 
             {/* Scope별 감축 시나리오 */}
             <CompanyReductionScenario
-                scopeEmissions={scopeEmissions}
-                totalEmissions={annualTotal}
+                scopeEmissions={metrics.scopeEmissions}
+                totalEmissions={metrics.annualGhgTotal}
                 year={selectedYear}
             />
 
             {/* 월별 Scope 스택 에어리어 차트 */}
-            <CompanyMonthlyChart data={monthlyByScope} year={selectedYear} />
+            <CompanyMonthlyChart data={metrics.monthlyByScope} year={selectedYear} />
 
             {/* 연도별 배출량 비교 차트 */}
             <YearlyComparisonChart
-                data={yearlyTotals}
+                data={metrics.yearlyTotals}
                 selectedYear={selectedYear}
                 title="연도별 배출량 추이"
                 description={`${company.name} · 연도별 누적 온실가스 배출량 (tCO₂e)`}
@@ -156,8 +203,11 @@ export function CompanyDetailContent({ id }: { id: string }) {
 
             {/* Scope 비중 + 배출원별 차트 */}
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <CompanyScopeChart scopes={scopes} totalEmissions={annualTotal} />
-                <CompanySourceChart sources={totalBySource} year={selectedYear} />
+                <CompanyScopeChart
+                    scopes={metrics.scopes}
+                    totalEmissions={metrics.annualGhgTotal}
+                />
+                <CompanySourceChart sources={metrics.totalBySource} year={selectedYear} />
             </div>
 
             {/* Action Notes 플로팅 채팅 패널 */}

@@ -1,27 +1,35 @@
-// 회사 카드 — 연간 배출량 및 GHG Scope 비중 시각화
+// 회사 카드 — 연간 PCF 및 Scope 비중 시각화
 
 import { RiskLevelBadge } from '@/components/risk/risk-level-badge';
 import { ScopeStackedBar } from '@/components/shared/scope-stacked-bar';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ROUTES } from '@/constants/navigation';
-import { filterByYear, getScopeBreakdown } from '@/lib/emissions';
-import { formatEmissions } from '@/lib/format';
+import { getPcfScopeBreakdown, type CompanyPcfTotal } from '@/lib/emissions';
+import { formatPcfEmissions } from '@/lib/format';
 import type { RiskAssessment } from '@/lib/risk';
-import type { CompanyWithTotal } from '@/types';
 import Link from 'next/link';
 
-// 회사 배출 현황 카드 렌더링
+function getCompanyCardPcfView(company: CompanyPcfTotal) {
+    const hasPcfRecords = company.activityRecords.length > 0;
+
+    return {
+        hasPcfRecords,
+        totalLabel: hasPcfRecords ? formatPcfEmissions(company.total) : '-',
+        scopes: getPcfScopeBreakdown(company.activityRecords),
+    };
+}
+
+// 회사 PCF 현황 카드 렌더링
 export function CompanyCard({
     company,
     year,
     riskAssessment,
 }: {
-    company: CompanyWithTotal;
+    company: CompanyPcfTotal;
     year: number;
     riskAssessment?: RiskAssessment;
 }) {
-    // Scope 비중도 총 배출량과 동일하게 선택 연도 기준으로 산정
-    const scopes = getScopeBreakdown(filterByYear(company.emissions, year));
+    const pcfView = getCompanyCardPcfView(company);
 
     return (
         <Link href={ROUTES.companyDetail(company.id)} className="block">
@@ -51,14 +59,16 @@ export function CompanyCard({
                 </CardHeader>
 
                 <CardContent className="flex-1 space-y-3">
-                    {/* 연간 총 배출량 */}
                     <div>
-                        <p className="text-2xl font-bold">{formatEmissions(company.total)}</p>
-                        <p className="text-muted-foreground text-xs">tCO₂e · {year}년 연간</p>
+                        <p className="text-2xl font-bold">{pcfView.totalLabel}</p>
+                        <p className="text-muted-foreground text-xs">
+                            {pcfView.hasPcfRecords
+                                ? `kgCO₂e · ${year}년 연간 PCF`
+                                : `${year}년 PCF 데이터 없음`}
+                        </p>
                     </div>
 
-                    {/* GHG Scope 비중 스택 바 */}
-                    <ScopeStackedBar scopes={scopes} showBackground />
+                    <ScopeStackedBar scopes={pcfView.scopes} showBackground />
                 </CardContent>
             </Card>
         </Link>
