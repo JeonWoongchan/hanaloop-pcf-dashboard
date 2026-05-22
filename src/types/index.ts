@@ -22,6 +22,7 @@ export type Post = {
   resourceUid: string;
   dateTime: string;
   content: string;
+  author: string;
 };
 
 export type CompanyWithTotal = Company & { total: number };

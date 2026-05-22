@@ -26,7 +26,7 @@ import { CompanyMonthlyChart } from './company-monthly-chart';
 import { CompanyRiskCard } from './company-risk-card';
 import { CompanyScopeChart } from './company-scope-chart';
 import { CompanySourceChart } from './company-source-chart';
-import { CompanyPosts } from '@/components/posts/company-posts';
+import { ActionNotesPanel } from '@/components/posts/action-notes-panel';
 import { RiskLevelBadge } from '@/components/risk/risk-level-badge';
 import { useCompanyRisk } from '@/hooks/risk/useCompanyRisk';
 import { CompanyReductionScenario } from './company-reduction-scenario';
@@ -36,12 +36,12 @@ function CompanyDetailSkeleton() {
     return (
         <div className="space-y-6">
             <Skeleton className="h-16 w-64 rounded-xl" />
-            <Skeleton className="h-[160px] rounded-xl" />
-            <Skeleton className="h-[280px] rounded-xl" />
+            <Skeleton className="h-40 rounded-xl" />
+            <Skeleton className="h-70 rounded-xl" />
             <Skeleton className="h-[200px] rounded-xl" />
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <Skeleton className="h-[260px] rounded-xl" />
-                <Skeleton className="h-[260px] rounded-xl" />
+                <Skeleton className="h-65 rounded-xl" />
+                <Skeleton className="h-65 rounded-xl" />
             </div>
             <div className="space-y-3">
                 <Skeleton className="h-8 w-32 rounded-md" />
@@ -135,8 +135,8 @@ export function CompanyDetailContent({ id }: { id: string }) {
                 <CompanySourceChart sources={totalBySource} year={selectedYear} />
             </div>
 
-            {/* 포스트 목록 및 CRUD */}
-            <CompanyPosts companyId={company.id} />
+            {/* Action Notes 플로팅 채팅 패널 */}
+            <ActionNotesPanel companyId={company.id} />
         </div>
     );
 }

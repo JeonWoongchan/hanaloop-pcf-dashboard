@@ -9,6 +9,21 @@ export function formatYearMonth(ym: string): string {
     return `${year}년 ${parseInt(month)}월`;
 }
 
+// "2026-05-22 14:30" → "2026년 5월 22일 14:30"
+export function formatDateTime(dt: string): string {
+    const [datePart, timePart] = dt.split(' ');
+    const [year, month, day] = datePart.split('-');
+    const base = `${year}년 ${parseInt(month)}월 ${parseInt(day)}일`;
+    return timePart ? `${base} ${timePart}` : base;
+}
+
+// 현재 시각을 "YYYY-MM-DD HH:mm" 형식 문자열로 반환
+export function formatNowToDateTime(): string {
+    const now = new Date();
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+}
+
 // "2024-01" → "1월" (차트 X축 단축 레이블)
 export function formatMonthShort(ym: string): string {
     return `${parseInt(ym.split('-')[1])}월`;
