@@ -186,7 +186,7 @@ function ScopeBreakdownCard({ scopeTotals }: { scopeTotals: Record<1 | 2 | 3, nu
             <Card className="cursor-pointer gap-0 transition-shadow hover:shadow-md">
                 <CardHeading
                     title="Scope별 배출 구성"
-                    tooltip="관리 대상 전체의 Scope 1, Scope 2, Scope 3 배출 비율입니다. 배출원 분석 페이지에서 배출원별 상세 현황을 확인할 수 있습니다."
+                    tooltip="관리 대상 전체의 GHG 집계 배출량을 Scope 1, Scope 2, Scope 3 비율로 나눈 값입니다. 배출원 분석 페이지에서 배출원별 상세 현황을 확인할 수 있습니다."
                     className="pb-2"
                     titleClassName="text-sm font-medium text-muted-foreground"
                 />
@@ -200,7 +200,7 @@ function TaxExposureCard({ summary }: { summary: RiskSummary }) {
     return (
         <MetricCard
             title="탄소세 예상 노출액"
-            tooltip="가정 세율(tCO₂e당 5만원) 기반 시나리오 추정치입니다. 실제 과세액과 다를 수 있습니다. 클릭하면 회사별 리스크 상세 분석 페이지로 이동합니다."
+            tooltip="선택 연도 GHG 집계 배출량에 가정 세율(tCO₂e당 5만원)을 적용한 시나리오 추정치입니다. 실제 과세액과 다를 수 있습니다. 클릭하면 회사별 리스크 상세 분석 페이지로 이동합니다."
             value={formatKrw(summary.totalTaxKrw)}
             helper={`고위험 ${summary.highRiskCount}개사 · 시나리오 기준`}
             icon={Banknote}

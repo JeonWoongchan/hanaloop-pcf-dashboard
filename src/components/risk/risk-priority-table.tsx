@@ -110,7 +110,7 @@ export function RiskPriorityTable({ assessments, year }: Props) {
                                 align="right"
                                 extra={
                                     <InfoTooltip
-                                        content={`예상 비용 = 선택 연도 연간 배출량 x 가정 탄소세율(${formatEmissions(CARBON_TAX_RATE_KRW_PER_TCO2E)}원/tCO2e)입니다. 실제 세무, 법률 산정이 아니라 관리 우선순위 판단을 위한 시나리오입니다.`}
+                                        content={`예상 비용 = 선택 연도 연간 배출량 × 가정 탄소세율(${formatEmissions(CARBON_TAX_RATE_KRW_PER_TCO2E)}원/tCO₂e)입니다. 실제 세무, 법률 산정이 아니라 관리 우선순위 판단을 위한 시나리오입니다.`}
                                     />
                                 }
                             >

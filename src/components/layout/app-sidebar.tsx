@@ -13,6 +13,7 @@ import {
 import { ROUTES } from '@/constants/navigation';
 import { BarChart3 } from 'lucide-react';
 import Link from 'next/link';
+import { SidebarGlossary } from './sidebar-glossary';
 import { SidebarNav } from './sidebar-nav';
 
 // 로고·브랜딩 및 내비게이션을 포함한 사이드바 렌더링
@@ -40,6 +41,7 @@ export function AppSidebar() {
                 <SidebarNav />
             </SidebarContent>
             <SidebarFooter className="border-t px-3 py-3">
+                <SidebarGlossary />
                 <div className="space-y-2 group-data-[collapsible=icon]:hidden">
                     <p className="text-foreground text-xs font-medium">GHG Emissions Dashboard</p>
                     <p className="text-muted-foreground text-xs">HanaLoop · PCF 관리 플랫폼</p>
