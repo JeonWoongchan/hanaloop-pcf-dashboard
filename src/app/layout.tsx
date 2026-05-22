@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-    title: 'GHG Emissions Dashboard',
-    description: '기업 온실가스 배출 현황 시각화 대시보드',
+    title: 'PCF Dashboard',
+    description: '기업 PCF 및 온실가스 배출 현황 시각화 대시보드',
 };
 
 export default function RootLayout({
