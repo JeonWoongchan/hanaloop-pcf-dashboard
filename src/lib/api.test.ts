@@ -3,14 +3,21 @@ import type { Post } from '@/types';
 
 type ApiModule = typeof import('./api');
 
-const NEW_POST_ID = '11111111-1111-4111-8111-111111111111';
+const createdPost: Post = {
+    id: 'new-post-id',
+    title: '감축 조치 메모',
+    resourceUid: 'c1',
+    dateTime: '2026-05-22 15:00',
+    content: '전력 사용량 감축 조치를 기록했습니다.',
+    author: 'QA 담당자',
+};
 
 async function importFreshApi(): Promise<ApiModule> {
     vi.resetModules();
     return import('./api');
 }
 
-async function resolveApiCall<T>(promise: Promise<T>): Promise<T> {
+async function resolveDelayedApiCall<T>(promise: Promise<T>): Promise<T> {
     const settledPromise = promise.then(
         (value) => ({ status: 'fulfilled' as const, value }),
         (reason: unknown) => ({ status: 'rejected' as const, reason })
@@ -21,13 +28,27 @@ async function resolveApiCall<T>(promise: Promise<T>): Promise<T> {
     return settled.value;
 }
 
+function jsonResponse(body: unknown, status = 200): Response {
+    return new Response(JSON.stringify(body), {
+        status,
+        headers: { 'Content-Type': 'application/json' },
+    });
+}
+
+function mockFetch(response: Response): ReturnType<typeof vi.fn> {
+    const fetchMock = vi.fn<(...args: Parameters<typeof fetch>) => Promise<Response>>();
+    fetchMock.mockResolvedValue(response);
+    vi.stubGlobal('fetch', fetchMock);
+    return fetchMock;
+}
+
 function makePost(overrides: Partial<Omit<Post, 'id'>> = {}): Omit<Post, 'id'> {
     return {
-        title: '감축 조치 메모',
-        resourceUid: 'c1',
-        dateTime: '2026-05-22 15:00',
-        content: '전력 사용량 감축 조치를 기록했습니다.',
-        author: 'QA 담당자',
+        title: createdPost.title,
+        resourceUid: createdPost.resourceUid,
+        dateTime: createdPost.dateTime,
+        content: createdPost.content,
+        author: createdPost.author,
         ...overrides,
     };
 }
@@ -43,95 +64,90 @@ afterEach(() => {
     vi.unstubAllGlobals();
 });
 
-describe('fake api', () => {
-    it('초기 국가·회사·Action Note 목록을 비동기로 반환한다', async () => {
+describe('api wrappers', () => {
+    it('국가·회사 목록은 현재 seed 데이터를 비동기로 반환한다', async () => {
         const api = await importFreshApi();
 
-        const countries = await resolveApiCall(api.fetchCountries());
-        const companies = await resolveApiCall(api.fetchCompanies());
-        const posts = await resolveApiCall(api.fetchPosts());
+        const countries = await resolveDelayedApiCall(api.fetchCountries());
+        const companies = await resolveDelayedApiCall(api.fetchCompanies());
 
         expect(countries).toContainEqual({ code: 'KR', name: 'South Korea' });
         expect(companies.some((company) => company.id === 'c1')).toBe(true);
-        expect(posts.some((post) => post.id === 'p1' && post.resourceUid === 'c1')).toBe(true);
     });
 
-    it('새 Action Note를 생성하고 이후 조회 결과에 반영한다', async () => {
+    it('Action Notes 목록을 Route Handler에서 가져온다', async () => {
+        const fetchMock = mockFetch(jsonResponse([createdPost]));
         const api = await importFreshApi();
-        vi.stubGlobal('crypto', { randomUUID: vi.fn(() => NEW_POST_ID) });
 
-        const created = await resolveApiCall(api.createOrUpdatePost(makePost()));
-        const posts = await resolveApiCall(api.fetchPosts());
+        const posts = await api.fetchPosts();
 
-        expect(created).toMatchObject({
-            id: NEW_POST_ID,
-            resourceUid: 'c1',
-            title: '감축 조치 메모',
-            author: 'QA 담당자',
+        expect(fetchMock).toHaveBeenCalledWith('/api/posts');
+        expect(posts).toEqual([createdPost]);
+    });
+
+    it('Action Notes 목록 조회 실패를 사용자 메시지용 Error로 변환한다', async () => {
+        mockFetch(jsonResponse({ error: 'server error' }, 500));
+        const api = await importFreshApi();
+
+        await expect(api.fetchPosts()).rejects.toThrow('게시글을 불러오지 못했습니다.');
+    });
+
+    it('새 Action Note는 POST 요청으로 저장한다', async () => {
+        const fetchMock = mockFetch(jsonResponse(createdPost, 201));
+        const api = await importFreshApi();
+        const payload = makePost();
+
+        const saved = await api.createOrUpdatePost(payload);
+
+        expect(fetchMock).toHaveBeenCalledWith('/api/posts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
         });
-        expect(posts.find((post) => post.id === NEW_POST_ID)).toEqual(created);
+        expect(saved).toEqual(createdPost);
     });
 
-    it('기존 Action Note를 id 기준으로 수정한다', async () => {
+    it('기존 Action Note는 PUT 요청으로 수정한다', async () => {
+        const fetchMock = mockFetch(jsonResponse(createdPost));
         const api = await importFreshApi();
+        const payload = { id: createdPost.id, ...makePost({ title: '수정된 대응 기록' }) };
 
-        const updated = await resolveApiCall(
-            api.createOrUpdatePost({
-                id: 'p1',
-                ...makePost({
-                    title: '수정된 대응 기록',
-                    content: '기존 메모 내용을 수정했습니다.',
-                    author: '검토자',
-                }),
-            })
-        );
-        const posts = await resolveApiCall(api.fetchPosts());
+        const saved = await api.createOrUpdatePost(payload);
 
-        expect(updated).toMatchObject({
-            id: 'p1',
-            title: '수정된 대응 기록',
-            content: '기존 메모 내용을 수정했습니다.',
-            author: '검토자',
+        expect(fetchMock).toHaveBeenCalledWith(`/api/posts/${createdPost.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
         });
-        expect(posts.find((post) => post.id === 'p1')).toEqual(updated);
+        expect(saved).toEqual(createdPost);
     });
 
-    it('Action Note를 삭제하고 이후 조회 결과에서 제외한다', async () => {
+    it('Action Note 저장 실패를 사용자 메시지용 Error로 변환한다', async () => {
+        mockFetch(jsonResponse({ error: 'server error' }, 500));
         const api = await importFreshApi();
 
-        await resolveApiCall(api.deletePost('p1'));
-        const posts = await resolveApiCall(api.fetchPosts());
-
-        expect(posts.some((post) => post.id === 'p1')).toBe(false);
-    });
-
-    it('저장 실패 시 Action Note 목록을 변경하지 않는다', async () => {
-        const randomSpy = vi.spyOn(Math, 'random');
-        randomSpy.mockReset();
-        randomSpy.mockReturnValueOnce(0.5).mockReturnValueOnce(0.1).mockReturnValue(0.5);
-        const api = await importFreshApi();
-        vi.stubGlobal('crypto', { randomUUID: vi.fn(() => NEW_POST_ID) });
-
-        await expect(resolveApiCall(api.createOrUpdatePost(makePost()))).rejects.toThrow(
+        await expect(api.createOrUpdatePost(makePost())).rejects.toThrow(
             '저장에 실패했습니다. 다시 시도해 주세요.'
         );
-        const posts = await resolveApiCall(api.fetchPosts());
-
-        expect(posts.some((post) => post.id === NEW_POST_ID)).toBe(false);
-        expect(posts.some((post) => post.id === 'p1')).toBe(true);
     });
 
-    it('삭제 실패 시 기존 Action Note를 보존한다', async () => {
-        const randomSpy = vi.spyOn(Math, 'random');
-        randomSpy.mockReset();
-        randomSpy.mockReturnValueOnce(0.5).mockReturnValueOnce(0.1).mockReturnValue(0.5);
+    it('Action Note 삭제는 DELETE 요청으로 처리한다', async () => {
+        const fetchMock = mockFetch(new Response(null, { status: 204 }));
         const api = await importFreshApi();
 
-        await expect(resolveApiCall(api.deletePost('p1'))).rejects.toThrow(
+        await expect(api.deletePost(createdPost.id)).resolves.toBeUndefined();
+
+        expect(fetchMock).toHaveBeenCalledWith(`/api/posts/${createdPost.id}`, {
+            method: 'DELETE',
+        });
+    });
+
+    it('Action Note 삭제 실패를 사용자 메시지용 Error로 변환한다', async () => {
+        mockFetch(jsonResponse({ error: 'server error' }, 500));
+        const api = await importFreshApi();
+
+        await expect(api.deletePost(createdPost.id)).rejects.toThrow(
             '삭제에 실패했습니다. 다시 시도해 주세요.'
         );
-        const posts = await resolveApiCall(api.fetchPosts());
-
-        expect(posts.some((post) => post.id === 'p1')).toBe(true);
     });
 });

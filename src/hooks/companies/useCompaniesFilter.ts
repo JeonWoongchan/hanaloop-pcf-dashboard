@@ -33,7 +33,7 @@ const countryParser = parseAsArrayOf(parseAsString).withDefault([]);
 // 국가 필터·정렬이 적용된 회사 목록과 필터 컨트롤 상태 반환
 export function useCompaniesFilter() {
     const { data: companies, isLoading, error, refetch } = useCompanies();
-    const { data: countries } = useCountries();
+    const { data: countries, error: countriesError } = useCountries();
 
     const [yearParam, setYearParam] = useQueryState('year', parseAsInteger);
     const [selectedCountries, setSelectedCountries] = useQueryState('country', countryParser);
@@ -117,6 +117,7 @@ export function useCompaniesFilter() {
         isLoading,
         error,
         refetch,
+        countriesError,
         displayedCompanies,
         countryOptions,
         isCountryChecked,

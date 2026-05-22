@@ -16,7 +16,8 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SORT_OPTIONS, useCompaniesFilter } from '@/hooks/companies/useCompaniesFilter';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { CompanyCard } from './company-card';
 
 // 회사 목록 로딩 중 스켈레톤 그리드
@@ -42,6 +43,7 @@ export function CompaniesContent() {
         isLoading,
         error,
         refetch,
+        countriesError,
         displayedCompanies,
         countryOptions,
         isCountryChecked,
@@ -56,6 +58,12 @@ export function CompaniesContent() {
     } = useCompaniesFilter();
 
     const [countryOpen, setCountryOpen] = useState(false);
+
+    useEffect(() => {
+        if (countriesError) {
+            toast.error('국가 목록을 불러오지 못해 국가 코드로 표시합니다.');
+        }
+    }, [countriesError]);
 
     if (isLoading) return <CompaniesGridSkeleton />;
     if (error) return <ErrorState onRetry={refetch} />;
