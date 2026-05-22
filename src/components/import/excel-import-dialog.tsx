@@ -39,9 +39,16 @@ const ALLOWED_EXTENSIONS = ['.xlsx', '.xls'];
 type Props = {
     open: boolean;
     onOpenChangeAction: (open: boolean) => void;
+    defaultCompanyId?: string;
+    fixedCompanyName?: string;
 };
 
-export function ExcelImportDialog({ open, onOpenChangeAction }: Props) {
+export function ExcelImportDialog({
+    open,
+    onOpenChangeAction,
+    defaultCompanyId,
+    fixedCompanyName,
+}: Props) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     // 진행 중인 preview 요청을 취소하기 위한 AbortController 참조
     const abortRef = useRef<AbortController | null>(null);
@@ -58,7 +65,9 @@ export function ExcelImportDialog({ open, onOpenChangeAction }: Props) {
     const { data: companies } = useCompanies();
     const { data: countries, isLoading: isCountriesLoading } = useCountries();
 
-    const isNewCompany = selectedCompanyId === COMPANY_NEW_SENTINEL;
+    const isCompanyFixed = Boolean(defaultCompanyId);
+    const isNewCompany = !isCompanyFixed && selectedCompanyId === COMPANY_NEW_SENTINEL;
+    const targetCompanyId = defaultCompanyId ?? selectedCompanyId;
 
     const reset = useCallback(() => {
         abortRef.current?.abort();
@@ -146,8 +155,8 @@ export function ExcelImportDialog({ open, onOpenChangeAction }: Props) {
                 companyName: newCompanyName.trim(),
                 companyCountry: newCompanyCountry,
             });
-        } else {
-            importMutation.mutate({ mode: 'existing', file, companyId: selectedCompanyId });
+        } else if (targetCompanyId) {
+            importMutation.mutate({ mode: 'existing', file, companyId: targetCompanyId });
         }
     };
 
@@ -159,9 +168,11 @@ export function ExcelImportDialog({ open, onOpenChangeAction }: Props) {
         preview !== null &&
         previewError === null &&
         !isPreviewing &&
-        (isNewCompany
-            ? newCompanyName.trim().length > 0 && newCompanyCountry.length > 0
-            : selectedCompanyId.length > 0);
+        (isCompanyFixed
+            ? Boolean(defaultCompanyId)
+            : isNewCompany
+              ? newCompanyName.trim().length > 0 && newCompanyCountry.length > 0
+              : selectedCompanyId.length > 0);
 
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -309,23 +320,29 @@ export function ExcelImportDialog({ open, onOpenChangeAction }: Props) {
                     {/* 대상 회사 선택 */}
                     <div className="space-y-3">
                         <label className="text-sm font-medium">대상 회사</label>
-                        <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
-                            <SelectTrigger className="w-full">
-                                <SelectValue placeholder="회사를 선택하세요" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {companies?.map((c) => (
-                                    <SelectItem key={c.id} value={c.id}>
-                                        {c.name}
+                        {isCompanyFixed ? (
+                            <div className="border-border bg-muted/40 text-foreground rounded-md border px-3 py-2 text-sm font-medium">
+                                {fixedCompanyName ?? '현재 회사'}
+                            </div>
+                        ) : (
+                            <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="회사를 선택하세요" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {companies?.map((c) => (
+                                        <SelectItem key={c.id} value={c.id}>
+                                            {c.name}
+                                        </SelectItem>
+                                    ))}
+                                    <SelectItem value={COMPANY_NEW_SENTINEL}>
+                                        ＋ 새 회사 등록
                                     </SelectItem>
-                                ))}
-                                <SelectItem value={COMPANY_NEW_SENTINEL}>
-                                    ＋ 새 회사 등록
-                                </SelectItem>
-                            </SelectContent>
-                        </Select>
+                                </SelectContent>
+                            </Select>
+                        )}
 
-                        {isNewCompany && (
+                        {!isCompanyFixed && isNewCompany && (
                             <div className="border-border space-y-3 rounded-md border p-3">
                                 <div>
                                     <label className="mb-1 block text-xs font-medium">
@@ -369,7 +386,7 @@ export function ExcelImportDialog({ open, onOpenChangeAction }: Props) {
                     </div>
                 </div>
 
-                <DialogFooter className="px-6 py-4">
+                <DialogFooter className="mx-0 mb-0 rounded-b-xl px-6 py-4">
                     <Button variant="outline" onClick={() => handleOpenChange(false)}>
                         취소
                     </Button>
