@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
 import { parseActivityExcel } from '@/lib/excel-import';
 import { apiError } from '@/lib/server/api-response';
+import { applyEmissionFactors } from '@/lib/server/emission-factors';
 
 export const dynamic = 'force-dynamic';
 
@@ -65,6 +66,9 @@ export async function POST(request: Request) {
 
         if (!result.ok) return apiError(result.error, 400);
 
+        const factorResult = await applyEmissionFactors(result.rows);
+        if (!factorResult.ok) return apiError(factorResult.error, 400);
+
         const targetResult = resolveImportTarget(
             getFormText(formData, 'companyId'),
             getFormText(formData, 'newCompanyName'),
@@ -92,10 +96,11 @@ export async function POST(request: Request) {
                       AND import_file_name = ${fileName}
                 `;
 
-            for (const row of result.rows) {
+            for (const row of factorResult.rows) {
                 await tx`
                         INSERT INTO activity_records (
                             company_id,
+                            emission_factor_id,
                             activity_date, year_month,
                             activity_type, description, quantity, unit,
                             source, scope,
@@ -103,6 +108,7 @@ export async function POST(request: Request) {
                             import_file_name, import_row_number
                         ) VALUES (
                             ${target.companyId},
+                            ${row.emissionFactorId},
                             ${row.originalDate}, ${row.yearMonth},
                             ${row.activityType}, ${row.description}, ${row.quantity}, ${row.unit},
                             ${row.source}, ${row.scope},
@@ -114,7 +120,7 @@ export async function POST(request: Request) {
         });
 
         return NextResponse.json(
-            { inserted: result.rows.length, companyId: target.companyId },
+            { inserted: factorResult.rows.length, companyId: target.companyId },
             { status: 201 }
         );
     } catch (error) {

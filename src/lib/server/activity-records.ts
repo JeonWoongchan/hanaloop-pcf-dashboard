@@ -4,6 +4,7 @@ import type { ActivityRecord } from '@/types';
 export type ActivityRecordRow = {
     id: string;
     company_id: string;
+    emission_factor_id: string | null;
     activity_date: Date | string;
     year_month: string;
     activity_type: string;
@@ -71,6 +72,7 @@ export function rowToActivityRecord(row: ActivityRecordRow): ActivityRecord {
     return {
         id: row.id,
         companyId: row.company_id,
+        emissionFactorId: row.emission_factor_id,
         activityDate: normalizeDate(row.activity_date),
         yearMonth: row.year_month,
         activityType: row.activity_type,
@@ -95,7 +97,7 @@ function rowsToActivityRecords(rows: ActivityRecordRow[]): ActivityRecord[] {
 export async function listActivityRecords(): Promise<ActivityRecord[]> {
     const rows = await sql<ActivityRecordRow[]>`
         SELECT
-            id, company_id,
+            id, company_id, emission_factor_id,
             activity_date, year_month,
             activity_type, description, quantity, unit,
             source, scope,
@@ -112,7 +114,7 @@ export async function listActivityRecords(): Promise<ActivityRecord[]> {
 export async function listActivityRecordsByCompany(companyId: string): Promise<ActivityRecord[]> {
     const rows = await sql<ActivityRecordRow[]>`
         SELECT
-            id, company_id,
+            id, company_id, emission_factor_id,
             activity_date, year_month,
             activity_type, description, quantity, unit,
             source, scope,

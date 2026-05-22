@@ -23,13 +23,14 @@ describe('parseActivityExcel', () => {
         if (!result.ok) return;
         expect(result.rows[0]).toMatchObject({
             rowNumber: 3,
-            source: 'electricity',
-            emissionFactorKg: 0.456,
-            emissions: 0.0456,
+            activityType: '전기',
+            description: '한국전력',
+            quantity: 100,
+            unit: 'kWh',
         });
     });
 
-    it('배출계수 시트가 있으면 기본 하드코딩 값보다 우선한다', () => {
+    it('배출계수 시트가 있어도 파서는 원본 활동 데이터만 읽는다', () => {
         const workbook = XLSX.utils.book_new();
         const activitySheet = XLSX.utils.aoa_to_sheet([
             ['일자(원본)', '활동 유형', '설명', '량', '단위'],
@@ -48,10 +49,14 @@ describe('parseActivityExcel', () => {
         expect(result.ok).toBe(true);
         if (!result.ok) return;
         expect(result.rows[0]).toMatchObject({
-            emissionFactorKg: 1.25,
-            emissionsKg: 12.5,
-            emissions: 0.0125,
+            originalDate: '2024-02-01',
+            activityType: '전기',
+            description: '한국전력',
+            quantity: 10,
+            unit: 'kWh',
         });
+        expect(result.rows[0]).not.toHaveProperty('emissionFactorKg');
+        expect(result.rows[0]).not.toHaveProperty('emissions');
     });
 
     it('파싱 오류 메시지에 실제 Excel 행 번호를 표시한다', () => {
@@ -59,7 +64,7 @@ describe('parseActivityExcel', () => {
         const sheet = XLSX.utils.aoa_to_sheet([
             ['업로드 안내'],
             ['일자(원본)', '활동 유형', '설명', '량', '단위'],
-            ['2024-03-10', '알수없음', '항목', 1, 'kg'],
+            ['2024-03-10', '전기', '한국전력', 0, 'kWh'],
         ]);
 
         XLSX.utils.book_append_sheet(workbook, sheet, '과제용 데이터');

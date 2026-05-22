@@ -1,27 +1,13 @@
 import * as XLSX from 'xlsx';
-import { SCOPE_MAP } from '@/constants/ghg-scope';
-import type { ParsedActivityRow } from '@/types';
-
-type EmissionFactor = {
-    source: string;
-    factorKg: number;
-};
-
-const DEFAULT_EMISSION_FACTORS: Record<string, EmissionFactor> = {
-    '전기:한국전력': { source: 'electricity', factorKg: 0.456 },
-    '원소재:플라스틱 1': { source: 'plastic1', factorKg: 2.3 },
-    '원소재:플라스틱 2': { source: 'plastic2', factorKg: 3.2 },
-    '운송:트럭': { source: 'shipping', factorKg: 3.5 },
-};
+import type { ParsedActivityInputRow } from '@/types';
 
 const ACTIVITY_SHEET_NAME = '과제용 데이터';
-const FACTOR_SHEET_NAME = '배출계수';
 const DATA_HEADER_LABEL = '일자';
 
 type RawExcelRow = Record<string, unknown>;
 
 export type ExcelParseResult =
-    | { ok: true; rows: ParsedActivityRow[] }
+    | { ok: true; rows: ParsedActivityInputRow[] }
     | { ok: false; error: string };
 
 function resolveDate(raw: unknown): string | null {
@@ -73,68 +59,10 @@ function getNumber(row: RawExcelRow, keys: string[]): number | null {
     return null;
 }
 
-function factorKey(activityType: string, description: string, unit?: string): string {
-    return unit ? `${activityType}:${description}:${unit}` : `${activityType}:${description}`;
-}
-
 function isBlankRow(row: RawExcelRow): boolean {
     return Object.values(row).every(
         (value) => value === null || value === undefined || value === ''
     );
-}
-
-function getActivityFactor(
-    factors: Record<string, EmissionFactor>,
-    activityType: string,
-    description: string,
-    unit: string
-): EmissionFactor | undefined {
-    return (
-        factors[factorKey(activityType, description, unit)] ??
-        factors[factorKey(activityType, description)]
-    );
-}
-
-function readEmissionFactors(workbook: XLSX.WorkBook): Record<string, EmissionFactor> {
-    const sheetName = workbook.SheetNames.find((name) => name.includes(FACTOR_SHEET_NAME));
-    if (!sheetName) return DEFAULT_EMISSION_FACTORS;
-
-    const ws = workbook.Sheets[sheetName];
-    if (!ws) return DEFAULT_EMISSION_FACTORS;
-
-    const rows = XLSX.utils.sheet_to_json<RawExcelRow>(ws);
-    if (rows.length === 0) return DEFAULT_EMISSION_FACTORS;
-
-    const factors: Record<string, EmissionFactor> = { ...DEFAULT_EMISSION_FACTORS };
-
-    for (const row of rows) {
-        if (isBlankRow(row)) continue;
-
-        const activityType = getString(row, [
-            '활동 유형',
-            '활동유형',
-            'activity_type',
-            'activityType',
-        ]);
-        const description = getString(row, ['설명', 'description']);
-        const unit = getString(row, ['단위', 'unit']);
-        const source = getString(row, ['source', '배출원', '소스']);
-        const factorKg = getNumber(row, [
-            '배출계수',
-            'factor_kg',
-            'factorKg',
-            'kgCO2e/unit',
-            'kgCO₂e/unit',
-        ]);
-
-        if (!activityType || !description || !source || factorKg === null || factorKg < 0) {
-            continue;
-        }
-
-        factors[factorKey(activityType, description, unit || undefined)] = { source, factorKg };
-    }
-
-    return factors;
 }
 
 function validateDate(rawDate: string, rowNumber: number): ExcelParseResult | null {
@@ -164,8 +92,7 @@ export function parseActivityExcel(buffer: Buffer): ExcelParseResult {
     const rows = XLSX.utils.sheet_to_json<RawExcelRow>(ws, { range: headerRowIndex });
     if (rows.length === 0) return { ok: false, error: '데이터가 없습니다.' };
 
-    const factors = readEmissionFactors(workbook);
-    const parsed: ParsedActivityRow[] = [];
+    const parsed: ParsedActivityInputRow[] = [];
 
     for (let index = 0; index < rows.length; index++) {
         const row = rows[index];
@@ -188,19 +115,7 @@ export function parseActivityExcel(buffer: Buffer): ExcelParseResult {
         const dateError = validateDate(originalDate, rowNumber);
         if (dateError) return dateError;
 
-        const mapping = getActivityFactor(factors, activityType, description, unit);
-        if (!mapping) {
-            return {
-                ok: false,
-                error: `배출계수를 찾을 수 없습니다: "${activityType} - ${description}" (${rowNumber}행)`,
-            };
-        }
-
         const yearMonth = originalDate.slice(0, 7);
-        const { source, factorKg } = mapping;
-        const scope = SCOPE_MAP[source] ?? 3;
-        const emissionsKg = Number((quantity * factorKg).toFixed(4));
-        const emissions = Number((emissionsKg / 1000).toFixed(4));
 
         parsed.push({
             originalDate,
@@ -210,11 +125,6 @@ export function parseActivityExcel(buffer: Buffer): ExcelParseResult {
             quantity,
             unit,
             rowNumber,
-            source,
-            scope,
-            emissionFactorKg: factorKg,
-            emissionsKg,
-            emissions,
         });
     }
 

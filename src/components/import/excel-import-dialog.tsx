@@ -181,7 +181,7 @@ export function ExcelImportDialog({
                     <DialogTitle>Excel 활동 데이터 임포트</DialogTitle>
                     <p className="text-muted-foreground text-sm">
                         과제 스펙 Excel(일자·활동유형·설명·량·단위)을 업로드하면 배출계수를 적용해
-                        PostgreSQL에 직접 저장합니다.
+                        DB에 등록된 배출계수 버전을 적용한 뒤 PostgreSQL에 직접 저장합니다.
                     </p>
                 </DialogHeader>
 
