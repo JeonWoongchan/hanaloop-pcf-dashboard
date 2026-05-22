@@ -23,13 +23,18 @@ const postSchema = z.object({
     dateTime: z
         .string()
         .regex(/^\d{4}-(0[1-9]|1[0-2])$/, 'YYYY-MM 형식으로 입력해 주세요.'),
+    author: z.string().min(1, '작성자를 입력해 주세요.'),
     content: z.string().min(1, '내용을 입력해 주세요.'),
 });
 
 type PostFormData = z.infer<typeof postSchema>;
 type FieldErrors = Partial<Record<keyof PostFormData, string>>;
 
-const EMPTY: PostFormData = { title: '', dateTime: '', content: '' };
+const EMPTY: PostFormData = { title: '', dateTime: '', author: '', content: '' };
+
+function toMonthValue(dateTime: string): string {
+    return dateTime.slice(0, 7);
+}
 
 // 라벨 + 입력 + 에러 메시지를 묶는 폼 필드 래퍼
 function FormField({
@@ -69,7 +74,12 @@ export function PostFormDialog({ companyId, post, open, onCloseAction }: Props) 
             /* eslint-disable react-hooks/set-state-in-effect */
             setForm(
                 post
-                    ? { title: post.title, dateTime: post.dateTime, content: post.content }
+                    ? {
+                        title: post.title,
+                        dateTime: toMonthValue(post.dateTime),
+                        author: post.author,
+                        content: post.content,
+                    }
                     : EMPTY
             );
             setErrors({});
@@ -130,6 +140,15 @@ export function PostFormDialog({ companyId, post, open, onCloseAction }: Props) 
                             type="month"
                             value={form.dateTime}
                             onChange={(e) => handleChange('dateTime', e.target.value)}
+                            disabled={isPending}
+                        />
+                    </FormField>
+
+                    <FormField label="작성자" error={errors.author}>
+                        <Input
+                            value={form.author}
+                            onChange={(e) => handleChange('author', e.target.value)}
+                            placeholder="작성자 이름"
                             disabled={isPending}
                         />
                     </FormField>

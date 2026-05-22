@@ -44,7 +44,7 @@ function MonthlyEmissionsCard({
     latest,
     momYoyChange,
 }: {
-    latest: MonthlyTotal | undefined;
+    latest: MonthlyTotal | null;
     momYoyChange: number | null;
 }) {
     const trend = getTrendProps(momYoyChange);
