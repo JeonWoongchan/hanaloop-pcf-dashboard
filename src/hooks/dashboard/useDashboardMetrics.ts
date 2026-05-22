@@ -1,20 +1,22 @@
-// 대시보드 집계 지표 계산 훅 — companies 참조 변경 시에만 재계산
-
+// 대시보드 집계 지표 계산 — companies 참조 변경 시에만 재계산
 import {
-    filterByYear,
     filterActivityRecordsByYear,
+    filterByYear,
     getAnnualTotals,
-    getAvailableYears,
     getAvailablePcfYears,
+    getAvailableYears,
     getCombinedAvailableYears,
     getMergedMonthlyData,
     getMonthlyByCompany,
     getMonthlyTotals,
+    getPcfAnnualTotals,
+    getPcfByCompany,
     getPcfMomYoyChange,
+    getPcfMonthlyByCompany,
     getPcfMonthlyTotals,
     getPcfYoyChange,
-    getSelectedYear,
     getScopeTotals,
+    getSelectedYear,
     getTotalByCompany,
     sumPcf,
     type MonthlyTotal,
@@ -32,23 +34,22 @@ export type DashboardPcfSummary = {
 };
 
 function getDashboardPcfSummary(
-    activityRecords: ActivityRecord[],
-    selectedYear: number
+    allActivityRecords: ActivityRecord[],
+    selectedYearRecords: ActivityRecord[]
 ): DashboardPcfSummary {
-    const selectedYearRecords = filterActivityRecordsByYear(activityRecords, selectedYear);
     const monthlyTotals = getPcfMonthlyTotals(selectedYearRecords);
     const latestMonth = monthlyTotals[monthlyTotals.length - 1] ?? null;
 
     return {
         annualTotal: sumPcf(selectedYearRecords),
         latestMonth,
-        yoyChange: getPcfYoyChange(activityRecords, monthlyTotals),
-        momYoyChange: getPcfMomYoyChange(activityRecords, latestMonth),
+        yoyChange: getPcfYoyChange(allActivityRecords, monthlyTotals),
+        momYoyChange: getPcfMomYoyChange(allActivityRecords, latestMonth),
         recordCount: selectedYearRecords.length,
     };
 }
 
-// 대시보드 표시에 필요한 집계 지표 일괄 계산 및 메모이제이션
+// 대시보드 표시에 필요한 GHG/PCF 집계를 한 번에 계산한다.
 export function useDashboardMetrics(
     companies: Company[],
     year?: number | null,
@@ -71,21 +72,33 @@ export function useDashboardMetrics(
         const monthlyByCompany = getMonthlyByCompany(filtered);
         const totalByCompany = getTotalByCompany(filtered);
         const yearlyTotals = getAnnualTotals(allEmissions);
-        // 리스크 평가
+
+        const selectedYearActivityRecords = filterActivityRecordsByYear(
+            activityRecords,
+            selectedYear
+        );
+        const pcfMonthlyTotals = getPcfMonthlyTotals(selectedYearActivityRecords);
+        const pcfMonthlyByCompany = getPcfMonthlyByCompany(companies, selectedYearActivityRecords);
+        const pcfByCompany = getPcfByCompany(companies, activityRecords, selectedYear);
+        const pcfYearlyTotals = getPcfAnnualTotals(activityRecords);
+        const pcfSummary = getDashboardPcfSummary(activityRecords, selectedYearActivityRecords);
+
         const assessments = getRiskAssessments(companies, selectedYear);
         const riskSummary = getRiskSummary(assessments);
 
         const filteredEmissions = filtered.flatMap((c) => c.emissions);
         const scopeTotals = getScopeTotals(filteredEmissions);
-        const pcfSummary = getDashboardPcfSummary(activityRecords, selectedYear);
 
         return {
             selectedYear,
             availableYears,
             yearlyTotals,
+            pcfYearlyTotals,
             pcfSummary,
             totalByCompany,
+            pcfByCompany,
             mergedMonthlyData: getMergedMonthlyData(monthlyByCompany, monthlyTotals),
+            pcfMergedMonthlyData: getMergedMonthlyData(pcfMonthlyByCompany, pcfMonthlyTotals),
             riskSummary,
             scopeTotals,
         };

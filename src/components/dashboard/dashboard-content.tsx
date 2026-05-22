@@ -1,7 +1,5 @@
 'use client';
 
-// 대시보드 홈 데이터 패칭 및 전체 레이아웃 구성
-
 import { AsyncStateBoundary } from '@/components/shared/async-state-boundary';
 import { ChartSkeleton, MetricGridSkeleton } from '@/components/shared/loading-skeletons';
 import { YearSelector } from '@/components/shared/year-selector';
@@ -12,7 +10,6 @@ import dynamic from 'next/dynamic';
 import { parseAsInteger, useQueryState } from 'nuqs';
 import { KpiCards } from './kpi-cards';
 
-// recharts 번들을 초기 JS에서 분리하기 위한 동적 임포트
 const EmissionTrendChart = dynamic(
     () => import('./emission-trend-chart').then((m) => ({ default: m.EmissionTrendChart })),
     { loading: () => <ChartSkeleton className="h-92" />, ssr: false }
@@ -23,13 +20,12 @@ const CompanyBarChart = dynamic(
 );
 const YearlyComparisonChart = dynamic(
     () =>
-        import('@/components/shared/yearly-comparison-chart').then((m) => ({
-            default: m.YearlyComparisonChart,
+        import('./dashboard-yearly-comparison-chart').then((m) => ({
+            default: m.DashboardYearlyComparisonChart,
         })),
     { loading: () => <ChartSkeleton className="h-52" />, ssr: false }
 );
 
-// 대시보드 레이아웃 전용 로딩 스켈레톤
 function DashboardSkeleton() {
     return (
         <div className="space-y-6">
@@ -41,7 +37,6 @@ function DashboardSkeleton() {
     );
 }
 
-// 대시보드 전체 컨텐츠 렌더링
 export function DashboardContent() {
     const { data: companies, isLoading, error, refetch } = useCompanies();
     const {
@@ -56,9 +51,12 @@ export function DashboardContent() {
         selectedYear,
         availableYears,
         yearlyTotals,
+        pcfYearlyTotals,
         pcfSummary,
         totalByCompany,
+        pcfByCompany,
         mergedMonthlyData,
+        pcfMergedMonthlyData,
         riskSummary,
         scopeTotals,
     } = useDashboardMetrics(companies ?? [], yearParam, activityRecords ?? []);
@@ -99,18 +97,21 @@ export function DashboardContent() {
 
                 <EmissionTrendChart
                     year={selectedYear}
-                    data={mergedMonthlyData}
+                    emissionsData={mergedMonthlyData}
+                    pcfData={pcfMergedMonthlyData}
                     companies={companies ?? []}
                 />
 
-                <CompanyBarChart year={selectedYear} data={totalByCompany} />
+                <CompanyBarChart
+                    year={selectedYear}
+                    emissionsData={totalByCompany}
+                    pcfData={pcfByCompany}
+                />
 
                 <YearlyComparisonChart
-                    data={yearlyTotals}
+                    emissionsData={yearlyTotals}
+                    pcfData={pcfYearlyTotals}
                     selectedYear={selectedYear}
-                    title="연도별 총 배출량 추이"
-                    description="전체 회사 합산 · 연도별 누적 온실가스 배출량 (tCO₂e)"
-                    helpText="전체 기업 합산 기준 연도별 배출량 추이입니다. 강조 표시된 막대가 현재 선택된 연도입니다. 연도 선택기로 기준 연도를 변경할 수 있습니다."
                 />
             </div>
         </AsyncStateBoundary>

@@ -124,6 +124,25 @@ describe('useDashboardMetrics', () => {
             { id: 'a', name: 'Alpha', country: 'KR', total: 300 },
             { id: 'b', name: 'Beta', country: 'US', total: 100 },
         ]);
+        expect(
+            metrics.pcfByCompany.map(({ id, name, country, total }) => ({
+                id,
+                name,
+                country,
+                total,
+            }))
+        ).toEqual([
+            { id: 'a', name: 'Alpha', country: 'KR', total: 91.2 },
+            { id: 'b', name: 'Beta', country: 'US', total: 70 },
+        ]);
+        expect(metrics.pcfYearlyTotals).toEqual([
+            { year: 2023, total: 45.6 },
+            { year: 2024, total: 161.2 },
+        ]);
+        expect(metrics.pcfMergedMonthlyData).toEqual([
+            { month: '2024-01', Alpha: 91.2, Beta: 0, [TOTAL_EMISSIONS_KEY]: 91.2 },
+            { month: '2024-02', Alpha: 0, Beta: 70, [TOTAL_EMISSIONS_KEY]: 70 },
+        ]);
         expect(metrics.scopeTotals).toEqual({ 1: 125, 2: 125, 3: 150 });
         expect(metrics.yearlyTotals).toEqual([
             { year: 2023, total: 75 },

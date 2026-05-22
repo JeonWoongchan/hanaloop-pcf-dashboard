@@ -121,6 +121,26 @@ export function getPcfAnnualTotals(records: ActivityRecord[]): AnnualTotal[] {
         .map(([year, total]) => ({ year, total: roundPcf(total) }));
 }
 
+export function getPcfMonthlyByCompany(
+    companies: Company[],
+    records: ActivityRecord[]
+): Record<string, number | string>[] {
+    const months = [...new Set(records.map((record) => record.yearMonth))].sort();
+
+    return months.map((month) => {
+        const row: Record<string, number | string> = { month };
+
+        for (const company of companies) {
+            const total = records
+                .filter((record) => record.companyId === company.id && record.yearMonth === month)
+                .reduce((sum, record) => sum + getActivityRecordEmissionsKg(record), 0);
+            row[company.name] = roundPcf(total);
+        }
+
+        return row;
+    });
+}
+
 export function getPcfYoyChange(
     allRecords: ActivityRecord[],
     monthlyTotals: MonthlyTotal[]
