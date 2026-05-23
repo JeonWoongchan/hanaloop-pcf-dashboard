@@ -60,10 +60,17 @@ export function CompanyCard({
 
                 <CardContent className="flex-1 space-y-3">
                     <div>
-                        <p className="text-2xl font-bold">{pcfView.totalLabel}</p>
+                        <div className="flex items-baseline gap-1.5">
+                            <p className="text-2xl font-bold">{pcfView.totalLabel}</p>
+                            {pcfView.hasPcfRecords && (
+                                <span className="text-muted-foreground text-xs font-medium">
+                                    kgCO₂e
+                                </span>
+                            )}
+                        </div>
                         <p className="text-muted-foreground text-xs">
                             {pcfView.hasPcfRecords
-                                ? `kgCO₂e · ${year}년 연간 PCF`
+                                ? `${year}년 연간 PCF`
                                 : `${year}년 PCF 데이터 없음`}
                         </p>
                     </div>
