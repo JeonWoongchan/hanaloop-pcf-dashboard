@@ -1,4 +1,18 @@
 import type { Company, Country, Post } from '@/types';
+
+type ApiErrorBody = {
+    error?: unknown;
+};
+
+async function readApiErrorMessage(res: Response, fallback: string): Promise<string> {
+    try {
+        const body = (await res.json()) as ApiErrorBody;
+        return typeof body.error === 'string' && body.error.trim() ? body.error : fallback;
+    } catch {
+        return fallback;
+    }
+}
+
 async function fetchJson<T>(url: string, errorMessage: string): Promise<T> {
     const res = await fetch(url);
     if (!res.ok) throw new Error(errorMessage);
@@ -26,11 +40,15 @@ export async function createOrUpdatePost(p: Omit<Post, 'id'> & { id?: string }):
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(p),
     });
-    if (!res.ok) throw new Error('저장에 실패했습니다. 다시 시도해 주세요.');
+    if (!res.ok) {
+        throw new Error(await readApiErrorMessage(res, '저장에 실패했습니다. 다시 시도해 주세요.'));
+    }
     return res.json() as Promise<Post>;
 }
 
 export async function deletePost(id: string): Promise<void> {
     const res = await fetch(`/api/posts/${id}`, { method: 'DELETE' });
-    if (!res.ok) throw new Error('삭제에 실패했습니다. 다시 시도해 주세요.');
+    if (!res.ok) {
+        throw new Error(await readApiErrorMessage(res, '삭제에 실패했습니다. 다시 시도해 주세요.'));
+    }
 }

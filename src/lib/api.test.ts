@@ -142,11 +142,11 @@ describe('api wrappers', () => {
     });
 
     it('Action Note 저장 실패를 사용자 메시지용 Error로 변환한다', async () => {
-        mockFetch(jsonResponse({ error: 'server error' }, 500));
+        mockFetch(jsonResponse({ error: '저장에 실패했습니다. 의도적인 실패입니다.(15%)' }, 500));
         const api = await importFreshApi();
 
         await expect(api.createOrUpdatePost(makePost())).rejects.toThrow(
-            '저장에 실패했습니다. 다시 시도해 주세요.'
+            '저장에 실패했습니다. 의도적인 실패입니다.(15%)'
         );
     });
 
@@ -162,11 +162,9 @@ describe('api wrappers', () => {
     });
 
     it('Action Note 삭제 실패를 사용자 메시지용 Error로 변환한다', async () => {
-        mockFetch(jsonResponse({ error: 'server error' }, 500));
+        mockFetch(jsonResponse({ error: '삭제에 실패했습니다.' }, 500));
         const api = await importFreshApi();
 
-        await expect(api.deletePost(createdPost.id)).rejects.toThrow(
-            '삭제에 실패했습니다. 다시 시도해 주세요.'
-        );
+        await expect(api.deletePost(createdPost.id)).rejects.toThrow('삭제에 실패했습니다.');
     });
 });
