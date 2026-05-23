@@ -53,12 +53,11 @@ function validateDraftNote(
 ): DraftValidation {
     const trimmedAuthor = author.trim();
     const trimmedContent = content.trim();
-    const shouldShowErrors = touched.author || touched.content;
 
     return {
         errors: {
-            author: getDraftAuthorError(trimmedAuthor, shouldShowErrors),
-            content: getDraftContentError(trimmedContent, shouldShowErrors),
+            author: getDraftAuthorError(trimmedAuthor, touched.author),
+            content: getDraftContentError(trimmedContent, touched.content),
         },
         isValid:
             Boolean(trimmedAuthor && trimmedContent) &&
@@ -222,7 +221,7 @@ export function useActionNotes(companyId: string) {
         });
     };
 
-    const handleNewKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    const handleNewKeyDown = (e: KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             handleSend();

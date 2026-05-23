@@ -276,6 +276,7 @@ export function ActionNotesPanel({ companyId }: Props) {
                         <Input
                             value={author}
                             onChange={(e) => handleAuthorChange(e.target.value)}
+                            onKeyDown={handleNewKeyDown}
                             placeholder="이름"
                             className="text-sm"
                             maxLength={ACTION_NOTE_AUTHOR_MAX_LENGTH}
