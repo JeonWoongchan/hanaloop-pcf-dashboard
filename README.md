@@ -126,6 +126,38 @@ Charts / Cards / Tables
 
 ![Dashboard charts](./docs/images/dashboard2.png)
 
+### 배출원 분석 페이지
+
+- 배출원별 랭킹
+- Scope 항목별 상세 분석 차트
+
+![Sources ranking](./docs/images/sources1.png)
+
+![Sources drilldown](./docs/images/sources2.png)
+
+### 리스크 관리 페이지
+
+- 회사별 리스크 점수와 등급
+- 예상 탄소세 노출액
+- 최근 배출 증가/감소 추세
+- 관리 우선순위 테이블
+
+#### 리스크 점수
+
+회사별 리스크 점수는 세 가지 요소를 합산해 산정합니다.
+
+- 연간 총 배출량 (절대 규모)
+- 최근 3개월 배출 증가 추세
+- Scope 3 비중 (공급망 리스크)
+
+점수에 따라 High / Medium / Low 등급으로 구분하고 관리 우선순위를 표시합니다.
+
+#### 탄소세 산정
+`50,000원 / tCO₂e`를 가정 시나리오로 사용합니다. 경영자가 어느 회사를 먼저 관리해야 하는지 비용 기준으로 판단할 수 있도록 예상 탄소세 노출액을 함께 표시합니다.
+
+![Risk](./docs/images/risk.png)
+
+
 ### 회사 목록 페이지
 
 - 관리 대상 회사 카드 목록
@@ -147,37 +179,6 @@ Charts / Cards / Tables
 ![Company Detail](./docs/images/company_detail.png)
 
 ![Company Detail PCF activity data](docs/images/company_detail_excel.png)
-
-### 배출원 분석 페이지
-
-- 배출원별 랭킹
-- Scope 항목별 상세 분석 차트
-
-#### 리스크 점수
-
-회사별 리스크 점수는 세 가지 요소를 합산해 산정합니다.
-
-- 연간 총 배출량 (절대 규모)
-- 최근 3개월 배출 증가 추세
-- Scope 3 비중 (공급망 리스크)
-
-점수에 따라 High / Medium / Low 등급으로 구분하고 관리 우선순위를 표시합니다.
-
-![Sources ranking](./docs/images/sources1.png)
-
-![Sources drilldown](./docs/images/sources2.png)
-
-### 리스크 관리 페이지
-
-- 회사별 리스크 점수와 등급
-- 예상 탄소세 노출액
-- 최근 배출 증가/감소 추세
-- 관리 우선순위 테이블
-
-#### 탄소세 산정
-`50,000원 / tCO₂e`를 가정 시나리오로 사용합니다. 경영자가 어느 회사를 먼저 관리해야 하는지 비용 기준으로 판단할 수 있도록 예상 탄소세 노출액을 함께 표시합니다.
-
-![Risk](./docs/images/risk.png)
 
 ---
 
