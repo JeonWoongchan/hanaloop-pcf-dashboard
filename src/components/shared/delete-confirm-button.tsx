@@ -1,61 +1,71 @@
 'use client';
 
-// 클릭 → 인라인 확인/취소 전환 방식의 삭제 확인 버튼
+// 삭제 확인 버튼 — 클릭 시 AlertDialog 모달로 확인 요청
 // 모달 없이 행·카드 내에서 삭제를 확정하는 공통 패턴
 
 import { useState } from 'react';
-import { Check, Trash2, X } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 
 type Props = {
     onConfirmAction: () => void;
     disabled?: boolean;
-    size?: 'sm' | 'default';
+    title?: string;
+    description?: string;
 };
 
-export function DeleteConfirmButton({ onConfirmAction, disabled, size = 'sm' }: Props) {
-    const [confirming, setConfirming] = useState(false);
-
-    if (confirming) {
-        return (
-            <div className="flex items-center gap-1">
-                <Button
-                    size="sm"
-                    variant="destructive"
-                    className="h-7 px-2 text-xs"
-                    disabled={disabled}
-                    onClick={() => {
-                        onConfirmAction();
-                        setConfirming(false);
-                    }}
-                >
-                    <Check className="mr-1 size-3" />
-                    확인
-                </Button>
-                <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-7 px-2 text-xs"
-                    disabled={disabled}
-                    onClick={() => setConfirming(false)}
-                >
-                    <X className="mr-1 size-3" />
-                    취소
-                </Button>
-            </div>
-        );
-    }
+export function DeleteConfirmButton({
+    onConfirmAction,
+    disabled,
+    title = '삭제하겠습니까?',
+    description = '이 작업은 되돌릴 수 없습니다.',
+}: Props) {
+    const [open, setOpen] = useState(false);
 
     return (
-        <Button
-            size={size === 'sm' ? 'icon' : 'default'}
-            variant="ghost"
-            className="text-muted-foreground hover:text-destructive size-7"
-            disabled={disabled}
-            onClick={() => setConfirming(true)}
-            aria-label="삭제"
-        >
-            <Trash2 className="size-3.5" />
-        </Button>
+        <>
+            <Button
+                size="icon"
+                variant="ghost"
+                className="text-muted-foreground hover:text-destructive size-7"
+                disabled={disabled}
+                onClick={() => setOpen(true)}
+                aria-label="삭제"
+            >
+                <Trash2 className="size-3.5" />
+            </Button>
+
+            <AlertDialog open={open} onOpenChange={setOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>{title}</AlertDialogTitle>
+                        <AlertDialogDescription>{description}</AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>취소</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={() => {
+                                onConfirmAction();
+                                setOpen(false);
+                            }}
+                            disabled={disabled}
+                            className="bg-destructive hover:bg-destructive/90 text-white"
+                        >
+                            {disabled ? '삭제 중...' : '삭제'}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+        </>
     );
 }
