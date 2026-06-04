@@ -8,6 +8,7 @@ import { ExcelImportDialog } from '@/components/import/excel-import-dialog';
 import { GhgImportDialog } from '@/components/import/ghg-import-dialog';
 import { ActionNotesPanel } from '@/components/posts/action-notes-panel';
 import { RiskLevelBadge } from '@/components/risk/risk-level-badge';
+import { ReportExportButton } from '@/components/reports/report-export-button';
 import { ErrorState } from '@/components/shared/error-state';
 import { ChartSkeleton, ListSkeleton } from '@/components/shared/loading-skeletons';
 import { MetricYearlyComparisonChart } from '@/components/shared/metric-yearly-comparison-chart';
@@ -17,6 +18,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { COUNTRY_FLAGS } from '@/constants/countries';
 import { useActivityRecords } from '@/hooks/activity-records/useActivityRecords';
 import { useCompany } from '@/hooks/companies/useCompanies';
+import { usePostsByCompany } from '@/hooks/posts/usePosts';
 import { useCompanyRisk } from '@/hooks/risk/useCompanyRisk';
 import {
     filterActivityRecordsByYear,
@@ -36,6 +38,7 @@ import {
     sumPcf,
 } from '@/lib/emissions';
 import { formatEmissions, formatPcfEmissions } from '@/lib/format';
+import { buildCompanyDetailReportWorkbook } from '@/lib/reports/builders/company-detail-report';
 import type { ActivityRecord, Company } from '@/types';
 import { Upload } from 'lucide-react';
 import dynamic from 'next/dynamic';
@@ -107,6 +110,11 @@ export function CompanyDetailContent({ id }: { id: string }) {
         error: activityRecordsError,
         refetch: refetchActivityRecords,
     } = useActivityRecords(company?.id ?? '');
+    const {
+        data: actionNotes,
+        isLoading: isActionNotesLoading,
+        error: actionNotesError,
+    } = usePostsByCompany(company?.id ?? '');
     const [yearParam, setYearParam] = useQueryState('year', parseAsInteger);
 
     const availableYears = useMemo(
@@ -188,6 +196,27 @@ export function CompanyDetailContent({ id }: { id: string }) {
                             <Upload className="mr-2 h-4 w-4" />
                             GHG 배출량 임포트
                         </Button>
+                        <ReportExportButton
+                            buildReportAction={() => {
+                                if (actionNotesError) {
+                                    throw new Error(
+                                        'Action Notes를 불러온 뒤 보고서를 내보낼 수 있습니다.'
+                                    );
+                                }
+
+                                return buildCompanyDetailReportWorkbook({
+                                    company,
+                                    year: selectedYear,
+                                    activityRecords: activityRecords ?? [],
+                                    actionNotes: actionNotes ?? [],
+                                    riskAssessment,
+                                    riskRank,
+                                    riskTotal,
+                                });
+                            }}
+                            fileName={`company-detail-${company.name}-${selectedYear}`}
+                            disabled={isActionNotesLoading}
+                        />
                         <YearSelector
                             years={availableYears}
                             value={selectedYear}
