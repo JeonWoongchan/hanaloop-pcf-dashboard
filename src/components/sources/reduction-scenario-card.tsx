@@ -4,7 +4,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { InfoTooltip } from '@/components/shared/info-tooltip';
-import { CARBON_TAX_RATE_KRW_PER_TCO2E } from '@/constants/risk';
+import { ALLOWANCE_PRICE_KRW_PER_TCO2E } from '@/constants/risk';
 import { SCOPE_COLORS, SOURCE_LABELS } from '@/constants/ghg-scope';
 import { formatEmissions, formatKrw } from '@/lib/format';
 import { useState } from 'react';
@@ -28,7 +28,7 @@ export function ReductionScenarioCard({ sourceId, scope, sourceTotal, totalEmiss
     const label = SOURCE_LABELS[sourceId] ?? sourceId;
     const color = SCOPE_COLORS[scope];
     const savedTco2e = Math.round((sourceTotal * reductionPct) / 100);
-    const savedKrw = savedTco2e * CARBON_TAX_RATE_KRW_PER_TCO2E;
+    const savedKrw = savedTco2e * ALLOWANCE_PRICE_KRW_PER_TCO2E;
     const shareOfTotal =
         totalEmissions > 0 ? ((savedTco2e / totalEmissions) * 100).toFixed(1) : '0';
 
@@ -38,7 +38,7 @@ export function ReductionScenarioCard({ sourceId, scope, sourceTotal, totalEmiss
                 <CardTitle className="flex items-center">
                     감축 시나리오
                     <InfoTooltip
-                        content={`선택한 배출원(${label})의 감축률을 조정하면 예상 절감량과 탄소세 절감 효과를 확인할 수 있습니다. 가정 세율 ${formatEmissions(CARBON_TAX_RATE_KRW_PER_TCO2E)}원/tCO₂e 기준 시나리오입니다.`}
+                        content={`선택한 배출원(${label})의 감축률을 조정하면 예상 절감량과 배출권 비용 절감 효과를 확인할 수 있습니다. 가정 배출권 단가 ${formatEmissions(ALLOWANCE_PRICE_KRW_PER_TCO2E)}원/배출권 기준 시나리오입니다.`}
                     />
                 </CardTitle>
             </CardHeader>
@@ -88,7 +88,7 @@ export function ReductionScenarioCard({ sourceId, scope, sourceTotal, totalEmiss
                         <p className="text-muted-foreground text-xs">tCO₂e</p>
                     </div>
                     <div className="text-center">
-                        <p className="text-muted-foreground text-xs">탄소세 절감</p>
+                        <p className="text-muted-foreground text-xs">배출권 비용 절감</p>
                         <p className="text-success mt-1 text-lg font-bold">{formatKrw(savedKrw)}</p>
                         <p className="text-muted-foreground text-xs">시나리오 기준</p>
                     </div>

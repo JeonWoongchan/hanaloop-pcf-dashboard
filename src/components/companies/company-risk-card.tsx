@@ -19,7 +19,7 @@ type Props = {
 
 // 리스크 분석 요약 카드 렌더링
 export function CompanyRiskCard({ assessment, rank, total }: Props) {
-    const { level, score, estimatedTaxKrw, recentTrendPct, reasons } = assessment;
+    const { level, score, estimatedAllowanceCostKrw, recentTrendPct, reasons } = assessment;
     const trend = getTrendProps(recentTrendPct);
 
     return (
@@ -67,10 +67,10 @@ export function CompanyRiskCard({ assessment, rank, total }: Props) {
                     {/* 수치 정보 */}
                     <div className="space-y-4">
                         <div>
-                            <p className="text-muted-foreground text-xs">탄소세 예상 노출액</p>
-                            <p className="text-xl font-semibold">{formatKrw(estimatedTaxKrw)}</p>
+                            <p className="text-muted-foreground text-xs">예상 배출권 구매비용</p>
+                            <p className="text-xl font-semibold">{formatKrw(estimatedAllowanceCostKrw)}</p>
                             <p className="text-muted-foreground text-xs">
-                                시나리오 기준 (tCO₂e당 5만 원)
+                                시나리오 기준 (5만원/배출권)
                             </p>
                         </div>
                         <div>

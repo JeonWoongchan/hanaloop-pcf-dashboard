@@ -1,12 +1,12 @@
 'use client';
 
-// 회사 상세 Scope별 감축 시나리오 — 스코프별 슬라이더로 절감량·탄소세 효과 시뮬레이션
+// 회사 상세 Scope별 감축 시나리오 — 스코프별 슬라이더로 절감량·배출권 비용 절감 효과 시뮬레이션
 
 import { CardHeading } from '@/components/shared/card-heading';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { SCOPE_COLORS, SCOPE_DESCRIPTIONS, SCOPE_LABELS, SCOPES } from '@/constants/ghg-scope';
-import { CARBON_TAX_RATE_KRW_PER_TCO2E } from '@/constants/risk';
+import { ALLOWANCE_PRICE_KRW_PER_TCO2E } from '@/constants/risk';
 import { formatEmissions, formatKrw } from '@/lib/format';
 import { useState } from 'react';
 
@@ -30,8 +30,8 @@ export function CompanyReductionScenario({ scopeEmissions, totalEmissions, year 
     );
     const totalSaved = SCOPES.reduce((sum, s) => sum + savedByScope[s], 0);
     const newTotal = totalEmissions - totalSaved;
-    const savedKrw = totalSaved * CARBON_TAX_RATE_KRW_PER_TCO2E;
-    const newTaxKrw = newTotal * CARBON_TAX_RATE_KRW_PER_TCO2E;
+    const savedAllowanceCostKrw = totalSaved * ALLOWANCE_PRICE_KRW_PER_TCO2E;
+    const newAllowanceCostKrw = newTotal * ALLOWANCE_PRICE_KRW_PER_TCO2E;
     const reductionPct = totalEmissions > 0 ? (totalSaved / totalEmissions) * 100 : 0;
 
     const hasReduction = totalSaved > 0;
@@ -40,7 +40,7 @@ export function CompanyReductionScenario({ scopeEmissions, totalEmissions, year 
         <Card>
             <CardHeading
                 title="감축 시나리오"
-                tooltip={`Scope별 감축 목표를 설정하면 ${year}년 기준 절감 효과를 즉시 확인할 수 있습니다. 가정 세율 ${formatEmissions(CARBON_TAX_RATE_KRW_PER_TCO2E)}원/tCO₂e 기준 시나리오이며 실제 세무 산정이 아닙니다.`}
+                tooltip={`Scope별 감축 목표를 설정하면 ${year}년 기준 절감 효과를 즉시 확인할 수 있습니다. 가정 배출권 단가 ${formatEmissions(ALLOWANCE_PRICE_KRW_PER_TCO2E)}원/배출권 기준 시나리오이며 실제 구매비용과 다를 수 있습니다.`}
                 className="pb-3"
             />
 
@@ -124,25 +124,25 @@ export function CompanyReductionScenario({ scopeEmissions, totalEmissions, year 
                     <div className="text-center">
                         <p className="text-muted-foreground text-xs">감축 후 배출량</p>
                         <p className="mt-1 text-lg font-bold tabular-nums">
-                            {hasReduction ? formatEmissions(newTotal) : '-'}
+                            {hasReduction ? `${formatEmissions(newTotal)} tCO₂e` : '-'}
                         </p>
                         <p className="text-muted-foreground text-xs">
                             {hasReduction
-                                ? `${formatEmissions(totalEmissions)} 대비 ${reductionPct.toFixed(1)}%↓`
+                                ? `${formatEmissions(totalEmissions)} tCO₂e 대비 ${reductionPct.toFixed(1)}%↓`
                                 : `현재 ${formatEmissions(totalEmissions)} tCO₂e`}
                         </p>
                     </div>
                     <div className="text-center">
-                        <p className="text-muted-foreground text-xs">탄소세 절감</p>
+                        <p className="text-muted-foreground text-xs">배출권 비용 절감</p>
                         <p className="text-success mt-1 text-lg font-bold tabular-nums">
-                            {hasReduction ? formatKrw(savedKrw) : '-'}
+                            {hasReduction ? formatKrw(savedAllowanceCostKrw) : '-'}
                         </p>
                         <p className="text-muted-foreground text-xs">시나리오 기준</p>
                     </div>
                     <div className="text-center">
-                        <p className="text-muted-foreground text-xs">감축 후 예상세</p>
+                        <p className="text-muted-foreground text-xs">감축 후 예상 구매비용</p>
                         <p className="mt-1 text-lg font-bold tabular-nums">
-                            {hasReduction ? formatKrw(newTaxKrw) : '-'}
+                            {hasReduction ? formatKrw(newAllowanceCostKrw) : '-'}
                         </p>
                         <p className="text-muted-foreground text-xs">연간 추정</p>
                     </div>
