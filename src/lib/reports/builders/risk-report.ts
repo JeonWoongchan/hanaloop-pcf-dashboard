@@ -1,6 +1,7 @@
 import { SCOPE_LABELS } from '@/constants/ghg-scope';
 import { RISK_LEVEL_LABELS } from '@/constants/risk';
 import type { RiskAssessment, RiskSummary } from '@/lib/risk';
+import { formatReportDateTime } from '../format-utils';
 import type { ReportWorkbook } from '../types';
 
 export type RiskReportInput = {
@@ -142,16 +143,3 @@ function getDominantScopeLabel(assessment: RiskAssessment): string | null {
     return assessment.dominantScope ? SCOPE_LABELS[assessment.dominantScope] : null;
 }
 
-function formatReportDateTime(date: Date): string {
-    const year = date.getFullYear();
-    const month = pad2(date.getMonth() + 1);
-    const day = pad2(date.getDate());
-    const hours = pad2(date.getHours());
-    const minutes = pad2(date.getMinutes());
-
-    return `${year}-${month}-${day} ${hours}:${minutes}`;
-}
-
-function pad2(value: number) {
-    return String(value).padStart(2, '0');
-}

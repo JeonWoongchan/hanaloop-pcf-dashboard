@@ -1,5 +1,6 @@
 import { SCOPE_LABELS, SOURCE_LABELS } from '@/constants/ghg-scope';
 import type { CompanyTotal, MonthlyTotal } from '@/lib/emissions';
+import { formatReportDateTime } from '../format-utils';
 import type { ReportRow, ReportWorkbook } from '../types';
 
 export type SourcesReportSourceItem = {
@@ -241,16 +242,3 @@ function round1(value: number) {
     return Number(value.toFixed(1));
 }
 
-function formatReportDateTime(date: Date): string {
-    const year = date.getFullYear();
-    const month = pad2(date.getMonth() + 1);
-    const day = pad2(date.getDate());
-    const hours = pad2(date.getHours());
-    const minutes = pad2(date.getMinutes());
-
-    return `${year}-${month}-${day} ${hours}:${minutes}`;
-}
-
-function pad2(value: number) {
-    return String(value).padStart(2, '0');
-}

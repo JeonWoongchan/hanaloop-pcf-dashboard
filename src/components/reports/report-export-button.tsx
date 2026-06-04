@@ -34,8 +34,12 @@ export function ReportExportButton({
     ...props
 }: ReportExportButtonProps) {
     const [isPending, setIsPending] = React.useState(false);
+    // ref로 동기 가드 — 리렌더 전 두 번째 클릭 차단
+    const isPendingRef = React.useRef(false);
 
     const handleClick = async () => {
+        if (isPendingRef.current) return;
+        isPendingRef.current = true;
         setIsPending(true);
 
         try {
@@ -45,6 +49,7 @@ export function ReportExportButton({
         } catch (error) {
             toast.error(getErrorMessage(error, errorMessage));
         } finally {
+            isPendingRef.current = false;
             setIsPending(false);
         }
     };

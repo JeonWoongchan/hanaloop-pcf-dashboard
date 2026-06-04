@@ -90,7 +90,8 @@ function normalizeCell(row: ReportRow, column: ReportColumn): ReportCellValue {
 
     if (value === undefined || value === null) return null;
     if (typeof value === 'string') return value;
-    if (typeof value === 'number' && Number.isFinite(value)) return value;
+    // NaN·Infinity는 Excel에서 표현 불가 — null로 처리
+    if (typeof value === 'number') return Number.isFinite(value) ? value : null;
 
     throw new Error(`${column.header} 컬럼에 Excel로 내보낼 수 없는 값이 있습니다.`);
 }
