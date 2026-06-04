@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CARBON_TAX_RATE_KRW_PER_TCO2E } from '@/constants/risk';
+import { ALLOWANCE_PRICE_KRW_PER_TCO2E } from '@/constants/risk';
 import type { Company } from '@/types';
 import { getRiskAssessments, getRiskSummary } from './risk';
 
@@ -48,7 +48,7 @@ describe('risk utilities', () => {
         expect(assessments[0]).toMatchObject({
             id: 'high-scope3',
             annualEmissions: 690,
-            estimatedTaxKrw: 690 * CARBON_TAX_RATE_KRW_PER_TCO2E,
+            estimatedAllowanceCostKrw: 690 * ALLOWANCE_PRICE_KRW_PER_TCO2E,
             dominantScope: 3,
             dominantScopePct: 100,
             score: 100,
@@ -64,7 +64,7 @@ describe('risk utilities', () => {
         expect(assessments[1]).toMatchObject({
             id: 'medium-scope2',
             annualEmissions: 500,
-            estimatedTaxKrw: 500 * CARBON_TAX_RATE_KRW_PER_TCO2E,
+            estimatedAllowanceCostKrw: 500 * ALLOWANCE_PRICE_KRW_PER_TCO2E,
             dominantScope: 2,
             dominantScopePct: 100,
             score: 48,
@@ -78,7 +78,7 @@ describe('risk utilities', () => {
         expect(assessments[2]).toMatchObject({
             id: 'low-balanced',
             annualEmissions: 90,
-            estimatedTaxKrw: 90 * CARBON_TAX_RATE_KRW_PER_TCO2E,
+            estimatedAllowanceCostKrw: 90 * ALLOWANCE_PRICE_KRW_PER_TCO2E,
             dominantScope: 1,
             score: 13,
             level: 'low',
@@ -94,7 +94,7 @@ describe('risk utilities', () => {
         const assessments = getRiskAssessments(riskCompaniesFixture, 2024);
 
         expect(getRiskSummary(assessments)).toEqual({
-            totalTaxKrw: 64_000_000,
+            totalAllowanceCostKrw: 64_000_000,
             highRiskCount: 1,
             averageScore: 54,
             increasingCompaniesCount: 1,
@@ -102,10 +102,10 @@ describe('risk utilities', () => {
         });
     });
 
-    it('탄소세율 시나리오를 인자로 받아 노출액을 재계산한다', () => {
+    it('배출권 단가 시나리오를 인자로 받아 구매비용을 재계산한다', () => {
         const [highRisk] = getRiskAssessments(riskCompaniesFixture, 2024, 1_000);
 
-        expect(highRisk.estimatedTaxKrw).toBe(690_000);
+        expect(highRisk.estimatedAllowanceCostKrw).toBe(690_000);
     });
 
     it('선택 연도 이후의 배출 데이터는 해당 연도 최근 추세 계산에서 제외한다', () => {
@@ -132,7 +132,7 @@ describe('risk utilities', () => {
         expect(assessment).toMatchObject({
             id: 'high-scope3',
             annualEmissions: 0,
-            estimatedTaxKrw: 0,
+            estimatedAllowanceCostKrw: 0,
             recentTrendPct: 30,
             dominantScope: null,
             dominantScopePct: 0,
@@ -144,7 +144,7 @@ describe('risk utilities', () => {
 
     it('빈 리스크 목록의 요약값은 0 기준으로 반환한다', () => {
         expect(getRiskSummary([])).toEqual({
-            totalTaxKrw: 0,
+            totalAllowanceCostKrw: 0,
             highRiskCount: 0,
             averageScore: 0,
             increasingCompaniesCount: 0,

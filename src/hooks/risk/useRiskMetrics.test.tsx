@@ -53,7 +53,7 @@ describe('useRiskMetrics', () => {
         expect(metrics.availableYears).toEqual([2025, 2024]);
         expect(metrics.assessments.map((item) => item.id)).toEqual(['high', 'low']);
         expect(metrics.summary).toMatchObject({
-            totalTaxKrw: 37_000_000,
+            totalAllowanceCostKrw: 37_000_000,
             highRiskCount: 1,
             increasingCompaniesCount: 1,
             improvingCount: 0,

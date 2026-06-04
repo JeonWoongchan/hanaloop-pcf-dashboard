@@ -1,7 +1,7 @@
-// 탄소세 노출액과 관리 우선순위 산정 유틸리티
+// 배출권 구매비용과 관리 우선순위 산정 유틸리티
 
 import {
-    CARBON_TAX_RATE_KRW_PER_TCO2E,
+    ALLOWANCE_PRICE_KRW_PER_TCO2E,
     HIGH_EMISSION_SCORE_RATIO,
     HIGH_SCOPE_SHARE_PCT,
     MEDIUM_SCOPE_SHARE_PCT,
@@ -24,7 +24,7 @@ export type RiskAssessment = {
     name: string;
     country: string;
     annualEmissions: number;
-    estimatedTaxKrw: number;
+    estimatedAllowanceCostKrw: number;
     recentTrendPct: number | null;
     dominantScope: 1 | 2 | 3 | null;
     dominantScopePct: number;
@@ -34,7 +34,7 @@ export type RiskAssessment = {
 };
 
 export type RiskSummary = {
-    totalTaxKrw: number;
+    totalAllowanceCostKrw: number;
     highRiskCount: number;
     averageScore: number;
     increasingCompaniesCount: number;
@@ -65,7 +65,7 @@ type RiskReasonRule = {
 export function getRiskAssessments(
     companies: Company[],
     year: number,
-    taxRate = CARBON_TAX_RATE_KRW_PER_TCO2E
+    allowancePrice = ALLOWANCE_PRICE_KRW_PER_TCO2E
 ): RiskAssessment[] {
     // 상대 배출량 점수 산정을 위한 최대 배출량 기준값
     const annualTotals = companies.map((company) =>
@@ -87,7 +87,7 @@ export function getRiskAssessments(
                 emissions,
                 trendEmissions,
                 maxAnnualEmissions,
-                taxRate
+                allowancePrice
             );
         })
         .sort((a, b) => b.score - a.score || b.annualEmissions - a.annualEmissions);
@@ -97,7 +97,7 @@ export function getRiskAssessments(
 export function getRiskSummary(assessments: RiskAssessment[]): RiskSummary {
     if (assessments.length === 0) {
         return {
-            totalTaxKrw: 0,
+            totalAllowanceCostKrw: 0,
             highRiskCount: 0,
             averageScore: 0,
             increasingCompaniesCount: 0,
@@ -108,7 +108,7 @@ export function getRiskSummary(assessments: RiskAssessment[]): RiskSummary {
     // 전체 리스크 현황 요약값 집계
     const totalScore = assessments.reduce((sum, item) => sum + item.score, 0);
     return {
-        totalTaxKrw: assessments.reduce((sum, item) => sum + item.estimatedTaxKrw, 0),
+        totalAllowanceCostKrw: assessments.reduce((sum, item) => sum + item.estimatedAllowanceCostKrw, 0),
         highRiskCount: assessments.filter((item) => item.level === 'high').length,
         averageScore: Math.round(totalScore / assessments.length),
         increasingCompaniesCount: assessments.filter(
@@ -126,7 +126,7 @@ function assessCompanyRisk(
     emissions: GhgEmission[], // 선택 연도 배출량 — 연간·Scope 계산용
     allEmissions: GhgEmission[], // 전체 배출량 — 연도 경계를 넘는 추세 계산용
     maxAnnualEmissions: number,
-    taxRate: number
+    allowancePrice: number
 ): RiskAssessment {
     // 선택 연도 연간 배출량 합산
     const annualEmissions = Math.round(sumEmissions(emissions));
@@ -154,7 +154,7 @@ function assessCompanyRisk(
         name: company.name,
         country: company.country,
         annualEmissions,
-        estimatedTaxKrw: Math.round(annualEmissions * taxRate),
+        estimatedAllowanceCostKrw: Math.round(annualEmissions * allowancePrice),
         recentTrendPct,
         dominantScope,
         dominantScopePct,
