@@ -94,7 +94,7 @@ describe('risk utilities', () => {
         const assessments = getRiskAssessments(riskCompaniesFixture, 2024);
 
         expect(getRiskSummary(assessments)).toEqual({
-            totalAllowanceCostKrw: 64_000_000,
+            totalAllowanceCostKrw: (690 + 500 + 90) * ALLOWANCE_PRICE_KRW_PER_TCO2E,
             highRiskCount: 1,
             averageScore: 54,
             increasingCompaniesCount: 1,

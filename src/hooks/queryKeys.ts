@@ -17,4 +17,7 @@ export const queryKeys = {
     ghgEmissions: {
         byCompany: (companyId: string) => ['ghgEmissions', 'company', companyId] as const,
     },
+    allowancePrice: {
+        current: ['allowancePrice', 'current'] as const,
+    },
 } as const;

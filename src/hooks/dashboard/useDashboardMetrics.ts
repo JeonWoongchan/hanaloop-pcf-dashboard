@@ -25,6 +25,8 @@ import {
     type MonthlyTotal,
 } from '@/lib/emissions';
 import { getRiskAssessments, getRiskSummary } from '@/lib/risk';
+import { ALLOWANCE_PRICE_KRW_PER_TCO2E } from '@/constants/risk';
+import { useAllowancePrice } from '@/hooks/allowance-price/useAllowancePrice';
 import type { ActivityRecord, Company } from '@/types';
 import { useMemo } from 'react';
 
@@ -82,6 +84,9 @@ export function useDashboardMetrics(
     year?: number | null,
     activityRecords: ActivityRecord[] = []
 ) {
+    const { data: allowanceData } = useAllowancePrice();
+    const allowancePrice = allowanceData?.priceKrw ?? ALLOWANCE_PRICE_KRW_PER_TCO2E;
+
     return useMemo(() => {
         const allEmissions = companies.flatMap((c) => c.emissions);
         const availableYears = getCombinedAvailableYears(
@@ -110,7 +115,7 @@ export function useDashboardMetrics(
         const pcfYearlyTotals = getPcfAnnualTotals(activityRecords);
         const pcfSummary = getDashboardPcfSummary(activityRecords, selectedYearActivityRecords);
 
-        const assessments = getRiskAssessments(companies, selectedYear);
+        const assessments = getRiskAssessments(companies, selectedYear, allowancePrice);
         const riskSummary = getRiskSummary(assessments);
 
         const filteredEmissions = filtered.flatMap((c) => c.emissions);
@@ -135,5 +140,5 @@ export function useDashboardMetrics(
             riskSummary,
             scopeTotals,
         };
-    }, [activityRecords, companies, year]);
+    }, [activityRecords, companies, year, allowancePrice]);
 }

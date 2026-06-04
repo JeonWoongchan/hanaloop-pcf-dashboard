@@ -1,7 +1,7 @@
 // 리스크 산정에 사용하는 가정값과 기준값
 
-// 배출권 비용 시나리오용 tCO₂e당 가정 배출권 단가
-export const ALLOWANCE_PRICE_KRW_PER_TCO2E = 50000;
+// 배출권 단가 DB 미로드 시 사용하는 폴백 기본값 — K-ETS 2024년 기준 시장 평균가
+export const ALLOWANCE_PRICE_KRW_PER_TCO2E = 24550;
 
 // 리스크 점수 100점 환산을 위한 항목별 최대 가중치
 export const RISK_SCORE_WEIGHTS = {

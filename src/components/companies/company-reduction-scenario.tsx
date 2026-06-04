@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { SCOPE_COLORS, SCOPE_DESCRIPTIONS, SCOPE_LABELS, SCOPES } from '@/constants/ghg-scope';
 import { ALLOWANCE_PRICE_KRW_PER_TCO2E } from '@/constants/risk';
+import { useAllowancePrice } from '@/hooks/allowance-price/useAllowancePrice';
 import { formatEmissions, formatKrw } from '@/lib/format';
 import { useState } from 'react';
 
@@ -22,6 +23,8 @@ type Props = {
 
 export function CompanyReductionScenario({ scopeEmissions, totalEmissions, year }: Props) {
     const [reductions, setReductions] = useState<Record<1 | 2 | 3, number>>({ 1: 0, 2: 0, 3: 0 });
+    const { data: allowanceData } = useAllowancePrice();
+    const allowancePrice = allowanceData?.priceKrw ?? ALLOWANCE_PRICE_KRW_PER_TCO2E;
 
     // 감축 후 Scope별 절감량 및 총합 계산
     const savedByScope = SCOPES.reduce(
@@ -30,8 +33,8 @@ export function CompanyReductionScenario({ scopeEmissions, totalEmissions, year 
     );
     const totalSaved = SCOPES.reduce((sum, s) => sum + savedByScope[s], 0);
     const newTotal = totalEmissions - totalSaved;
-    const savedAllowanceCostKrw = totalSaved * ALLOWANCE_PRICE_KRW_PER_TCO2E;
-    const newAllowanceCostKrw = newTotal * ALLOWANCE_PRICE_KRW_PER_TCO2E;
+    const savedAllowanceCostKrw = totalSaved * allowancePrice;
+    const newAllowanceCostKrw = newTotal * allowancePrice;
     const reductionPct = totalEmissions > 0 ? (totalSaved / totalEmissions) * 100 : 0;
 
     const hasReduction = totalSaved > 0;
@@ -40,7 +43,7 @@ export function CompanyReductionScenario({ scopeEmissions, totalEmissions, year 
         <Card>
             <CardHeading
                 title="감축 시나리오"
-                tooltip={`Scope별 감축 목표를 설정하면 ${year}년 기준 절감 효과를 즉시 확인할 수 있습니다. 가정 배출권 단가 ${formatEmissions(ALLOWANCE_PRICE_KRW_PER_TCO2E)}원/배출권 기준 시나리오이며 실제 구매비용과 다를 수 있습니다.`}
+                tooltip={`Scope별 감축 목표를 설정하면 ${year}년 기준 절감 효과를 즉시 확인할 수 있습니다. 가정 배출권 단가 ${formatEmissions(allowancePrice)}원/배출권 기준 시나리오이며 실제 구매비용과 다를 수 있습니다.`}
                 className="pb-3"
             />
 

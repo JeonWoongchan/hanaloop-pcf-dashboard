@@ -5,6 +5,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { InfoTooltip } from '@/components/shared/info-tooltip';
 import { ALLOWANCE_PRICE_KRW_PER_TCO2E } from '@/constants/risk';
+import { useAllowancePrice } from '@/hooks/allowance-price/useAllowancePrice';
 import { SCOPE_COLORS, SOURCE_LABELS } from '@/constants/ghg-scope';
 import { formatEmissions, formatKrw } from '@/lib/format';
 import { useState } from 'react';
@@ -24,11 +25,13 @@ type Props = {
 // 감축 시나리오 카드 렌더링
 export function ReductionScenarioCard({ sourceId, scope, sourceTotal, totalEmissions }: Props) {
     const [reductionPct, setReductionPct] = useState(20);
+    const { data: allowanceData } = useAllowancePrice();
+    const allowancePrice = allowanceData?.priceKrw ?? ALLOWANCE_PRICE_KRW_PER_TCO2E;
 
     const label = SOURCE_LABELS[sourceId] ?? sourceId;
     const color = SCOPE_COLORS[scope];
     const savedTco2e = Math.round((sourceTotal * reductionPct) / 100);
-    const savedKrw = savedTco2e * ALLOWANCE_PRICE_KRW_PER_TCO2E;
+    const savedKrw = savedTco2e * allowancePrice;
     const shareOfTotal =
         totalEmissions > 0 ? ((savedTco2e / totalEmissions) * 100).toFixed(1) : '0';
 
@@ -38,7 +41,7 @@ export function ReductionScenarioCard({ sourceId, scope, sourceTotal, totalEmiss
                 <CardTitle className="flex items-center">
                     감축 시나리오
                     <InfoTooltip
-                        content={`선택한 배출원(${label})의 감축률을 조정하면 예상 절감량과 배출권 비용 절감 효과를 확인할 수 있습니다. 가정 배출권 단가 ${formatEmissions(ALLOWANCE_PRICE_KRW_PER_TCO2E)}원/배출권 기준 시나리오입니다.`}
+                        content={`선택한 배출원(${label})의 감축률을 조정하면 예상 절감량과 배출권 비용 절감 효과를 확인할 수 있습니다. 가정 배출권 단가 ${formatEmissions(allowancePrice)}원/배출권 기준 시나리오입니다.`}
                     />
                 </CardTitle>
             </CardHeader>

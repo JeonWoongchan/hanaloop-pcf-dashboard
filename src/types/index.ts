@@ -48,6 +48,14 @@ export type ActivityRecord = {
     createdAt: string;
 };
 
+// allowance_prices 테이블 현재 단가 레코드
+export type AllowancePrice = {
+    id: string;
+    priceKrw: number;
+    effectiveFrom: string; // "YYYY-MM-DD"
+    note: string | null;
+};
+
 // ghg_emissions 테이블 행 — id 포함 전체 레코드
 export type GhgEmissionRecord = {
     id: string;

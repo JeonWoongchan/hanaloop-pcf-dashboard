@@ -1,5 +1,6 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ActivityRecord, Company } from '@/types';
 import { TOTAL_EMISSIONS_KEY } from '@/lib/emissions';
 import { useDashboardMetrics } from './useDashboardMetrics';
@@ -91,13 +92,19 @@ function readDashboardMetrics(
     activityRecords: ActivityRecord[] = []
 ): ReturnType<typeof useDashboardMetrics> {
     let result: ReturnType<typeof useDashboardMetrics> | null = null;
+    // useAllowancePrice가 QueryClient를 필요로 하므로 래퍼 제공
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
     function Probe() {
         result = useDashboardMetrics(companies, year, activityRecords);
         return null;
     }
 
-    renderToStaticMarkup(<Probe />);
+    renderToStaticMarkup(
+        <QueryClientProvider client={queryClient}>
+            <Probe />
+        </QueryClientProvider>
+    );
     if (!result) throw new Error('useDashboardMetrics probe failed');
     return result;
 }

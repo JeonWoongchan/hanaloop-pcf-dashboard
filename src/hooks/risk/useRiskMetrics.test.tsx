@@ -1,5 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ALLOWANCE_PRICE_KRW_PER_TCO2E } from '@/constants/risk';
 import type { Company } from '@/types';
 import { useRiskMetrics } from './useRiskMetrics';
 
@@ -34,13 +36,19 @@ function readRiskMetrics(
     year?: number | null
 ): ReturnType<typeof useRiskMetrics> {
     let result: ReturnType<typeof useRiskMetrics> | null = null;
+    // useAllowancePrice가 QueryClient를 필요로 하므로 래퍼 제공
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
     function Probe() {
         result = useRiskMetrics(companies, year);
         return null;
     }
 
-    renderToStaticMarkup(<Probe />);
+    renderToStaticMarkup(
+        <QueryClientProvider client={queryClient}>
+            <Probe />
+        </QueryClientProvider>
+    );
     if (!result) throw new Error('useRiskMetrics probe failed');
     return result;
 }
@@ -53,7 +61,8 @@ describe('useRiskMetrics', () => {
         expect(metrics.availableYears).toEqual([2025, 2024]);
         expect(metrics.assessments.map((item) => item.id)).toEqual(['high', 'low']);
         expect(metrics.summary).toMatchObject({
-            totalAllowanceCostKrw: 37_000_000,
+            // DB 미로드 시 폴백 상수로 계산 — (690 + 50) × ALLOWANCE_PRICE_KRW_PER_TCO2E
+            totalAllowanceCostKrw: 740 * ALLOWANCE_PRICE_KRW_PER_TCO2E,
             highRiskCount: 1,
             increasingCompaniesCount: 1,
             improvingCount: 0,

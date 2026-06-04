@@ -1,3 +1,5 @@
+'use client';
+
 import { CardHeading } from '@/components/shared/card-heading';
 import { ChartSkeleton } from '@/components/shared/loading-skeletons';
 import { MetricCard } from '@/components/shared/metric-card';
@@ -19,6 +21,8 @@ import {
     PCF_EMISSIONS_UNIT,
 } from '@/lib/format';
 import type { RiskSummary } from '@/lib/risk';
+import { ALLOWANCE_PRICE_KRW_PER_TCO2E } from '@/constants/risk';
+import { useAllowancePrice } from '@/hooks/allowance-price/useAllowancePrice';
 import { Banknote } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
@@ -196,11 +200,11 @@ function ScopeBreakdownCard({ scopeTotals }: { scopeTotals: Record<1 | 2 | 3, nu
     );
 }
 
-function TaxExposureCard({ summary }: { summary: RiskSummary }) {
+function TaxExposureCard({ summary, priceLabel }: { summary: RiskSummary; priceLabel: string }) {
     return (
         <MetricCard
             title="예상 배출권 구매비용"
-            tooltip="선택 연도 GHG 집계 배출량(tCO₂e)에 가정 배출권 단가(5만원/배출권)를 곱한 시나리오 추정치입니다. 무상할당·보유 배출권을 고려하지 않은 단순 추정이며 실제 구매비용과 다를 수 있습니다. 클릭하면 회사별 리스크 상세 분석 페이지로 이동합니다."
+            tooltip={`선택 연도 GHG 집계 배출량(tCO₂e)에 가정 배출권 단가 ${priceLabel}을 곱한 시나리오 추정치입니다. 무상할당·보유 배출권을 고려하지 않은 단순 추정이며 실제 구매비용과 다를 수 있습니다. 클릭하면 회사별 리스크 상세 분석 페이지로 이동합니다.`}
             value={formatKrw(summary.totalAllowanceCostKrw)}
             helper={`고위험 ${summary.highRiskCount}개사 · 시나리오 기준`}
             icon={Banknote}
@@ -228,6 +232,11 @@ export function KpiCards({
     riskSummary,
 }: Props) {
     const [mode, setMode] = useState<KpiMode>('pcf');
+    const { data: allowanceData } = useAllowancePrice();
+    const priceKrw = allowanceData?.priceKrw ?? ALLOWANCE_PRICE_KRW_PER_TCO2E;
+    const priceLabel = allowanceData
+        ? `${formatEmissions(priceKrw)}원/배출권 (${allowanceData.effectiveFrom} 기준)`
+        : `${formatEmissions(priceKrw)}원/배출권`;
     const summary = mode === 'pcf' ? pcfSummary : emissionsSummary;
 
     return (
@@ -242,7 +251,7 @@ export function KpiCards({
                 <AnnualMetricCard mode={mode} summary={summary} year={year} />
                 <MonthlyMetricCard mode={mode} summary={summary} year={year} />
                 <ScopeBreakdownCard scopeTotals={scopeTotals} />
-                <TaxExposureCard summary={riskSummary} />
+                <TaxExposureCard summary={riskSummary} priceLabel={priceLabel} />
             </div>
         </Tabs>
     );
