@@ -36,10 +36,10 @@ type Props<TPreview> = {
     defaultCompanyId?: string;
     fixedCompanyName?: string;
     // 파일을 받아 미리보기 데이터를 반환 — 도메인별로 다른 엔드포인트 사용
-    onFetchPreview: (file: File, signal: AbortSignal) => Promise<TPreview[]>;
+    onFetchPreviewAction: (file: File, signal: AbortSignal) => Promise<TPreview[]>;
     // 미리보기 테이블·요약 렌더링 — 도메인별로 컬럼이 다름
-    renderPreview: (rows: TPreview[]) => React.ReactNode;
-    onCommit: (params: { file: File; companyId: string }) => void;
+    renderPreviewAction: (rows: TPreview[]) => React.ReactNode;
+    onCommitAction: (params: { file: File; companyId: string }) => void;
     isCommitting: boolean;
 };
 
@@ -54,9 +54,9 @@ export function BaseImportDialog<TPreview>({
     description,
     defaultCompanyId,
     fixedCompanyName,
-    onFetchPreview,
-    renderPreview,
-    onCommit,
+    onFetchPreviewAction,
+    renderPreviewAction,
+    onCommitAction,
     isCommitting,
 }: Props<TPreview>) {
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -108,7 +108,7 @@ export function BaseImportDialog<TPreview>({
             setPreviewError(null);
             setPreview(null);
             try {
-                const rows = await onFetchPreview(f, controller.signal);
+                const rows = await onFetchPreviewAction(f, controller.signal);
                 setPreview(rows);
             } catch (err) {
                 // AbortError는 정상적인 취소이므로 에러 표시 생략
@@ -120,7 +120,7 @@ export function BaseImportDialog<TPreview>({
                 setIsPreviewing(false);
             }
         },
-        [onFetchPreview]
+        [onFetchPreviewAction]
     );
 
     const handleFileSelect = useCallback(
@@ -154,7 +154,7 @@ export function BaseImportDialog<TPreview>({
             setCompanyError('대상 회사를 선택해 주세요.');
             return;
         }
-        onCommit({ file, companyId: targetCompanyId });
+        onCommitAction({ file, companyId: targetCompanyId });
     };
 
     // isPreviewing 포함 — 이전 파일의 preview가 state에 남아있는 동안 제출 차단
@@ -252,7 +252,7 @@ export function BaseImportDialog<TPreview>({
 
                     {/* 도메인별 미리보기 테이블 */}
                     {preview && preview.length > 0 && (
-                        <div className="mb-4">{renderPreview(preview)}</div>
+                        <div className="mb-4">{renderPreviewAction(preview)}</div>
                     )}
 
                     {/* 대상 회사 선택 */}

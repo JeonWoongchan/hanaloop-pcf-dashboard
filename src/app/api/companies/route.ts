@@ -82,7 +82,7 @@ export async function POST(request: Request) {
         const body: unknown = await request.json();
         const parsed = companyBodySchema.safeParse(body);
         if (!parsed.success) {
-            return apiError(parsed.error.errors[0]?.message ?? '입력값이 올바르지 않습니다.', 400);
+            return apiError(parsed.error.issues[0]?.message ?? '입력값이 올바르지 않습니다.', 400);
         }
 
         const { name, countryCode } = parsed.data;

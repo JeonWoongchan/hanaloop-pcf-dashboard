@@ -44,10 +44,10 @@ type Props<T extends { id: string }> = {
     error?: Error | null;
     emptyMessage?: string;
     minWidthClass?: string;
-    onDelete?: (id: string) => void;
-    isDeletingId?: string | null;
-    onEdit?: (row: T) => void;
-    onRetry?: () => void;
+    onDeleteAction?: (id: string) => void;
+    isDeletingIdAction?: string | null;
+    onEditAction?: (row: T) => void;
+    onRetryAction?: () => void;
 };
 
 function TableSkeleton() {
@@ -72,12 +72,12 @@ export function DataTableWithActions<T extends { id: string }>({
     error,
     emptyMessage = '데이터가 없습니다.',
     minWidthClass,
-    onDelete,
-    isDeletingId,
-    onEdit,
-    onRetry,
+    onDeleteAction,
+    isDeletingIdAction,
+    onEditAction,
+    onRetryAction,
 }: Props<T>) {
-    const hasActions = Boolean(onDelete ?? onEdit);
+    const hasActions = Boolean(onDeleteAction ?? onEditAction);
     const useInternalScroll = data.length > INTERNAL_SCROLL_ROW_THRESHOLD;
 
     return (
@@ -88,7 +88,7 @@ export function DataTableWithActions<T extends { id: string }>({
                 {error && (
                     <ErrorState
                         message="데이터를 불러오지 못했습니다."
-                        onRetry={onRetry ? () => void onRetry() : undefined}
+                        onRetry={onRetryAction ? () => void onRetryAction() : undefined}
                     />
                 )}
                 {!isLoading && !error && data.length === 0 && (
@@ -98,7 +98,7 @@ export function DataTableWithActions<T extends { id: string }>({
                     <div
                         className={cn(
                             'overflow-x-auto',
-                            useInternalScroll && 'max-h-[520px] overflow-auto'
+                            useInternalScroll && 'max-h-130 overflow-auto'
                         )}
                     >
                         <Table className={minWidthClass}>
@@ -136,21 +136,21 @@ export function DataTableWithActions<T extends { id: string }>({
                                         {hasActions && (
                                             <TableCell className="py-2 text-right">
                                                 <div className="flex items-center justify-end gap-1">
-                                                    {onEdit && (
+                                                    {onEditAction && (
                                                         <Button
                                                             size="icon"
                                                             variant="ghost"
                                                             className="text-muted-foreground hover:text-foreground size-7"
-                                                            onClick={() => onEdit(row)}
+                                                            onClick={() => onEditAction(row)}
                                                             aria-label="행 수정"
                                                         >
                                                             <Pencil className="size-3.5" />
                                                         </Button>
                                                     )}
-                                                    {onDelete && (
+                                                    {onDeleteAction && (
                                                         <DeleteConfirmButton
-                                                            onConfirm={() => onDelete(row.id)}
-                                                            disabled={isDeletingId === row.id}
+                                                            onConfirmAction={() => onDeleteAction(row.id)}
+                                                            disabled={isDeletingIdAction === row.id}
                                                         />
                                                     )}
                                                 </div>

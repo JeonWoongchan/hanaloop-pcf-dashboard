@@ -4,8 +4,6 @@
 
 import { useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -25,12 +23,10 @@ import {
 import { useCountries } from '@/hooks/countries/useCountries';
 import { useCreateCompany, useUpdateCompany } from '@/hooks/companies/useCompanyMutations';
 
-const formSchema = z.object({
-    name: z.string().min(1, '회사명을 입력해 주세요.').max(100, '100자 이내로 입력해 주세요.'),
-    countryCode: z.string().min(1, '국가를 선택해 주세요.'),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+type FormValues = {
+    name: string;
+    countryCode: string;
+};
 
 type EditTarget = { id: string; name: string; countryCode: string };
 
@@ -51,7 +47,6 @@ export function CompanyFormDialog({ open, onOpenChangeAction, editTarget }: Prop
         control,
         formState: { errors },
     } = useForm<FormValues>({
-        resolver: zodResolver(formSchema),
         defaultValues: { name: '', countryCode: '' },
     });
 
@@ -68,7 +63,6 @@ export function CompanyFormDialog({ open, onOpenChangeAction, editTarget }: Prop
 
     const createMutation = useCreateCompany(() => onOpenChangeAction(false));
     const updateMutation = useUpdateCompany(() => onOpenChangeAction(false));
-
     const isPending = createMutation.isPending || updateMutation.isPending;
 
     const onSubmit = (values: FormValues) => {
@@ -88,12 +82,17 @@ export function CompanyFormDialog({ open, onOpenChangeAction, editTarget }: Prop
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                     <div className="space-y-1.5">
-                        <label htmlFor="company-name" className="text-sm font-medium">회사명</label>
+                        <label htmlFor="company-name" className="text-sm font-medium">
+                            회사명
+                        </label>
                         <Input
                             id="company-name"
                             placeholder="예: CT-045 Corporation"
                             aria-invalid={Boolean(errors.name)}
-                            {...register('name')}
+                            {...register('name', {
+                                required: '회사명을 입력해 주세요.',
+                                maxLength: { value: 100, message: '100자 이내로 입력해 주세요.' },
+                            })}
                         />
                         {errors.name && (
                             <p className="text-destructive text-xs">{errors.name.message}</p>
@@ -101,10 +100,13 @@ export function CompanyFormDialog({ open, onOpenChangeAction, editTarget }: Prop
                     </div>
 
                     <div className="space-y-1.5">
-                        <label htmlFor="company-country" className="text-sm font-medium">국가</label>
+                        <label htmlFor="company-country" className="text-sm font-medium">
+                            국가
+                        </label>
                         <Controller
                             control={control}
                             name="countryCode"
+                            rules={{ required: '국가를 선택해 주세요.' }}
                             render={({ field }) => (
                                 <Select
                                     value={field.value}
@@ -117,7 +119,9 @@ export function CompanyFormDialog({ open, onOpenChangeAction, editTarget }: Prop
                                     >
                                         <SelectValue
                                             placeholder={
-                                                isCountriesLoading ? '국가 목록 로딩 중…' : '국가 선택'
+                                                isCountriesLoading
+                                                    ? '국가 목록 로딩 중…'
+                                                    : '국가 선택'
                                             }
                                         />
                                     </SelectTrigger>

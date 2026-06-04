@@ -19,19 +19,19 @@ export async function POST(request: Request) {
         const result = parseGhgExcel(buffer);
         if (!result.ok) return apiError(result.error, 400);
 
-        // UNIQUE (company_id, year_month, source) 기반 행 단위 upsert
-        let upserted = 0;
-        for (const row of result.rows) {
-            await sql`
-                INSERT INTO ghg_emissions (company_id, year_month, source, emissions)
-                VALUES (${companyId}, ${row.yearMonth}, ${row.source}, ${row.emissions})
-                ON CONFLICT (company_id, year_month, source)
-                DO UPDATE SET emissions = EXCLUDED.emissions
-            `;
-            upserted++;
-        }
+        // 단일 트랜잭션으로 전체 행 upsert — 중간 실패 시 전체 롤백
+        await sql.begin(async (tx) => {
+            for (const row of result.rows) {
+                await tx`
+                    INSERT INTO ghg_emissions (company_id, year_month, source, emissions)
+                    VALUES (${companyId}, ${row.yearMonth}, ${row.source}, ${row.emissions})
+                    ON CONFLICT (company_id, year_month, source)
+                    DO UPDATE SET emissions = EXCLUDED.emissions
+                `;
+            }
+        });
 
-        return NextResponse.json({ upserted, companyId }, { status: 201 });
+        return NextResponse.json({ upserted: result.rows.length, companyId }, { status: 201 });
     } catch (error) {
         console.error('[/api/ghg-emissions/import]', error);
         return apiError('GHG 배출량 임포트에 실패했습니다.');

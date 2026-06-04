@@ -8,12 +8,12 @@ import { Check, Trash2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 type Props = {
-    onConfirm: () => void;
+    onConfirmAction: () => void;
     disabled?: boolean;
     size?: 'sm' | 'default';
 };
 
-export function DeleteConfirmButton({ onConfirm, disabled, size = 'sm' }: Props) {
+export function DeleteConfirmButton({ onConfirmAction, disabled, size = 'sm' }: Props) {
     const [confirming, setConfirming] = useState(false);
 
     if (confirming) {
@@ -25,7 +25,7 @@ export function DeleteConfirmButton({ onConfirm, disabled, size = 'sm' }: Props)
                     className="h-7 px-2 text-xs"
                     disabled={disabled}
                     onClick={() => {
-                        onConfirm();
+                        onConfirmAction();
                         setConfirming(false);
                     }}
                 >

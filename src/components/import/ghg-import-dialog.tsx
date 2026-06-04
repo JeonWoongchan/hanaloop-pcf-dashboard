@@ -109,9 +109,9 @@ export function GhgImportDialog({
             description="연월·배출원·배출량(tCO₂e) 3개 컬럼으로 구성된 Excel 파일을 업로드하세요. 동일한 연월·배출원 조합은 덮어씁니다."
             defaultCompanyId={defaultCompanyId}
             fixedCompanyName={fixedCompanyName}
-            onFetchPreview={fetchGhgPreview}
-            renderPreview={(rows) => <GhgPreviewTable rows={rows} />}
-            onCommit={({ file, companyId }) => importMutation.mutate({ file, companyId })}
+            onFetchPreviewAction={fetchGhgPreview}
+            renderPreviewAction={(rows) => <GhgPreviewTable rows={rows} />}
+            onCommitAction={({ file, companyId }) => importMutation.mutate({ file, companyId })}
             isCommitting={importMutation.isPending}
         />
     );

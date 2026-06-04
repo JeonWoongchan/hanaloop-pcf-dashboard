@@ -2,25 +2,13 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/hooks/queryKeys';
+import { readApiError } from '@/lib/api-fetch-error';
 import { toast } from 'sonner';
 
 type ImportPayload = { file: File; companyId: string };
 type ImportResult = { inserted: number; companyId: string };
 
 const IMPORT_ERROR_MESSAGE = '임포트에 실패했습니다.';
-
-function getApiErrorMessage(body: unknown): string | null {
-    if (typeof body !== 'object' || body === null || !('error' in body)) return null;
-    const error = body.error;
-    return typeof error === 'string' && error.trim() ? error : null;
-}
-
-async function readImportError(response: Response): Promise<string> {
-    const isJson = response.headers.get('content-type')?.includes('application/json');
-    if (!isJson) return IMPORT_ERROR_MESSAGE;
-    const body = await response.json().catch((): unknown => null);
-    return getApiErrorMessage(body) ?? IMPORT_ERROR_MESSAGE;
-}
 
 async function importExcel(payload: ImportPayload): Promise<ImportResult> {
     const formData = new FormData();
@@ -29,7 +17,7 @@ async function importExcel(payload: ImportPayload): Promise<ImportResult> {
 
     const res = await fetch('/api/import', { method: 'POST', body: formData });
     if (!res.ok) {
-        throw new Error(await readImportError(res));
+        throw new Error(await readApiError(res, IMPORT_ERROR_MESSAGE));
     }
     return res.json() as Promise<ImportResult>;
 }

@@ -109,7 +109,7 @@ export function CompanyCard({
                         </Button>
                     )}
                     {onDeleteAction && (
-                        <DeleteConfirmButton onConfirm={onDeleteAction} disabled={isDeleting} />
+                        <DeleteConfirmButton onConfirmAction={onDeleteAction} disabled={isDeleting} />
                     )}
                 </div>
             )}

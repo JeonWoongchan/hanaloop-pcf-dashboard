@@ -2,6 +2,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/hooks/queryKeys';
+import { readApiError } from '@/lib/api-fetch-error';
 import { toast } from 'sonner';
 
 type GhgImportPayload = { file: File; companyId: string };
@@ -16,13 +17,7 @@ async function importGhgEmissions(payload: GhgImportPayload): Promise<GhgImportR
 
     const res = await fetch('/api/ghg-emissions/import', { method: 'POST', body: formData });
     if (!res.ok) {
-        const isJson = res.headers.get('content-type')?.includes('application/json');
-        const body = isJson ? await res.json().catch((): unknown => null) : null;
-        const message =
-            typeof body === 'object' && body !== null && 'error' in body
-                ? String(body.error)
-                : IMPORT_ERROR_MESSAGE;
-        throw new Error(message);
+        throw new Error(await readApiError(res, IMPORT_ERROR_MESSAGE));
     }
     return res.json() as Promise<GhgImportResult>;
 }
