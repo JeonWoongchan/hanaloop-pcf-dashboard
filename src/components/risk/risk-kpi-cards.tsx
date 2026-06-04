@@ -7,7 +7,7 @@ import { ALLOWANCE_PRICE_KRW_PER_TCO2E } from '@/constants/risk';
 import { useAllowancePrice } from '@/hooks/allowance-price/useAllowancePrice';
 import { formatEmissions, formatKrw } from '@/lib/format';
 import type { RiskSummary } from '@/lib/risk';
-import { AlertTriangle, Calculator, Gauge, TrendingDown } from 'lucide-react';
+import { AlertTriangle, Calculator, Gauge, Tickets } from 'lucide-react';
 
 type Props = {
     summary: RiskSummary;
@@ -33,6 +33,13 @@ export function RiskKpiCards({ summary, year, totalCompanies }: Props) {
                 icon={Calculator}
             />
             <MetricCard
+                title="총 필요 배출권"
+                tooltip="선택 연도 총 배출량을 1 tCO₂e당 배출권 1개 기준으로 올림 환산한 수량입니다. 실제 부족분은 무상할당량과 보유 배출권에 따라 달라집니다."
+                value={`${formatEmissions(summary.totalRequiredAllowances)}개`}
+                helper="1 tCO₂e = 배출권 1개"
+                icon={Tickets}
+            />
+            <MetricCard
                 title="High Risk 회사"
                 tooltip="리스크 점수가 70점 이상인 관리 대상 회사 수입니다. 배출량, 최근 증가 추세, Scope 구성을 종합합니다."
                 value={
@@ -50,18 +57,6 @@ export function RiskKpiCards({ summary, year, totalCompanies }: Props) {
                 value={summary.averageScore}
                 helper="100점 만점"
                 icon={Gauge}
-            />
-            <MetricCard
-                title="감소 추세 회사"
-                tooltip="최근 3개월 평균 배출량이 직전 3개월 평균보다 감소한 회사 수입니다. 배출 모멘텀이 개선되고 있는 기업입니다."
-                value={
-                    <>
-                        <span className="text-success">{summary.improvingCount}</span>
-                        <span className="text-muted-foreground"> / {totalCompanies}</span>
-                    </>
-                }
-                helper="최근 추세 기준"
-                icon={TrendingDown}
             />
         </div>
     );

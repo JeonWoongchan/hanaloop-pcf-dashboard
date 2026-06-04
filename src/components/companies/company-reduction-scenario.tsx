@@ -8,6 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { SCOPE_COLORS, SCOPE_DESCRIPTIONS, SCOPE_LABELS, SCOPES } from '@/constants/ghg-scope';
 import { ALLOWANCE_PRICE_KRW_PER_TCO2E } from '@/constants/risk';
 import { useAllowancePrice } from '@/hooks/allowance-price/useAllowancePrice';
+import { getAllowanceCostKrw, getRequiredAllowances, getSavedAllowances } from '@/lib/allowances';
 import { formatEmissions, formatKrw } from '@/lib/format';
 import { useState } from 'react';
 
@@ -33,8 +34,11 @@ export function CompanyReductionScenario({ scopeEmissions, totalEmissions, year 
     );
     const totalSaved = SCOPES.reduce((sum, s) => sum + savedByScope[s], 0);
     const newTotal = totalEmissions - totalSaved;
-    const savedAllowanceCostKrw = totalSaved * allowancePrice;
-    const newAllowanceCostKrw = newTotal * allowancePrice;
+    const baselineAllowances = getRequiredAllowances(totalEmissions);
+    const afterReductionAllowances = getRequiredAllowances(newTotal);
+    const savedAllowances = getSavedAllowances(totalEmissions, newTotal);
+    const savedAllowanceCostKrw = getAllowanceCostKrw(savedAllowances, allowancePrice);
+    const newAllowanceCostKrw = getAllowanceCostKrw(afterReductionAllowances, allowancePrice);
     const reductionPct = totalEmissions > 0 ? (totalSaved / totalEmissions) * 100 : 0;
 
     const hasReduction = totalSaved > 0;
@@ -125,14 +129,14 @@ export function CompanyReductionScenario({ scopeEmissions, totalEmissions, year 
                 {/* 통합 결과 */}
                 <div className="bg-muted/40 grid grid-cols-3 gap-3 rounded-lg p-4">
                     <div className="text-center">
-                        <p className="text-muted-foreground text-xs">감축 후 배출량</p>
+                        <p className="text-muted-foreground text-xs">감축 후 필요 배출권</p>
                         <p className="mt-1 text-lg font-bold tabular-nums">
-                            {hasReduction ? `${formatEmissions(newTotal)} tCO₂e` : '-'}
+                            {hasReduction ? `${formatEmissions(afterReductionAllowances)}개` : '-'}
                         </p>
                         <p className="text-muted-foreground text-xs">
                             {hasReduction
-                                ? `${formatEmissions(totalEmissions)} tCO₂e 대비 ${reductionPct.toFixed(1)}%↓`
-                                : `현재 ${formatEmissions(totalEmissions)} tCO₂e`}
+                                ? `현재 ${formatEmissions(baselineAllowances)}개 대비 ${formatEmissions(savedAllowances)}개↓`
+                                : `현재 ${formatEmissions(baselineAllowances)}개`}
                         </p>
                     </div>
                     <div className="text-center">
@@ -147,7 +151,9 @@ export function CompanyReductionScenario({ scopeEmissions, totalEmissions, year 
                         <p className="mt-1 text-lg font-bold tabular-nums">
                             {hasReduction ? formatKrw(newAllowanceCostKrw) : '-'}
                         </p>
-                        <p className="text-muted-foreground text-xs">연간 추정</p>
+                        <p className="text-muted-foreground text-xs">
+                            배출량 {reductionPct.toFixed(1)}% 감축
+                        </p>
                     </div>
                 </div>
             </CardContent>

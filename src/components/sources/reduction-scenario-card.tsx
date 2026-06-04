@@ -7,6 +7,7 @@ import { InfoTooltip } from '@/components/shared/info-tooltip';
 import { ALLOWANCE_PRICE_KRW_PER_TCO2E } from '@/constants/risk';
 import { useAllowancePrice } from '@/hooks/allowance-price/useAllowancePrice';
 import { SCOPE_COLORS, SOURCE_LABELS } from '@/constants/ghg-scope';
+import { getAllowanceCostKrw, getRequiredAllowances, getSavedAllowances } from '@/lib/allowances';
 import { formatEmissions, formatKrw } from '@/lib/format';
 import { useState } from 'react';
 
@@ -24,7 +25,13 @@ type Props = {
 };
 
 // 감축 시나리오 카드 렌더링
-export function ReductionScenarioCard({ sourceId, scope, sourceTotal, totalEmissions, year }: Props) {
+export function ReductionScenarioCard({
+    sourceId,
+    scope,
+    sourceTotal,
+    totalEmissions,
+    year,
+}: Props) {
     const [reductionPct, setReductionPct] = useState(20);
     const { data: allowanceData } = useAllowancePrice(year);
     const allowancePrice = allowanceData?.priceKrw ?? ALLOWANCE_PRICE_KRW_PER_TCO2E;
@@ -32,7 +39,10 @@ export function ReductionScenarioCard({ sourceId, scope, sourceTotal, totalEmiss
     const label = SOURCE_LABELS[sourceId] ?? sourceId;
     const color = SCOPE_COLORS[scope];
     const savedTco2e = Math.round((sourceTotal * reductionPct) / 100);
-    const savedKrw = savedTco2e * allowancePrice;
+    const reducedTco2e = sourceTotal - savedTco2e;
+    const baselineAllowances = getRequiredAllowances(sourceTotal);
+    const savedAllowances = getSavedAllowances(sourceTotal, reducedTco2e);
+    const savedKrw = getAllowanceCostKrw(savedAllowances, allowancePrice);
     const shareOfTotal =
         totalEmissions > 0 ? ((savedTco2e / totalEmissions) * 100).toFixed(1) : '0';
 
@@ -87,9 +97,13 @@ export function ReductionScenarioCard({ sourceId, scope, sourceTotal, totalEmiss
                 {/* 절감 효과 */}
                 <div className="bg-muted/40 grid grid-cols-3 gap-3 rounded-lg p-4">
                     <div className="text-center">
-                        <p className="text-muted-foreground text-xs">절감량</p>
-                        <p className="mt-1 text-lg font-bold">{formatEmissions(savedTco2e)}</p>
-                        <p className="text-muted-foreground text-xs">tCO₂e</p>
+                        <p className="text-muted-foreground text-xs">절감 배출권</p>
+                        <p className="mt-1 text-lg font-bold">
+                            {formatEmissions(savedAllowances)}개
+                        </p>
+                        <p className="text-muted-foreground text-xs">
+                            현재 {formatEmissions(baselineAllowances)}개
+                        </p>
                     </div>
                     <div className="text-center">
                         <p className="text-muted-foreground text-xs">배출권 비용 절감</p>

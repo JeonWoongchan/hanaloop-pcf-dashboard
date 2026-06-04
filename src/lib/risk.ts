@@ -15,6 +15,7 @@ import {
 } from '@/constants/risk';
 import { SCOPE_DESCRIPTIONS } from '@/constants/ghg-scope';
 import type { Company, GhgEmission } from '@/types';
+import { getAllowanceCostKrw, getRequiredAllowances } from './allowances';
 import { filterByYear, getScopeBreakdown } from './emissions';
 
 export type RiskLevel = 'high' | 'medium' | 'low';
@@ -24,6 +25,8 @@ export type RiskAssessment = {
     name: string;
     country: string;
     annualEmissions: number;
+    requiredAllowances: number;
+    allowancePriceKrw: number;
     estimatedAllowanceCostKrw: number;
     recentTrendPct: number | null;
     dominantScope: 1 | 2 | 3 | null;
@@ -34,6 +37,7 @@ export type RiskAssessment = {
 };
 
 export type RiskSummary = {
+    totalRequiredAllowances: number;
     totalAllowanceCostKrw: number;
     highRiskCount: number;
     averageScore: number;
@@ -97,6 +101,7 @@ export function getRiskAssessments(
 export function getRiskSummary(assessments: RiskAssessment[]): RiskSummary {
     if (assessments.length === 0) {
         return {
+            totalRequiredAllowances: 0,
             totalAllowanceCostKrw: 0,
             highRiskCount: 0,
             averageScore: 0,
@@ -108,7 +113,14 @@ export function getRiskSummary(assessments: RiskAssessment[]): RiskSummary {
     // 전체 리스크 현황 요약값 집계
     const totalScore = assessments.reduce((sum, item) => sum + item.score, 0);
     return {
-        totalAllowanceCostKrw: assessments.reduce((sum, item) => sum + item.estimatedAllowanceCostKrw, 0),
+        totalRequiredAllowances: assessments.reduce(
+            (sum, item) => sum + item.requiredAllowances,
+            0
+        ),
+        totalAllowanceCostKrw: assessments.reduce(
+            (sum, item) => sum + item.estimatedAllowanceCostKrw,
+            0
+        ),
         highRiskCount: assessments.filter((item) => item.level === 'high').length,
         averageScore: Math.round(totalScore / assessments.length),
         increasingCompaniesCount: assessments.filter(
@@ -129,7 +141,8 @@ function assessCompanyRisk(
     allowancePrice: number
 ): RiskAssessment {
     // 선택 연도 연간 배출량 합산
-    const annualEmissions = Math.round(sumEmissions(emissions));
+    const annualEmissionsRaw = sumEmissions(emissions);
+    const annualEmissions = Math.round(annualEmissionsRaw);
     // Scope별 비중 및 주요 Scope 산정
     const scopeBreakdown = getScopeBreakdown(emissions);
     const dominantScopeItem = scopeBreakdown.reduce<(typeof scopeBreakdown)[number] | undefined>(
@@ -148,13 +161,16 @@ function assessCompanyRisk(
     const scopeScore = getScopeScore(scopeBreakdown);
     const score = Math.round(emissionScore + trendScore + scopeScore);
     const level = getRiskLevel(score);
+    const requiredAllowances = getRequiredAllowances(annualEmissionsRaw);
 
     return {
         id: company.id,
         name: company.name,
         country: company.country,
         annualEmissions,
-        estimatedAllowanceCostKrw: Math.round(annualEmissions * allowancePrice),
+        requiredAllowances,
+        allowancePriceKrw: allowancePrice,
+        estimatedAllowanceCostKrw: getAllowanceCostKrw(requiredAllowances, allowancePrice),
         recentTrendPct,
         dominantScope,
         dominantScopePct,

@@ -29,6 +29,7 @@ type SortKey =
     | 'name'
     | 'score'
     | 'annualEmissions'
+    | 'requiredAllowances'
     | 'estimatedAllowanceCostKrw'
     | 'recentTrendPct'
     | 'level';
@@ -42,6 +43,8 @@ const SORT_COMPARATORS: SortComparators<RiskAssessment, SortKey> = {
     score: (a, b, direction) => compareByDirection(a.score - b.score, direction),
     annualEmissions: (a, b, direction) =>
         compareByDirection(a.annualEmissions - b.annualEmissions, direction),
+    requiredAllowances: (a, b, direction) =>
+        compareByDirection(a.requiredAllowances - b.requiredAllowances, direction),
     estimatedAllowanceCostKrw: (a, b, direction) =>
         compareByDirection(a.estimatedAllowanceCostKrw - b.estimatedAllowanceCostKrw, direction),
     recentTrendPct: (a, b, direction) =>
@@ -74,7 +77,7 @@ export function RiskPriorityTable({ assessments, year }: Props) {
                 description={`${year}년 기준 배출권 구매비용과 배출 증가 리스크가 큰 관리 대상 회사`}
             />
             <CardContent>
-                <Table className="min-w-230">
+                <Table className="min-w-260">
                     <TableCaption className="sr-only">
                         {year}년 관리 대상 회사별 배출권 비용 리스크 우선순위
                     </TableCaption>
@@ -105,12 +108,22 @@ export function RiskPriorityTable({ assessments, year }: Props) {
                                 연간 배출량
                             </SortableHead>
                             <SortableHead
+                                {...sort.getSortProps('requiredAllowances')}
+                                label="필요 배출권"
+                                align="right"
+                                extra={
+                                    <InfoTooltip content="1 tCO₂e를 배출권 1개로 보고 연간 배출량을 올림 환산한 수량입니다." />
+                                }
+                            >
+                                필요 배출권
+                            </SortableHead>
+                            <SortableHead
                                 {...sort.getSortProps('estimatedAllowanceCostKrw')}
                                 label="예상 배출권 비용"
                                 align="right"
                                 extra={
                                     <InfoTooltip
-                                        content={`예상 배출권 비용 = 연간 배출량(tCO₂e) × 가정 배출권 단가(${formatEmissions(ALLOWANCE_PRICE_KRW_PER_TCO2E)}원/배출권)입니다. 무상할당·보유 배출권을 고려하지 않은 단순 시나리오입니다.`}
+                                        content={`예상 배출권 비용 = 필요 배출권 × 선택 연도 배출권 단가입니다. 단가 미로드 시 기본값 ${formatEmissions(ALLOWANCE_PRICE_KRW_PER_TCO2E)}원/배출권을 사용하며, 무상할당·보유 배출권은 고려하지 않습니다.`}
                                     />
                                 }
                             >

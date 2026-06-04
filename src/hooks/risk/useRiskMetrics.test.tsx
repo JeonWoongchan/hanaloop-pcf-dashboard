@@ -62,6 +62,7 @@ describe('useRiskMetrics', () => {
         expect(metrics.assessments.map((item) => item.id)).toEqual(['high', 'low']);
         expect(metrics.summary).toMatchObject({
             // DB 미로드 시 폴백 상수로 계산 — (690 + 50) × ALLOWANCE_PRICE_KRW_PER_TCO2E
+            totalRequiredAllowances: 740,
             totalAllowanceCostKrw: 740 * ALLOWANCE_PRICE_KRW_PER_TCO2E,
             highRiskCount: 1,
             increasingCompaniesCount: 1,

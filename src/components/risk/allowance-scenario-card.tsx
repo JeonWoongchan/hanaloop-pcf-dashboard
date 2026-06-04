@@ -18,7 +18,7 @@ export function AllowanceScenarioCard({ year }: Props) {
         <Card>
             <CardHeading
                 title="배출권 비용 시나리오 가정"
-                description="실제 세무·법률 자문이 아니라 제한된 과제 데이터 기반의 내부 판단용 시나리오입니다."
+                description="실제 배출권 정산 비용이 아니라 제한된 과제 데이터 기반의 내부 판단용 시나리오입니다."
             />
             <CardContent>
                 <dl className="text-muted-foreground grid gap-4 text-sm md:grid-cols-3">
@@ -34,12 +34,12 @@ export function AllowanceScenarioCard({ year }: Props) {
                         </dd>
                     </div>
                     <div>
-                        <dt className="text-foreground font-medium">점수 산정</dt>
-                        <dd>연간 배출량, 최근 3개월 증가율, Scope 구성을 종합합니다.</dd>
+                        <dt className="text-foreground font-medium">필요 배출권</dt>
+                        <dd>1 tCO₂e를 배출권 1개로 보고 연간 배출량을 올림 환산합니다.</dd>
                     </div>
                     <div>
                         <dt className="text-foreground font-medium">활용 목적</dt>
-                        <dd>규제 대응과 감축 조치가 필요한 관리 대상을 먼저 찾습니다.</dd>
+                        <dd>무상할당·보유 배출권을 제외한 총 필요량 기준으로 우선순위를 봅니다.</dd>
                     </div>
                 </dl>
             </CardContent>

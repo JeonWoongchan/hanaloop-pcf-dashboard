@@ -10,7 +10,7 @@
 
 PCF(Product Carbon Footprint, 제품 탄소 발자국)는 제품 단위에서 발생하는 온실가스 배출량을 CO₂ 환산량으로 계산한 값입니다.
 
-PCF는 원래 ISO 14067, GHG Protocol Product Standard에 따라 제품 기능 단위와 생애주기 경계를 정의한 뒤 산정해야 합니다. 
+PCF는 원래 ISO 14067, GHG Protocol Product Standard에 따라 제품 기능 단위와 생애주기 경계를 정의한 뒤 산정해야 합니다.
 다만 과제 데이터에는 제품 생산수량과 전체 LCA 경계 정보가 없으므로, 이 프로젝트에서는 제공된 활동 데이터에 배출계수를 적용해 PCF 산정 배출량을 계산했습니다.
 
 ```txt
@@ -27,11 +27,11 @@ GHG 배출량은 회사 단위로 집계된 온실가스 배출 현황입니다.
 
 GHG Protocol 기준에 따라 배출원을 Scope 1/2/3으로 구분합니다.
 
-| Scope | 의미 | 해당 배출원 예시 |
-| --- | --- | --- |
-| Scope 1 | 직접 배출 — 직접 연소하는 연료 | 휘발유, 경유, LPG, 천연가스 |
-| Scope 2 | 간접 배출 — 구매한 전기·열·증기 | 전기, 열, 증기 |
-| Scope 3 | 가치사슬 전반 — 공급망·운송·출장 등 | 운송, 출장, 폐기물 |
+| Scope   | 의미                                | 해당 배출원 예시            |
+| ------- | ----------------------------------- | --------------------------- |
+| Scope 1 | 직접 배출 — 직접 연소하는 연료      | 휘발유, 경유, LPG, 천연가스 |
+| Scope 2 | 간접 배출 — 구매한 전기·열·증기     | 전기, 열, 증기              |
+| Scope 3 | 가치사슬 전반 — 공급망·운송·출장 등 | 운송, 출장, 폐기물          |
 
 ---
 
@@ -41,19 +41,19 @@ GHG Protocol 기준에 따라 배출원을 Scope 1/2/3으로 구분합니다.
 
 1. `.env.example`을 복사해 `.env`를 생성합니다.
 
-   ```bash
-   # macOS/Linux
-   cp .env.example .env
+    ```bash
+    # macOS/Linux
+    cp .env.example .env
 
-   # Windows
-   copy .env.example .env
-   ```
+    # Windows
+    copy .env.example .env
+    ```
 
 2. Docker Compose로 실행합니다.
 
-   ```bash
-   docker compose up --build
-   ```
+    ```bash
+    docker compose up --build
+    ```
 
 3. 브라우저에서 `http://localhost:3000`으로 접속합니다.
 
@@ -61,17 +61,17 @@ GHG Protocol 기준에 따라 배출원을 Scope 1/2/3으로 구분합니다.
 
 ## 기술 스택
 
-| 영역 | 기술                               | 선택 이유                                                    |
-| --- |----------------------------------|----------------------------------------------------------|
-| Framework | Next.js 15 App Router, React 19  | Route Handler와 페이지 라우팅을 한 프로젝트 안에서 구성하기 위해               |
-| Language | TypeScript strict                | 배출량, Scope, PCF 계산처럼 데이터 형태가 중요한 영역의 오류를 줄이기 위해          |
-| UI | Tailwind CSS v4, shadcn/ui       | 접근성 기본값과 일관된 디자인 토큰을 활용하기 위해                             |
-| Chart | Recharts                         | 대시보드 차트 구현 속도와 커스터마이징 균형을 맞추기 위해                         |
-| Server State | TanStack Query v5                | 서버 데이터 캐싱, 낙관적 업데이트, 실패 롤백을 명확히 분리하기 위해                  |
-| URL State | nuqs                             | 연도·국가·배출원 필터를 URL에 보존해 새로고침과 링크 공유를 지원하기 위해              |
-| Database | PostgreSQL, postgres npm package | 회사·배출량·Action Notes·활동 데이터·배출계수 버전 이력을 관계형 테이블로 관리 |
-| Infra | Docker, Docker Compose           | 평가자가 별도 DB 설치 없이 동일한 실행 환경을 만들 수 있게 하기 위해                |
-| Test | Vitest                           | 배출량 집계, 리스크 산정, 포맷, Excel 파싱 같은 순수 함수를 빠르게 검증하기 위해       |
+| 영역         | 기술                             | 선택 이유                                                                        |
+| ------------ | -------------------------------- | -------------------------------------------------------------------------------- |
+| Framework    | Next.js 15 App Router, React 19  | Route Handler와 페이지 라우팅을 한 프로젝트 안에서 구성하기 위해                 |
+| Language     | TypeScript strict                | 배출량, Scope, PCF 계산처럼 데이터 형태가 중요한 영역의 오류를 줄이기 위해       |
+| UI           | Tailwind CSS v4, shadcn/ui       | 접근성 기본값과 일관된 디자인 토큰을 활용하기 위해                               |
+| Chart        | Recharts                         | 대시보드 차트 구현 속도와 커스터마이징 균형을 맞추기 위해                        |
+| Server State | TanStack Query v5                | 서버 데이터 캐싱, 낙관적 업데이트, 실패 롤백을 명확히 분리하기 위해              |
+| URL State    | nuqs                             | 연도·국가·배출원 필터를 URL에 보존해 새로고침과 링크 공유를 지원하기 위해        |
+| Database     | PostgreSQL, postgres npm package | 회사·배출량·Action Notes·활동 데이터·배출계수 버전 이력을 관계형 테이블로 관리   |
+| Infra        | Docker, Docker Compose           | 평가자가 별도 DB 설치 없이 동일한 실행 환경을 만들 수 있게 하기 위해             |
+| Test         | Vitest                           | 배출량 집계, 리스크 산정, 포맷, Excel 파싱 같은 순수 함수를 빠르게 검증하기 위해 |
 
 ---
 
@@ -89,11 +89,11 @@ Content components
 Charts / Cards / Tables
 ```
 
-| 상태 | 관리 방식 | 예시 |
-| --- | --- | --- |
-| 서버 데이터 | TanStack Query | 회사, 국가, Action Notes, 활동 데이터 |
-| URL 필터 | nuqs | 연도, 국가, 배출원 |
-| 로컬 UI 상태 | React state | 탭, 다이얼로그, 슬라이더, 편집 상태 |
+| 상태         | 관리 방식      | 예시                                  |
+| ------------ | -------------- | ------------------------------------- |
+| 서버 데이터  | TanStack Query | 회사, 국가, Action Notes, 활동 데이터 |
+| URL 필터     | nuqs           | 연도, 국가, 배출원                    |
+| 로컬 UI 상태 | React state    | 탭, 다이얼로그, 슬라이더, 편집 상태   |
 
 ---
 
@@ -103,19 +103,20 @@ Charts / Cards / Tables
 
 ![Database ERD](./docs/images/erd.png)
 
-| 테이블 | 역할 |
-| --- | --- |
-| `countries` | 국가 코드와 국가명 |
-| `companies` | 관리 대상 회사 |
-| `ghg_emissions` | 회사 단위 월별/source별 GHG 배출량 결과 |
-| `posts` | 회사별 Action Notes |
-| `emission_factors` | 활동 유형·설명·단위별 배출계수와 버전 이력 |
+| 테이블             | 역할                                                  |
+| ------------------ | ----------------------------------------------------- |
+| `countries`        | 국가 코드와 국가명                                    |
+| `companies`        | 관리 대상 회사                                        |
+| `ghg_emissions`    | 회사 단위 월별/source별 GHG 배출량 결과               |
+| `posts`            | 회사별 Action Notes                                   |
+| `emission_factors` | 활동 유형·설명·단위별 배출계수와 버전 이력            |
 | `activity_records` | Excel 원본 활동 데이터, 사용한 계수, 계산 결과 스냅샷 |
 
 ---
 
 ## 주요 기능과 화면
-* 시연 영상은 과제 제출 메일의 압축 파일로 첨부하였습니다.
+
+- 시연 영상은 과제 제출 메일의 압축 파일로 첨부하였습니다.
 
 ### 대시보드 페이지
 
@@ -153,10 +154,10 @@ Charts / Cards / Tables
 점수에 따라 High / Medium / Low 등급으로 구분하고 관리 우선순위를 표시합니다.
 
 #### 배출권 비용 산정
-`50,000원 / 배출권`을 가정 단가로 사용합니다. 1 tCO₂e를 배출권 1개로 환산하며, 경영자가 어느 회사를 먼저 관리해야 하는지 비용 기준으로 판단할 수 있도록 예상 배출권 구매비용을 함께 표시합니다. 무상할당·보유 배출권을 고려하지 않은 단순 시나리오입니다.
+
+선택 연도 배출권 단가를 사용합니다. 1 tCO₂e를 배출권 1개로 올림 환산하며, 경영자가 어느 회사를 먼저 관리해야 하는지 비용 기준으로 판단할 수 있도록 필요 배출권 수량과 예상 배출권 구매비용을 함께 표시합니다. 무상할당·보유 배출권을 고려하지 않은 단순 시나리오입니다.
 
 ![Risk](./docs/images/risk.png)
-
 
 ### 회사 목록 페이지
 
@@ -186,18 +187,18 @@ Charts / Cards / Tables
 
 ## 과제 요구사항 대응
 
-| 요구사항 | 대응                                                                                      |
-| --- |-----------------------------------------------------------------------------------------|
-| PCF 계산 결과 시각화 | Excel 활동 데이터를 `activity_records`에 저장하고 Dashboard/Company Detail에서 PCF 산정 결과와 활동 데이터를 시각화 |
-| 데이터 값 정확성·단위 표시 | PCF 산정값은 `kgCO₂e`, GHG 배출량은 `tCO₂e`로 표시                                                 |
-| 입력 오류 시 에러 메시지 | Excel import 파싱 실패, 회사 미선택, 배출계수 미매칭, 저장 실패를 toast/error state로 표시                      |
-| README 로컬 실행 5단계 이내 | Docker 기준 `cp .env.example .env` → `docker compose up --build` → 브라우저 접속으로 실행 가능        |
-| README AI 사용 내역 | `AI 사용 내역` 섹션에 AI가 보조한 부분과 개발자가 직접 결정한 부분을 분리해 기록                                       |
-| README 시스템 설명·설계 | `아키텍처`, `데이터 모델`, `주요 설계 결정` 섹션으로 구조와 설계 근거 설명                                          |
-| ERD/스키마 다이어그램 | README 데이터 모델 섹션에 DB 구조 정리                                                              |
-| Docker Compose 실행 | `docker-compose.yml`로 app과 PostgreSQL을 함께 실행                                            |
-| Excel import | Companies 페이지에서 Excel 업로드, 미리보기, 저장 흐름 제공                                               |
-| 시연 자료 | README에는 페이지별 스크린샷을 포함하고, 페이지별 시연 영상은 제출 압축 파일에 별도 포함                                   |
+| 요구사항                    | 대응                                                                                                                |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| PCF 계산 결과 시각화        | Excel 활동 데이터를 `activity_records`에 저장하고 Dashboard/Company Detail에서 PCF 산정 결과와 활동 데이터를 시각화 |
+| 데이터 값 정확성·단위 표시  | PCF 산정값은 `kgCO₂e`, GHG 배출량은 `tCO₂e`로 표시                                                                  |
+| 입력 오류 시 에러 메시지    | Excel import 파싱 실패, 회사 미선택, 배출계수 미매칭, 저장 실패를 toast/error state로 표시                          |
+| README 로컬 실행 5단계 이내 | Docker 기준 `cp .env.example .env` → `docker compose up --build` → 브라우저 접속으로 실행 가능                      |
+| README AI 사용 내역         | `AI 사용 내역` 섹션에 AI가 보조한 부분과 개발자가 직접 결정한 부분을 분리해 기록                                    |
+| README 시스템 설명·설계     | `아키텍처`, `데이터 모델`, `주요 설계 결정` 섹션으로 구조와 설계 근거 설명                                          |
+| ERD/스키마 다이어그램       | README 데이터 모델 섹션에 DB 구조 정리                                                                              |
+| Docker Compose 실행         | `docker-compose.yml`로 app과 PostgreSQL을 함께 실행                                                                 |
+| Excel import                | Companies 페이지에서 Excel 업로드, 미리보기, 저장 흐름 제공                                                         |
+| 시연 자료                   | README에는 페이지별 스크린샷을 포함하고, 페이지별 시연 영상은 제출 압축 파일에 별도 포함                            |
 
 ---
 
@@ -215,11 +216,11 @@ GHG·PCF 개념이 생소한 사용자도 맥락 없이 수치를 이해할 수 
 
 차트 컴포넌트는 `next/dynamic`으로 지연 로드하고 `ssr: false`를 적용했습니다. Recharts가 초기 번들에 포함되면서 주요 페이지의 First Load JS가 커졌고, 차트는 화면의 핵심 요소지만 텍스트·KPI보다 먼저 로드될 필요는 없다고 판단했습니다.
 
-| 페이지 | 최적화 전 | 최적화 후 | 감소량 |
-| --- | --- | --- | --- |
-| `/` | 320 kB | 179 kB | -141 kB (-44%) |
-| `/companies/[id]` | 315 kB | 198 kB | -117 kB (-37%) |
-| `/sources` | 302 kB | 167 kB | -135 kB (-45%) |
+| 페이지            | 최적화 전 | 최적화 후 | 감소량         |
+| ----------------- | --------- | --------- | -------------- |
+| `/`               | 320 kB    | 179 kB    | -141 kB (-44%) |
+| `/companies/[id]` | 315 kB    | 198 kB    | -117 kB (-37%) |
+| `/sources`        | 302 kB    | 167 kB    | -135 kB (-45%) |
 
 초기 JS를 줄여 KPI와 텍스트가 먼저 보이게 한 반면, 차트 청크를 별도로 내려받는 추가 네트워크 요청이 발생합니다. 이를 보완하기 위해 Skeleton 높이를 재사용해 차트 로딩 중 레이아웃 시프트를 줄였습니다.
 
@@ -232,6 +233,7 @@ GHG·PCF 개념이 생소한 사용자도 맥락 없이 수치를 이해할 수 
 ---
 
 ## AI 사용 내역
+
 Claude Code와 Codex를 함께 사용했습니다. AI는 구현 속도를 높이는 보조 도구로 사용했고, 서비스 구현 방향성 및 도메인 해석과 아키텍처 결정 등은 직접 결정했습니다.
 
 - **AI가 보조한 부분**: 컴포넌트 초안 생성, 컴포넌트 분리/공통화 시 코드 작성, 테스트 케이스 보강, Dockerfile 작성 보조, 설계 방향과 트레이드오프에 대한 대안 검토/조언
@@ -248,14 +250,14 @@ Claude Code와 Codex를 함께 사용했습니다. AI는 구현 속도를 높이
 
 ## 소요 시간
 
-| 단계                                   | 소요 |
-|--------------------------------------| --- |
-| 과제 요구사항 분석, GHG/PCF 도메인 정리           | 약 0.5일 |
-| Dashboard, Companies, Company Detail 기본 화면 구현 | 약 1일 |
-| Risk, 배출원 분석 화면 구현                   | 약 1일 |
+| 단계                                                           | 소요     |
+| -------------------------------------------------------------- | -------- |
+| 과제 요구사항 분석, GHG/PCF 도메인 정리                        | 약 0.5일 |
+| Dashboard, Companies, Company Detail 기본 화면 구현            | 약 1일   |
+| Risk, 배출원 분석 화면 구현                                    | 약 1일   |
 | Posts 기능 구현(Action Notes, 낙관적 업데이트, 실패 롤백 처리) | 약 0.5일 |
-| PostgreSQL 전환, Route Handler, Docker Compose 구성 | 약 0.5일 |
-| Excel import, 배출계수 DB 조회             | 약 0.5일 |
-| 테스트, 빌드 검증, 문서 정리                    | 약 1일 |
+| PostgreSQL 전환, Route Handler, Docker Compose 구성            | 약 0.5일 |
+| Excel import, 배출계수 DB 조회                                 | 약 0.5일 |
+| 테스트, 빌드 검증, 문서 정리                                   | 약 1일   |
 
 ---

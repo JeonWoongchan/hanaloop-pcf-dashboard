@@ -48,6 +48,8 @@ describe('risk utilities', () => {
         expect(assessments[0]).toMatchObject({
             id: 'high-scope3',
             annualEmissions: 690,
+            requiredAllowances: 690,
+            allowancePriceKrw: ALLOWANCE_PRICE_KRW_PER_TCO2E,
             estimatedAllowanceCostKrw: 690 * ALLOWANCE_PRICE_KRW_PER_TCO2E,
             dominantScope: 3,
             dominantScopePct: 100,
@@ -64,6 +66,7 @@ describe('risk utilities', () => {
         expect(assessments[1]).toMatchObject({
             id: 'medium-scope2',
             annualEmissions: 500,
+            requiredAllowances: 500,
             estimatedAllowanceCostKrw: 500 * ALLOWANCE_PRICE_KRW_PER_TCO2E,
             dominantScope: 2,
             dominantScopePct: 100,
@@ -78,6 +81,7 @@ describe('risk utilities', () => {
         expect(assessments[2]).toMatchObject({
             id: 'low-balanced',
             annualEmissions: 90,
+            requiredAllowances: 90,
             estimatedAllowanceCostKrw: 90 * ALLOWANCE_PRICE_KRW_PER_TCO2E,
             dominantScope: 1,
             score: 13,
@@ -94,6 +98,7 @@ describe('risk utilities', () => {
         const assessments = getRiskAssessments(riskCompaniesFixture, 2024);
 
         expect(getRiskSummary(assessments)).toEqual({
+            totalRequiredAllowances: 690 + 500 + 90,
             totalAllowanceCostKrw: (690 + 500 + 90) * ALLOWANCE_PRICE_KRW_PER_TCO2E,
             highRiskCount: 1,
             averageScore: 54,
@@ -106,6 +111,7 @@ describe('risk utilities', () => {
         const [highRisk] = getRiskAssessments(riskCompaniesFixture, 2024, 1_000);
 
         expect(highRisk.estimatedAllowanceCostKrw).toBe(690_000);
+        expect(highRisk.allowancePriceKrw).toBe(1_000);
     });
 
     it('선택 연도 이후의 배출 데이터는 해당 연도 최근 추세 계산에서 제외한다', () => {
@@ -132,6 +138,7 @@ describe('risk utilities', () => {
         expect(assessment).toMatchObject({
             id: 'high-scope3',
             annualEmissions: 0,
+            requiredAllowances: 0,
             estimatedAllowanceCostKrw: 0,
             recentTrendPct: 30,
             dominantScope: null,
@@ -144,6 +151,7 @@ describe('risk utilities', () => {
 
     it('빈 리스크 목록의 요약값은 0 기준으로 반환한다', () => {
         expect(getRiskSummary([])).toEqual({
+            totalRequiredAllowances: 0,
             totalAllowanceCostKrw: 0,
             highRiskCount: 0,
             averageScore: 0,

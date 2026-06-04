@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RISK_BAR_COLORS } from '@/constants/risk';
 import { ROUTES } from '@/constants/navigation';
 import type { RiskAssessment } from '@/lib/risk';
-import { formatKrw, getTrendProps } from '@/lib/format';
+import { formatEmissions, formatKrw, getTrendProps } from '@/lib/format';
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
@@ -19,7 +19,15 @@ type Props = {
 
 // 리스크 분석 요약 카드 렌더링
 export function CompanyRiskCard({ assessment, rank, total }: Props) {
-    const { level, score, estimatedAllowanceCostKrw, recentTrendPct, reasons } = assessment;
+    const {
+        level,
+        score,
+        requiredAllowances,
+        allowancePriceKrw,
+        estimatedAllowanceCostKrw,
+        recentTrendPct,
+        reasons,
+    } = assessment;
     const trend = getTrendProps(recentTrendPct);
 
     return (
@@ -68,10 +76,19 @@ export function CompanyRiskCard({ assessment, rank, total }: Props) {
                     <div className="space-y-4">
                         <div>
                             <p className="text-muted-foreground text-xs">예상 배출권 구매비용</p>
-                            <p className="text-xl font-semibold">{formatKrw(estimatedAllowanceCostKrw)}</p>
-                            <p className="text-muted-foreground text-xs">
-                                시나리오 기준 (5만원/배출권)
+                            <p className="text-xl font-semibold">
+                                {formatKrw(estimatedAllowanceCostKrw)}
                             </p>
+                            <p className="text-muted-foreground text-xs">
+                                {formatEmissions(allowancePriceKrw)}원/배출권 기준
+                            </p>
+                        </div>
+                        <div>
+                            <p className="text-muted-foreground text-xs">필요 배출권</p>
+                            <p className="text-xl font-semibold">
+                                {formatEmissions(requiredAllowances)}개
+                            </p>
+                            <p className="text-muted-foreground text-xs">1 tCO₂e = 배출권 1개</p>
                         </div>
                         <div>
                             <p className="text-muted-foreground text-xs">최근 배출 추세</p>
