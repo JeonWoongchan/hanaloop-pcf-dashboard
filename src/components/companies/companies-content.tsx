@@ -8,6 +8,7 @@ import { EmptyState } from '@/components/shared/empty-state';
 import { AsyncStateBoundary } from '@/components/shared/async-state-boundary';
 import { ExcelImportDialog } from '@/components/import/excel-import-dialog';
 import { GhgImportDialog } from '@/components/import/ghg-import-dialog';
+import { ReportExportButton } from '@/components/reports/report-export-button';
 import { CardGridSkeleton } from '@/components/shared/loading-skeletons';
 import { MultiSelectPopover } from '@/components/shared/multi-select-popover';
 import { ScopeLegend } from '@/components/shared/scope-legend';
@@ -27,6 +28,7 @@ import { toast } from 'sonner';
 import { CompanyCard } from './company-card';
 import { CompanyFormDialog } from './company-form-dialog';
 import type { CompanyPcfTotal } from '@/lib/emissions';
+import { buildCompaniesReportWorkbook } from '@/lib/reports/builders/companies-report';
 
 // 회사 목록 로딩 중 스켈레톤 그리드
 function CompaniesGridSkeleton() {
@@ -122,24 +124,31 @@ export function CompaniesContent() {
                         </Button>
 
                         {/* Excel 활동 데이터 임포트 */}
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setImportOpen(true)}
-                        >
+                        <Button variant="outline" size="sm" onClick={() => setImportOpen(true)}>
                             <Upload className="mr-2 h-4 w-4" />
                             활동 데이터 임포트
                         </Button>
 
                         {/* Excel GHG 배출량 임포트 */}
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setGhgImportOpen(true)}
-                        >
+                        <Button variant="outline" size="sm" onClick={() => setGhgImportOpen(true)}>
                             <Upload className="mr-2 h-4 w-4" />
                             GHG 배출량 임포트
                         </Button>
+
+                        <ReportExportButton
+                            buildReportAction={() =>
+                                buildCompaniesReportWorkbook({
+                                    year: selectedYear,
+                                    companies: displayedCompanies,
+                                    totalCompanyCount,
+                                    selectedCountries,
+                                    countryOptions,
+                                    sortOrder,
+                                    riskMap,
+                                })
+                            }
+                            fileName={`companies-report-${selectedYear}`}
+                        />
 
                         {/* 국가 선택 */}
                         <MultiSelectPopover
@@ -203,10 +212,11 @@ export function CompaniesContent() {
                                     year={selectedYear}
                                     riskAssessment={riskMap.get(company.id)}
                                     onEditAction={() => handleEdit(company)}
-                                    onDeleteAction={() =>
-                                        deleteMutation.mutate(company.id)
+                                    onDeleteAction={() => deleteMutation.mutate(company.id)}
+                                    isDeleting={
+                                        deleteMutation.variables === company.id &&
+                                        deleteMutation.isPending
                                     }
-                                    isDeleting={deleteMutation.variables === company.id && deleteMutation.isPending}
                                 />
                             ))}
                         </div>
