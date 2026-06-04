@@ -48,8 +48,8 @@ export function parseGhgExcel(buffer: Buffer): GhgExcelParseResult {
     const ws = workbook.Sheets[sheetName];
     if (!ws) return { ok: false, error: '시트를 읽을 수 없습니다.' };
 
-    // defVal:'' 로 빈 셀도 빈 문자열로 포함 — 모든 행이 배열에 포함되어 rowNumber가 실제 Excel 행 번호와 일치
-    const rows = XLSX.utils.sheet_to_json<RawExcelRow>(ws, { defVal: '' });
+    // defval:'' 로 빈 셀도 빈 문자열로 포함 — 모든 행이 배열에 포함되어 rowNumber가 실제 Excel 행 번호와 일치
+    const rows = XLSX.utils.sheet_to_json<RawExcelRow>(ws, { defval: '' });
     if (rows.length === 0) return { ok: false, error: '데이터가 없습니다.' };
 
     const validSources = new Set(Object.keys(SCOPE_MAP));

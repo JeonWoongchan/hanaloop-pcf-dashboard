@@ -14,4 +14,7 @@ export const queryKeys = {
         all: ['activityRecords'] as const,
         byCompany: (companyId: string) => ['activityRecords', 'company', companyId] as const,
     },
+    ghgEmissions: {
+        byCompany: (companyId: string) => ['ghgEmissions', 'company', companyId] as const,
+    },
 } as const;

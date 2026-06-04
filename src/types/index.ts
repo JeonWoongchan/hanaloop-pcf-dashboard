@@ -48,6 +48,14 @@ export type ActivityRecord = {
     createdAt: string;
 };
 
+// ghg_emissions 테이블 행 — id 포함 전체 레코드
+export type GhgEmissionRecord = {
+    id: string;
+    yearMonth: string;
+    source: string;
+    emissions: number;
+};
+
 // GHG 배출량 Excel 임포트 파싱 결과 — yearMonth·source·emissions 3컬럼
 export type ParsedGhgRow = {
     yearMonth: string; // "YYYY-MM"

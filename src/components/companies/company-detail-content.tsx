@@ -1,6 +1,7 @@
 'use client';
 
 import { ActivityRecordsTable } from '@/components/activity/activity-records-table';
+import { GhgEmissionsTable } from '@/components/ghg/ghg-emissions-table';
 import { CompanyReductionScenario } from '@/components/companies/company-reduction-scenario';
 import { CompanyRiskCard } from '@/components/companies/company-risk-card';
 import { ExcelImportDialog } from '@/components/import/excel-import-dialog';
@@ -192,6 +193,8 @@ export function CompanyDetailContent({ id }: { id: string }) {
                 )}
 
                 <ActivityRecordsTable companyId={company.id} year={selectedYear} />
+
+                <GhgEmissionsTable companyId={company.id} year={selectedYear} />
 
                 <CompanyMonthlyChart
                     emissionsData={metrics.monthlyByScope}

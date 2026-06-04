@@ -1,67 +1,79 @@
 'use client';
 
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { STALE_TIME } from '@/constants/cache';
 import { queryKeys } from '@/hooks/queryKeys';
+import { readApiError } from '@/lib/api-fetch-error';
 import type { ActivityRecord } from '@/types';
-import { useQuery } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
-const ACTIVITY_RECORDS_ERROR_MESSAGE = '활동 데이터를 불러오지 못했습니다.';
-const ACTIVITY_RECORDS_STALE_TIME = STALE_TIME.LONG;
-
-function getApiErrorMessage(body: unknown): string | null {
-    if (typeof body !== 'object' || body === null || !('error' in body)) {
-        return null;
-    }
-
-    const error = body.error;
-    return typeof error === 'string' && error.trim() ? error : null;
-}
-
-async function readApiError(response: Response): Promise<string> {
-    const body = await response.json().catch((): unknown => null);
-    return getApiErrorMessage(body) ?? ACTIVITY_RECORDS_ERROR_MESSAGE;
-}
+const FETCH_ERROR = '활동 데이터를 불러오지 못했습니다.';
+const DELETE_ERROR = '활동 데이터 삭제에 실패했습니다.';
 
 async function fetchActivityRecords(endpoint: string): Promise<ActivityRecord[]> {
     const res = await fetch(endpoint);
-    if (!res.ok) {
-        throw new Error(await readApiError(res));
-    }
-
+    if (!res.ok) throw new Error(await readApiError(res, FETCH_ERROR));
     return res.json() as Promise<ActivityRecord[]>;
 }
 
-function activityRecordsByCompanyEndpoint(companyId: string): string {
-    return `/api/activity-records/${encodeURIComponent(companyId)}`;
-}
-
-function fetchAllActivityRecords(): Promise<ActivityRecord[]> {
-    return fetchActivityRecords('/api/activity-records');
-}
-
-function fetchActivityRecordsByCompany(companyId: string): Promise<ActivityRecord[]> {
-    if (!companyId) {
-        return Promise.resolve([]);
-    }
-
-    return fetchActivityRecords(activityRecordsByCompanyEndpoint(companyId));
+async function deleteActivityRecord(id: string): Promise<void> {
+    const res = await fetch(`/api/activity-records/record/${id}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error(await readApiError(res, DELETE_ERROR));
 }
 
 export function useAllActivityRecords() {
     return useQuery({
         queryKey: queryKeys.activityRecords.all,
-        queryFn: fetchAllActivityRecords,
-        staleTime: ACTIVITY_RECORDS_STALE_TIME,
+        queryFn: () => fetchActivityRecords('/api/activity-records'),
+        staleTime: STALE_TIME.LONG,
     });
 }
 
 export function useActivityRecords(companyId: string) {
-    const normalizedCompanyId = companyId.trim();
+    const normalizedId = companyId.trim();
 
     return useQuery({
-        queryKey: queryKeys.activityRecords.byCompany(normalizedCompanyId),
-        queryFn: () => fetchActivityRecordsByCompany(normalizedCompanyId),
-        enabled: normalizedCompanyId.length > 0,
-        staleTime: ACTIVITY_RECORDS_STALE_TIME,
+        queryKey: queryKeys.activityRecords.byCompany(normalizedId),
+        queryFn: () =>
+            fetchActivityRecords(
+                `/api/activity-records/${encodeURIComponent(normalizedId)}`
+            ),
+        enabled: normalizedId.length > 0,
+        staleTime: STALE_TIME.LONG,
+    });
+}
+
+export function useDeleteActivityRecord(companyId: string) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: deleteActivityRecord,
+        onMutate: async (id: string) => {
+            await queryClient.cancelQueries({
+                queryKey: queryKeys.activityRecords.byCompany(companyId),
+            });
+            const previous = queryClient.getQueryData<ActivityRecord[]>(
+                queryKeys.activityRecords.byCompany(companyId)
+            );
+            queryClient.setQueryData<ActivityRecord[]>(
+                queryKeys.activityRecords.byCompany(companyId),
+                (old) => old?.filter((r) => r.id !== id)
+            );
+            return { previous };
+        },
+        onError: (_err: Error, _id, context) => {
+            if (context?.previous) {
+                queryClient.setQueryData(
+                    queryKeys.activityRecords.byCompany(companyId),
+                    context.previous
+                );
+            }
+            toast.error(DELETE_ERROR);
+        },
+        onSettled: () => {
+            void queryClient.invalidateQueries({
+                queryKey: queryKeys.activityRecords.byCompany(companyId),
+            });
+        },
     });
 }

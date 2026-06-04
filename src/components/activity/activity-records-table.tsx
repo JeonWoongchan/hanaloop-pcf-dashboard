@@ -24,7 +24,8 @@ import {
     useSort,
     type SortComparators,
 } from '@/hooks/shared/useSort';
-import { useActivityRecords } from '@/hooks/activity-records/useActivityRecords';
+import { useActivityRecords, useDeleteActivityRecord } from '@/hooks/activity-records/useActivityRecords';
+import { DeleteConfirmButton } from '@/components/shared/delete-confirm-button';
 import { filterActivityRecordsByYear } from '@/lib/emissions';
 import type { ActivityRecord } from '@/types';
 
@@ -73,6 +74,7 @@ type Props = {
 
 export function ActivityRecordsTable({ companyId, year }: Props) {
     const { data: records, isLoading, error, refetch } = useActivityRecords(companyId);
+    const deleteMutation = useDeleteActivityRecord(companyId);
     const sort = useSort<SortKey>({ initialKey: 'activityDate', initialDirection: 'desc' });
 
     const filteredRecords = useMemo(
@@ -188,6 +190,9 @@ export function ActivityRecordsTable({ companyId, year }: Props) {
                                     >
                                         행
                                     </TableHead>
+                                    <TableHead
+                                        className={`${stickyHeaderClassName ?? ''} w-10 py-3`}
+                                    />
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -233,6 +238,17 @@ export function ActivityRecordsTable({ companyId, year }: Props) {
                                         </TableCell>
                                         <TableCell className="text-muted-foreground text-right text-xs">
                                             {rec.importRowNumber ?? '-'}
+                                        </TableCell>
+                                        <TableCell className="py-2 text-right">
+                                            <DeleteConfirmButton
+                                                onConfirmAction={() =>
+                                                    deleteMutation.mutate(rec.id)
+                                                }
+                                                disabled={
+                                                    deleteMutation.isPending &&
+                                                    deleteMutation.variables === rec.id
+                                                }
+                                            />
                                         </TableCell>
                                     </TableRow>
                                 ))}
