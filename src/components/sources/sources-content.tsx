@@ -3,6 +3,7 @@
 // 배출원 분석 페이지 — 데이터 패칭 및 전체 레이아웃
 
 import { AsyncStateBoundary } from '@/components/shared/async-state-boundary';
+import { ReportExportButton } from '@/components/reports/report-export-button';
 import { ChartSkeleton } from '@/components/shared/loading-skeletons';
 import { Skeleton } from '@/components/ui/skeleton';
 import { YearSelector } from '@/components/shared/year-selector';
@@ -17,6 +18,7 @@ import { useCompanies } from '@/hooks/companies/useCompanies';
 import { useSourceMetrics } from '@/hooks/sources/useSourceMetrics';
 import { getAvailableYears, getCompanyScatterPoints, getSelectedYear } from '@/lib/emissions';
 import { formatEmissions } from '@/lib/format';
+import { buildSourcesReportWorkbook } from '@/lib/reports/builders/sources-report';
 import dynamic from 'next/dynamic';
 import { parseAsInteger, parseAsString, useQueryState } from 'nuqs';
 import { useMemo } from 'react';
@@ -70,6 +72,7 @@ export function SourcesContent() {
         scopeTotals,
         companyBreakdown,
         monthlyTrend,
+        totalEmissions,
     } = useSourceMetrics(companies ?? [], selectedYear, sourceParam);
 
     // 배출원별 색상 맵 단일 산정
@@ -94,18 +97,35 @@ export function SourcesContent() {
         >
             <div className="space-y-6">
                 {/* 페이지 헤더 */}
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex flex-col items-start justify-between gap-4 sm:flex-row">
                     <div>
                         <h2 className="text-2xl font-bold tracking-tight">배출원 분석</h2>
                         <p className="text-muted-foreground">
                             {selectedYear}년 관리 대상 전체 · 배출원별 현황 및 Scope 분포 분석
                         </p>
                     </div>
-                    <YearSelector
-                        years={availableYears}
-                        value={selectedYear}
-                        onChangeAction={(y) => void setYearParam(y)}
-                    />
+                    <div className="flex flex-wrap items-center gap-2">
+                        <ReportExportButton
+                            buildReportAction={() =>
+                                buildSourcesReportWorkbook({
+                                    year: selectedYear,
+                                    allSources,
+                                    activeSource,
+                                    scopeTotals,
+                                    companyBreakdown,
+                                    monthlyTrend,
+                                    totalEmissions,
+                                    totalCompanies: companies?.length ?? 0,
+                                })
+                            }
+                            fileName={`sources-report-${selectedYear}-${activeSourceId ?? 'all'}`}
+                        />
+                        <YearSelector
+                            years={availableYears}
+                            value={selectedYear}
+                            onChangeAction={(y) => void setYearParam(y)}
+                        />
+                    </div>
                 </div>
 
                 {/* Scope별 요약 카드 */}
