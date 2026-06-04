@@ -23,7 +23,7 @@ type Props = {
 
 export function CompanyReductionScenario({ scopeEmissions, totalEmissions, year }: Props) {
     const [reductions, setReductions] = useState<Record<1 | 2 | 3, number>>({ 1: 0, 2: 0, 3: 0 });
-    const { data: allowanceData } = useAllowancePrice();
+    const { data: allowanceData } = useAllowancePrice(year);
     const allowancePrice = allowanceData?.priceKrw ?? ALLOWANCE_PRICE_KRW_PER_TCO2E;
 
     // 감축 후 Scope별 절감량 및 총합 계산

@@ -20,12 +20,13 @@ type Props = {
     scope: 1 | 2 | 3;
     sourceTotal: number;
     totalEmissions: number;
+    year?: number;
 };
 
 // 감축 시나리오 카드 렌더링
-export function ReductionScenarioCard({ sourceId, scope, sourceTotal, totalEmissions }: Props) {
+export function ReductionScenarioCard({ sourceId, scope, sourceTotal, totalEmissions, year }: Props) {
     const [reductionPct, setReductionPct] = useState(20);
-    const { data: allowanceData } = useAllowancePrice();
+    const { data: allowanceData } = useAllowancePrice(year);
     const allowancePrice = allowanceData?.priceKrw ?? ALLOWANCE_PRICE_KRW_PER_TCO2E;
 
     const label = SOURCE_LABELS[sourceId] ?? sourceId;

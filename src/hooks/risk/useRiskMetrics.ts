@@ -9,24 +9,21 @@ import { useMemo } from 'react';
 
 // 리스크 페이지 표시에 필요한 파생 지표 일괄 계산
 export function useRiskMetrics(companies: Company[], year?: number | null) {
-    const { data: allowanceData } = useAllowancePrice();
-    // DB 단가 미로드 시 상수 폴백
+    const availableYears = useMemo(
+        () => getAvailableYears(companies.flatMap((c) => c.emissions)),
+        [companies]
+    );
+    const selectedYear = getSelectedYear(year, availableYears);
+
+    // 선택 연도 기준 배출권 단가 조회 — DB 미로드 시 상수 폴백
+    const { data: allowanceData } = useAllowancePrice(selectedYear);
     const allowancePrice = allowanceData?.priceKrw ?? ALLOWANCE_PRICE_KRW_PER_TCO2E;
 
-    return useMemo(() => {
-        // 관리 대상 배출 데이터의 사용 가능 연도 계산
-        const availableYears = getAvailableYears(companies.flatMap((company) => company.emissions));
-        const selectedYear = getSelectedYear(year, availableYears);
+    const assessments = useMemo(
+        () => getRiskAssessments(companies, selectedYear, allowancePrice),
+        [companies, selectedYear, allowancePrice]
+    );
+    const summary = useMemo(() => getRiskSummary(assessments), [assessments]);
 
-        // 선택 연도 기준 회사별 리스크와 KPI 요약 산정
-        const assessments = getRiskAssessments(companies, selectedYear, allowancePrice);
-        const summary = getRiskSummary(assessments);
-
-        return {
-            selectedYear,
-            availableYears,
-            assessments,
-            summary,
-        };
-    }, [companies, year, allowancePrice]);
+    return { selectedYear, availableYears, assessments, summary };
 }

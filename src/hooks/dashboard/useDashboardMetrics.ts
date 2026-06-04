@@ -84,16 +84,30 @@ export function useDashboardMetrics(
     year?: number | null,
     activityRecords: ActivityRecord[] = []
 ) {
-    const { data: allowanceData } = useAllowancePrice();
+    // selectedYear 선계산 — useAllowancePrice(year)에 전달하기 위해 useMemo 밖에서 도출
+    const allEmissionsForYears = useMemo(
+        () => companies.flatMap((c) => c.emissions),
+        [companies]
+    );
+    const availableYearsForPrice = useMemo(
+        () =>
+            getCombinedAvailableYears(
+                getAvailableYears(allEmissionsForYears),
+                getAvailablePcfYears(activityRecords)
+            ),
+        [allEmissionsForYears, activityRecords]
+    );
+    const selectedYearForPrice = getSelectedYear(year, availableYearsForPrice);
+
+    // 선택 연도 기준 배출권 단가 조회
+    const { data: allowanceData } = useAllowancePrice(selectedYearForPrice);
     const allowancePrice = allowanceData?.priceKrw ?? ALLOWANCE_PRICE_KRW_PER_TCO2E;
 
     return useMemo(() => {
-        const allEmissions = companies.flatMap((c) => c.emissions);
-        const availableYears = getCombinedAvailableYears(
-            getAvailableYears(allEmissions),
-            getAvailablePcfYears(activityRecords)
-        );
-        const selectedYear = getSelectedYear(year, availableYears);
+        // useMemo 밖에서 이미 계산된 값을 재사용 — 이중 flatMap/getCombined 방지
+        const allEmissions = allEmissionsForYears;
+        const availableYears = availableYearsForPrice;
+        const selectedYear = selectedYearForPrice;
 
         const filtered = companies.map((c) => ({
             ...c,
@@ -140,5 +154,5 @@ export function useDashboardMetrics(
             riskSummary,
             scopeTotals,
         };
-    }, [activityRecords, companies, year, allowancePrice]);
+    }, [activityRecords, companies, allowancePrice, allEmissionsForYears, availableYearsForPrice, selectedYearForPrice]);
 }

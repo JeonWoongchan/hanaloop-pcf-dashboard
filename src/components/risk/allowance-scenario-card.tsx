@@ -8,8 +8,10 @@ import { ALLOWANCE_PRICE_KRW_PER_TCO2E } from '@/constants/risk';
 import { useAllowancePrice } from '@/hooks/allowance-price/useAllowancePrice';
 import { formatEmissions } from '@/lib/format';
 
-export function AllowanceScenarioCard() {
-    const { data: allowanceData } = useAllowancePrice();
+type Props = { year: number };
+
+export function AllowanceScenarioCard({ year }: Props) {
+    const { data: allowanceData } = useAllowancePrice(year);
     const priceKrw = allowanceData?.priceKrw ?? ALLOWANCE_PRICE_KRW_PER_TCO2E;
 
     return (

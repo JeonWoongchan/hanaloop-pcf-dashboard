@@ -15,7 +15,8 @@ export type CompanyRiskResult = {
 
 export function useCompanyRisk(companyId: string, year: number): CompanyRiskResult {
     const { data: companies } = useCompanies();
-    const { data: allowanceData } = useAllowancePrice();
+    // 선택 연도 기준 배출권 단가 조회
+    const { data: allowanceData } = useAllowancePrice(year);
     const allowancePrice = allowanceData?.priceKrw ?? ALLOWANCE_PRICE_KRW_PER_TCO2E;
 
     return useMemo(() => {

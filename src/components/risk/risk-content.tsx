@@ -62,7 +62,7 @@ export function RiskContent() {
                     totalCompanies={companies?.length ?? 0}
                 />
 
-                <AllowanceScenarioCard />
+                <AllowanceScenarioCard year={selectedYear} />
 
                 <RiskPriorityTable assessments={assessments} year={selectedYear} />
             </div>

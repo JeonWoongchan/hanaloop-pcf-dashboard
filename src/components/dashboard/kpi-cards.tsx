@@ -232,7 +232,7 @@ export function KpiCards({
     riskSummary,
 }: Props) {
     const [mode, setMode] = useState<KpiMode>('pcf');
-    const { data: allowanceData } = useAllowancePrice();
+    const { data: allowanceData } = useAllowancePrice(year);
     const priceKrw = allowanceData?.priceKrw ?? ALLOWANCE_PRICE_KRW_PER_TCO2E;
     const priceLabel = allowanceData
         ? `${formatEmissions(priceKrw)}원/배출권 (${allowanceData.effectiveFrom} 기준)`

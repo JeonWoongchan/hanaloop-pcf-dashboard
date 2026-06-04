@@ -17,7 +17,7 @@ type Props = {
 
 // 리스크 KPI 카드 목록 조합
 export function RiskKpiCards({ summary, year, totalCompanies }: Props) {
-    const { data: allowanceData } = useAllowancePrice();
+    const { data: allowanceData } = useAllowancePrice(year);
     const priceKrw = allowanceData?.priceKrw ?? ALLOWANCE_PRICE_KRW_PER_TCO2E;
     const priceLabel = allowanceData
         ? `${formatEmissions(priceKrw)}원/배출권 (${allowanceData.effectiveFrom} 기준)`

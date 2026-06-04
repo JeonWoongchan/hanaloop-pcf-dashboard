@@ -12,15 +12,27 @@ type AllowancePriceRow = {
     note: string | null;
 };
 
-export async function GET() {
+export async function GET(request: Request) {
     try {
-        // 가장 최근 effective_from 레코드를 현재 단가로 사용 — 배출계수 조회와 동일 패턴
-        const rows = await sql<AllowancePriceRow[]>`
-            SELECT id, price_krw, effective_from::text, note
-            FROM allowance_prices
-            ORDER BY effective_from DESC, created_at DESC
-            LIMIT 1
-        `;
+        const { searchParams } = new URL(request.url);
+        const yearParam = searchParams.get('year');
+        const year = yearParam ? Number(yearParam) : null;
+
+        // year가 주어지면 해당 연도 말일 이전 최신 단가, 없으면 전체 최신 단가
+        const rows = year
+            ? await sql<AllowancePriceRow[]>`
+                SELECT id, price_krw, effective_from::text, note
+                FROM allowance_prices
+                WHERE effective_from <= make_date(${year}, 12, 31)
+                ORDER BY effective_from DESC, created_at DESC
+                LIMIT 1
+              `
+            : await sql<AllowancePriceRow[]>`
+                SELECT id, price_krw, effective_from::text, note
+                FROM allowance_prices
+                ORDER BY effective_from DESC, created_at DESC
+                LIMIT 1
+              `;
 
         if (rows.length === 0) return apiError('등록된 배출권 단가가 없습니다.', 404);
 
