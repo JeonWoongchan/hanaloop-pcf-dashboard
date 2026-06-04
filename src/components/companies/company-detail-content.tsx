@@ -5,6 +5,7 @@ import { GhgEmissionsTable } from '@/components/ghg/ghg-emissions-table';
 import { CompanyReductionScenario } from '@/components/companies/company-reduction-scenario';
 import { CompanyRiskCard } from '@/components/companies/company-risk-card';
 import { ExcelImportDialog } from '@/components/import/excel-import-dialog';
+import { GhgImportDialog } from '@/components/import/ghg-import-dialog';
 import { ActionNotesPanel } from '@/components/posts/action-notes-panel';
 import { RiskLevelBadge } from '@/components/risk/risk-level-badge';
 import { ErrorState } from '@/components/shared/error-state';
@@ -98,6 +99,7 @@ function getCompanyDetailMetrics(
 
 export function CompanyDetailContent({ id }: { id: string }) {
     const [importOpen, setImportOpen] = useState(false);
+    const [ghgImportOpen, setGhgImportOpen] = useState(false);
     const { data: company, isLoading, error, refetch } = useCompany(id);
     const {
         data: activityRecords,
@@ -147,6 +149,12 @@ export function CompanyDetailContent({ id }: { id: string }) {
                 defaultCompanyId={company.id}
                 fixedCompanyName={company.name}
             />
+            <GhgImportDialog
+                open={ghgImportOpen}
+                onOpenChangeAction={setGhgImportOpen}
+                defaultCompanyId={company.id}
+                fixedCompanyName={company.name}
+            />
             <div className="space-y-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div className="space-y-1">
@@ -174,7 +182,11 @@ export function CompanyDetailContent({ id }: { id: string }) {
                     <div className="flex shrink-0 flex-wrap gap-2 sm:justify-end">
                         <Button variant="outline" size="sm" onClick={() => setImportOpen(true)}>
                             <Upload className="mr-2 h-4 w-4" />
-                            Excel 임포트
+                            활동 데이터 임포트
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={() => setGhgImportOpen(true)}>
+                            <Upload className="mr-2 h-4 w-4" />
+                            GHG 배출량 임포트
                         </Button>
                         <YearSelector
                             years={availableYears}
