@@ -191,4 +191,70 @@ describe('buildCompanyDetailReportWorkbook', () => {
             '두 번째 메모',
         ]);
     });
+
+    it('선택 연도에 데이터가 없어도 6개 시트와 0값 요약을 유지한다', () => {
+        const workbook = buildCompanyDetailReportWorkbook({
+            company: {
+                id: 'empty-company',
+                name: 'Empty Company',
+                country: 'KR',
+                emissions: [],
+            },
+            year: 2026,
+            activityRecords: [],
+            actionNotes: [],
+            riskAssessment: null,
+            riskRank: null,
+            riskTotal: 0,
+            exportedAt: new Date(2026, 0, 1, 9, 30),
+        });
+
+        expect(workbook.sheets.map((sheet) => sheet.name)).toEqual([
+            '요약',
+            '월별 배출량',
+            'Scope별 배출',
+            '배출원별 배출',
+            '활동 데이터',
+            'Action Notes',
+        ]);
+        expect(workbook.sheets[0].rows).toContainEqual({
+            item: '연간 GHG 집계 배출량',
+            value: 0,
+            unit: 'tCO2e',
+            description: '선택 연도 GHG 배출량 합계입니다.',
+        });
+        expect(workbook.sheets[0].rows).toContainEqual({
+            item: '리스크 등급',
+            value: null,
+            unit: null,
+            description: '선택 연도 리스크 평가 등급입니다.',
+        });
+        expect(workbook.sheets[1].rows).toEqual([]);
+        expect(workbook.sheets[2].rows).toEqual([
+            {
+                scope: 'Scope 1',
+                ghgEmissionsTco2e: 0,
+                ghgSharePct: 0,
+                pcfEmissionsKgCo2e: 0,
+                pcfSharePct: 0,
+            },
+            {
+                scope: 'Scope 2',
+                ghgEmissionsTco2e: 0,
+                ghgSharePct: 0,
+                pcfEmissionsKgCo2e: 0,
+                pcfSharePct: 0,
+            },
+            {
+                scope: 'Scope 3',
+                ghgEmissionsTco2e: 0,
+                ghgSharePct: 0,
+                pcfEmissionsKgCo2e: 0,
+                pcfSharePct: 0,
+            },
+        ]);
+        expect(workbook.sheets[3].rows).toEqual([]);
+        expect(workbook.sheets[4].rows).toEqual([]);
+        expect(workbook.sheets[5].rows).toEqual([]);
+    });
 });

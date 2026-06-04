@@ -162,4 +162,46 @@ describe('buildCompaniesReportWorkbook', () => {
             dominantPcfScopePct: 100,
         });
     });
+
+    it('필터 결과가 비어도 요약과 빈 회사별 현황 시트를 생성한다', () => {
+        const workbook = buildCompaniesReportWorkbook({
+            year: 2026,
+            companies: [],
+            totalCompanyCount: 3,
+            selectedCountries: [],
+            countryOptions: [
+                { code: 'KR', name: '대한민국' },
+                { code: 'US', name: '미국' },
+            ],
+            sortOrder: 'name',
+            exportedAt: new Date(2026, 0, 1, 9, 30),
+        });
+
+        expect(workbook.sheets.map((sheet) => sheet.name)).toEqual(['요약', '회사별 현황']);
+        expect(workbook.sheets[1].rows).toEqual([]);
+        expect(workbook.sheets[0].rows).toContainEqual({
+            item: '국가 필터',
+            value: '전체 국가',
+            unit: null,
+            description: '회사 목록 페이지의 현재 국가 필터입니다.',
+        });
+        expect(workbook.sheets[0].rows).toContainEqual({
+            item: '정렬',
+            value: '회사명 순',
+            unit: null,
+            description: '회사 목록 페이지의 현재 정렬 기준입니다.',
+        });
+        expect(workbook.sheets[0].rows).toContainEqual({
+            item: '보고서 포함 회사 수',
+            value: 0,
+            unit: '개',
+            description: '현재 국가/연도/정렬 조건을 반영한 회사 수입니다.',
+        });
+        expect(workbook.sheets[0].rows).toContainEqual({
+            item: '평균 리스크 점수',
+            value: null,
+            unit: '점',
+            description: '현재 보고서 포함 회사의 평균 리스크 점수입니다.',
+        });
+    });
 });

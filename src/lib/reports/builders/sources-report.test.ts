@@ -104,4 +104,41 @@ describe('buildSourcesReportWorkbook', () => {
             sourceSharePct: 85.7,
         });
     });
+
+    it('선택 연도에 배출원 데이터가 없어도 빈 드릴다운 시트를 생성한다', () => {
+        const workbook = buildSourcesReportWorkbook({
+            year: 2026,
+            allSources: [],
+            activeSource: null,
+            scopeTotals: { 1: 0, 2: 0, 3: 0 },
+            companyBreakdown: [],
+            monthlyTrend: [],
+            totalEmissions: 0,
+            totalCompanies: 0,
+            exportedAt: new Date(2026, 0, 1, 9, 30),
+        });
+
+        expect(workbook.fileName).toBe('sources-report-2026-all');
+        expect(workbook.sheets.map((sheet) => sheet.name)).toEqual([
+            '요약',
+            '배출원 순위',
+            '선택 배출원 월별 추이',
+            '선택 배출원 회사별 기여',
+        ]);
+        expect(workbook.sheets[1].rows).toEqual([]);
+        expect(workbook.sheets[2].rows).toEqual([]);
+        expect(workbook.sheets[3].rows).toEqual([]);
+        expect(workbook.sheets[0].rows).toContainEqual({
+            item: '선택 배출원',
+            value: null,
+            unit: null,
+            description: '배출원 분석 페이지에서 현재 선택된 배출원입니다.',
+        });
+        expect(workbook.sheets[0].rows).toContainEqual({
+            item: '총 배출량',
+            value: 0,
+            unit: 'tCO2e',
+            description: '선택 연도 전체 관리 대상의 GHG 배출량 합계입니다.',
+        });
+    });
 });
