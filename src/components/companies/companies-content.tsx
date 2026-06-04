@@ -2,8 +2,8 @@
 
 // 회사 목록 필터·정렬 UI 및 카드 그리드 렌더링
 
-import { useState } from 'react';
-import { Upload } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Plus, Upload } from 'lucide-react';
 import { EmptyState } from '@/components/shared/empty-state';
 import { AsyncStateBoundary } from '@/components/shared/async-state-boundary';
 import { ExcelImportDialog } from '@/components/import/excel-import-dialog';
@@ -21,9 +21,11 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { SORT_OPTIONS, useCompaniesFilter } from '@/hooks/companies/useCompaniesFilter';
-import { useEffect } from 'react';
+import { useDeleteCompany } from '@/hooks/companies/useCompanyMutations';
 import { toast } from 'sonner';
 import { CompanyCard } from './company-card';
+import { CompanyFormDialog } from './company-form-dialog';
+import type { CompanyPcfTotal } from '@/lib/emissions';
 
 // 회사 목록 로딩 중 스켈레톤 그리드
 function CompaniesGridSkeleton() {
@@ -41,6 +43,10 @@ function CompaniesGridSkeleton() {
 // 회사 목록 컨텐츠 렌더링
 export function CompaniesContent() {
     const [importOpen, setImportOpen] = useState(false);
+    const [formOpen, setFormOpen] = useState(false);
+    const [editTarget, setEditTarget] = useState<
+        { id: string; name: string; countryCode: string } | undefined
+    >();
 
     const {
         isLoading,
@@ -61,6 +67,7 @@ export function CompaniesContent() {
         riskMap,
     } = useCompaniesFilter();
 
+    const deleteMutation = useDeleteCompany();
     const [countryOpen, setCountryOpen] = useState(false);
 
     useEffect(() => {
@@ -69,14 +76,29 @@ export function CompaniesContent() {
         }
     }, [countriesError]);
 
+    const handleEdit = (company: CompanyPcfTotal) => {
+        setEditTarget({ id: company.id, name: company.name, countryCode: company.country });
+        setFormOpen(true);
+    };
+
+    const handleFormClose = (open: boolean) => {
+        setFormOpen(open);
+        if (!open) setEditTarget(undefined);
+    };
+
     // isEmpty: DB에 회사가 아예 없는 경우 / 필터 후 결과 없음은 내부 EmptyState로 별도 처리
     return (
         <>
             <ExcelImportDialog open={importOpen} onOpenChangeAction={setImportOpen} />
+            <CompanyFormDialog
+                open={formOpen}
+                onOpenChangeAction={handleFormClose}
+                editTarget={editTarget}
+            />
             <AsyncStateBoundary
                 isLoading={isLoading}
                 error={error}
-                isEmpty={totalCompanyCount === 0}
+                isEmpty={totalCompanyCount === 0 && !isLoading}
                 loadingFallback={<CompaniesGridSkeleton />}
                 emptyMessage="등록된 관리 대상 회사가 없습니다."
                 onRetry={refetch}
@@ -84,15 +106,28 @@ export function CompaniesContent() {
                 <div className="space-y-4">
                     {/* 필터·정렬 컨트롤 */}
                     <div className="flex flex-wrap items-center gap-3">
+                        {/* 회사 추가 */}
+                        <Button
+                            size="sm"
+                            onClick={() => {
+                                setEditTarget(undefined);
+                                setFormOpen(true);
+                            }}
+                        >
+                            <Plus className="mr-2 h-4 w-4" />
+                            회사 추가
+                        </Button>
+
+                        {/* Excel 활동 데이터 임포트 */}
                         <Button
                             variant="outline"
                             size="sm"
-                            className="ml-auto"
                             onClick={() => setImportOpen(true)}
                         >
                             <Upload className="mr-2 h-4 w-4" />
-                            Excel 임포트
+                            활동 데이터 임포트
                         </Button>
+
                         {/* 국가 선택 */}
                         <MultiSelectPopover
                             items={countryOptions.map((c) => ({ id: c.code, label: c.name }))}
@@ -154,6 +189,11 @@ export function CompaniesContent() {
                                     company={company}
                                     year={selectedYear}
                                     riskAssessment={riskMap.get(company.id)}
+                                    onEditAction={() => handleEdit(company)}
+                                    onDeleteAction={() =>
+                                        deleteMutation.mutate(company.id)
+                                    }
+                                    isDeleting={deleteMutation.variables === company.id && deleteMutation.isPending}
                                 />
                             ))}
                         </div>

@@ -1,7 +1,12 @@
-// 회사 카드 — 연간 PCF 및 Scope 비중 시각화
+'use client';
 
+// 회사 카드 — 연간 PCF 및 Scope 비중 시각화 + 편집·삭제 액션
+
+import { Pencil } from 'lucide-react';
 import { RiskLevelBadge } from '@/components/risk/risk-level-badge';
+import { DeleteConfirmButton } from '@/components/shared/delete-confirm-button';
 import { ScopeStackedBar } from '@/components/shared/scope-stacked-bar';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ROUTES } from '@/constants/navigation';
 import { getPcfScopeBreakdown, type CompanyPcfTotal } from '@/lib/emissions';
@@ -19,21 +24,31 @@ function getCompanyCardPcfView(company: CompanyPcfTotal) {
     };
 }
 
+type Props = {
+    company: CompanyPcfTotal;
+    year: number;
+    riskAssessment?: RiskAssessment;
+    onEditAction?: () => void;
+    onDeleteAction?: () => void;
+    isDeleting?: boolean;
+};
+
 // 회사 PCF 현황 카드 렌더링
 export function CompanyCard({
     company,
     year,
     riskAssessment,
-}: {
-    company: CompanyPcfTotal;
-    year: number;
-    riskAssessment?: RiskAssessment;
-}) {
+    onEditAction,
+    onDeleteAction,
+    isDeleting,
+}: Props) {
     const pcfView = getCompanyCardPcfView(company);
+    const hasActions = Boolean(onEditAction ?? onDeleteAction);
 
     return (
-        <Link href={ROUTES.companyDetail(company.id)} className="block">
-            <Card className="flex flex-col transition-shadow hover:shadow-md">
+        <Card className="flex flex-col transition-shadow hover:shadow-md">
+            {/* 카드 본문은 Link — 상세 페이지로 이동 */}
+            <Link href={ROUTES.companyDetail(company.id)} className="flex-1">
                 <CardHeader className="pb-2">
                     <div className="flex items-start justify-between gap-2">
                         {/* 회사명 + 국가 코드 */}
@@ -77,7 +92,27 @@ export function CompanyCard({
 
                     <ScopeStackedBar scopes={pcfView.scopes} showBackground />
                 </CardContent>
-            </Card>
-        </Link>
+            </Link>
+
+            {/* 편집·삭제 버튼 — Link 외부에 별도 배치 */}
+            {hasActions && (
+                <div className="border-border flex items-center justify-end gap-1 border-t px-3 py-2">
+                    {onEditAction && (
+                        <Button
+                            size="icon"
+                            variant="ghost"
+                            className="text-muted-foreground hover:text-foreground size-7"
+                            onClick={onEditAction}
+                            aria-label="회사 정보 수정"
+                        >
+                            <Pencil className="size-3.5" />
+                        </Button>
+                    )}
+                    {onDeleteAction && (
+                        <DeleteConfirmButton onConfirm={onDeleteAction} disabled={isDeleting} />
+                    )}
+                </div>
+            )}
+        </Card>
     );
 }

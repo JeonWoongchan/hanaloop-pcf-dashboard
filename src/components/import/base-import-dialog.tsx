@@ -1,14 +1,17 @@
 'use client';
 
+// 파일 업로드·미리보기·회사 선택·확인 공통 뼈대
+// 도메인별 import dialog는 이 컴포넌트를 사용하고 renderPreview만 교체
+
 import { useCallback, useRef, useState } from 'react';
-import { Upload, FileSpreadsheet, AlertCircle, X } from 'lucide-react';
+import { AlertCircle, FileSpreadsheet, Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
     DialogContent,
+    DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogFooter,
 } from '@/components/ui/dialog';
 import {
     Select,
@@ -17,47 +20,52 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCompanies } from '@/hooks/companies/useCompanies';
-import { useExcelImport } from '@/hooks/import/useExcelImport';
-import { SOURCE_LABELS } from '@/constants/ghg-scope';
-import { formatPcfEmissions, PCF_EMISSIONS_UNIT } from '@/lib/format';
 import { cn } from '@/lib/utils';
-import type { ParsedActivityRow } from '@/types';
 
 const ALLOWED_EXTENSIONS = ['.xlsx', '.xls'];
 const INVALID_FIELD_CLASS = 'border-destructive ring-destructive/20 ring-3';
-const COMPANY_ERROR_ID = 'excel-company-error';
 
-type Props = {
+type Props<TPreview> = {
     open: boolean;
     onOpenChangeAction: (open: boolean) => void;
+    title: string;
+    description: string;
+    // 회사 상세에서 열면 해당 회사로 고정
     defaultCompanyId?: string;
     fixedCompanyName?: string;
+    // 파일을 받아 미리보기 데이터를 반환 — 도메인별로 다른 엔드포인트 사용
+    onFetchPreview: (file: File, signal: AbortSignal) => Promise<TPreview[]>;
+    // 미리보기 테이블·요약 렌더링 — 도메인별로 컬럼이 다름
+    renderPreview: (rows: TPreview[]) => React.ReactNode;
+    onCommit: (params: { file: File; companyId: string }) => void;
+    isCommitting: boolean;
 };
 
+function ErrorMessage({ children }: { children: string }) {
+    return <p className="text-destructive mt-1 text-xs">{children}</p>;
+}
 
-export function ExcelImportDialog({
+export function BaseImportDialog<TPreview>({
     open,
     onOpenChangeAction,
+    title,
+    description,
     defaultCompanyId,
     fixedCompanyName,
-}: Props) {
+    onFetchPreview,
+    renderPreview,
+    onCommit,
+    isCommitting,
+}: Props<TPreview>) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     // 진행 중인 preview 요청을 취소하기 위한 AbortController 참조
     const abortRef = useRef<AbortController | null>(null);
 
     const [isDragging, setIsDragging] = useState(false);
     const [file, setFile] = useState<File | null>(null);
-    const [preview, setPreview] = useState<ParsedActivityRow[] | null>(null);
+    const [preview, setPreview] = useState<TPreview[] | null>(null);
     const [previewError, setPreviewError] = useState<string | null>(null);
     const [isPreviewing, setIsPreviewing] = useState(false);
     const [selectedCompanyId, setSelectedCompanyId] = useState('');
@@ -81,50 +89,45 @@ export function ExcelImportDialog({
         if (fileInputRef.current) fileInputRef.current.value = '';
     }, []);
 
-    const handleOpenChange = (v: boolean) => {
-        if (!v) reset();
-        onOpenChangeAction(v);
-    };
+    const handleOpenChange = useCallback(
+        (v: boolean) => {
+            if (!v) reset();
+            onOpenChangeAction(v);
+        },
+        [reset, onOpenChangeAction]
+    );
 
-    // reset/handleOpenChange 이후에 선언 — onSuccess에서 handleOpenChange(false) 호출 시 reset()도 실행됨
-    const importMutation = useExcelImport(() => handleOpenChange(false));
+    const fetchPreview = useCallback(
+        async (f: File) => {
+            // 이전 요청 취소 후 새 컨트롤러 발급 — 파일 교체 시 경쟁 응답 방지
+            abortRef.current?.abort();
+            const controller = new AbortController();
+            abortRef.current = controller;
 
-    const fetchPreview = useCallback(async (f: File) => {
-        // 이전 요청 취소 후 새 컨트롤러 발급 — 파일 교체 시 경쟁 응답 방지
-        abortRef.current?.abort();
-        const controller = new AbortController();
-        abortRef.current = controller;
-
-        setIsPreviewing(true);
-        setPreviewError(null);
-        setPreview(null);
-        try {
-            const fd = new FormData();
-            fd.append('file', f);
-            const res = await fetch('/api/import/preview', {
-                method: 'POST',
-                body: fd,
-                signal: controller.signal,
-            });
-            if (!res.ok) {
-                const isJson = res.headers.get('content-type')?.includes('application/json');
-                const body = isJson ? ((await res.json()) as { error?: string }) : {};
-                setPreviewError(body.error ?? '파싱 실패');
-            } else {
-                setPreview((await res.json()) as ParsedActivityRow[]);
+            setIsPreviewing(true);
+            setPreviewError(null);
+            setPreview(null);
+            try {
+                const rows = await onFetchPreview(f, controller.signal);
+                setPreview(rows);
+            } catch (err) {
+                // AbortError는 정상적인 취소이므로 에러 표시 생략
+                if (err instanceof DOMException && err.name === 'AbortError') return;
+                const message =
+                    err instanceof Error ? err.message : '파일 파싱에 실패했습니다.';
+                setPreviewError(message);
+            } finally {
+                setIsPreviewing(false);
             }
-        } catch (err) {
-            // AbortError는 정상적인 취소이므로 에러 표시 생략
-            if (err instanceof DOMException && err.name === 'AbortError') return;
-            setPreviewError('파일 파싱에 실패했습니다.');
-        } finally {
-            setIsPreviewing(false);
-        }
-    }, []);
+        },
+        [onFetchPreview]
+    );
 
     const handleFileSelect = useCallback(
         (f: File) => {
-            const isAllowed = ALLOWED_EXTENSIONS.some((ext) => f.name.toLowerCase().endsWith(ext));
+            const isAllowed = ALLOWED_EXTENSIONS.some((ext) =>
+                f.name.toLowerCase().endsWith(ext)
+            );
             if (!isAllowed) {
                 setPreviewError('.xlsx 또는 .xls 파일만 업로드할 수 있습니다.');
                 return;
@@ -145,34 +148,30 @@ export function ExcelImportDialog({
         [handleFileSelect]
     );
 
-    const handleImport = () => {
+    const handleCommit = () => {
         if (!file) return;
         if (!isCompanyFixed && !selectedCompanyId) {
             setCompanyError('대상 회사를 선택해 주세요.');
             return;
         }
-        importMutation.mutate({ file, companyId: targetCompanyId });
+        onCommit({ file, companyId: targetCompanyId });
     };
 
-    const totalPcfEmissions = preview?.reduce((sum, r) => sum + r.emissionsKg, 0) ?? 0;
-
     // isPreviewing 포함 — 이전 파일의 preview가 state에 남아있는 동안 제출 차단
-    const canImport =
+    const canCommit =
         file !== null &&
         preview !== null &&
         previewError === null &&
         !isPreviewing &&
+        !isCommitting &&
         (isCompanyFixed ? Boolean(defaultCompanyId) : selectedCompanyId.length > 0);
 
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogContent className="flex max-h-[90vh] max-w-3xl flex-col gap-0 p-0">
                 <DialogHeader className="px-6 pt-6 pb-4">
-                    <DialogTitle>Excel 활동 데이터 임포트</DialogTitle>
-                    <p className="text-muted-foreground text-sm">
-                        과제 스펙 Excel(일자·활동유형·설명·량·단위)을 업로드하면 배출계수를 적용해
-                        DB에 등록된 배출계수 버전을 적용한 뒤 PostgreSQL에 직접 저장합니다.
-                    </p>
+                    <DialogTitle>{title}</DialogTitle>
+                    <p className="text-muted-foreground text-sm">{description}</p>
                 </DialogHeader>
 
                 <div className="flex-1 overflow-y-auto px-6 pb-2">
@@ -251,64 +250,9 @@ export function ExcelImportDialog({
                         </div>
                     )}
 
+                    {/* 도메인별 미리보기 테이블 */}
                     {preview && preview.length > 0 && (
-                        <div className="mb-4">
-                            <p className="text-muted-foreground mb-2 text-xs">
-                                {preview.length}행 파싱 완료 · 합계{' '}
-                                <span className="text-foreground font-medium">
-                                    {formatPcfEmissions(totalPcfEmissions)} {PCF_EMISSIONS_UNIT}
-                                </span>
-                            </p>
-                            <div className="border-border max-h-56 overflow-y-auto rounded-md border">
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>연월</TableHead>
-                                            <TableHead>활동 유형</TableHead>
-                                            <TableHead>설명</TableHead>
-                                            <TableHead className="text-right">량</TableHead>
-                                            <TableHead>단위</TableHead>
-                                            <TableHead className="text-right">
-                                                PCF 산정값
-                                            </TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {preview.map((row, idx) => (
-                                            <TableRow key={idx}>
-                                                <TableCell className="font-mono text-xs">
-                                                    {row.yearMonth}
-                                                </TableCell>
-                                                <TableCell className="text-xs">
-                                                    {row.activityType}
-                                                </TableCell>
-                                                <TableCell className="text-xs">
-                                                    {row.description}
-                                                </TableCell>
-                                                <TableCell className="text-right text-xs">
-                                                    {row.quantity.toLocaleString()}
-                                                </TableCell>
-                                                <TableCell className="text-xs">
-                                                    {row.unit}
-                                                </TableCell>
-                                                <TableCell className="text-right font-mono text-xs">
-                                                    {formatPcfEmissions(row.emissionsKg)}
-                                                    <span className="text-muted-foreground ml-1">
-                                                        {PCF_EMISSIONS_UNIT}
-                                                    </span>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </div>
-                            <p className="text-muted-foreground mt-1 text-xs">
-                                * 배출원 코드:{' '}
-                                {[...new Set(preview.map((r) => r.source))]
-                                    .map((s) => `${SOURCE_LABELS[s] ?? s}(${s})`)
-                                    .join(', ')}
-                            </p>
-                        </div>
+                        <div className="mb-4">{renderPreview(preview)}</div>
                     )}
 
                     {/* 대상 회사 선택 */}
@@ -333,9 +277,6 @@ export function ExcelImportDialog({
                                             companyError && INVALID_FIELD_CLASS
                                         )}
                                         aria-invalid={Boolean(companyError)}
-                                        aria-describedby={
-                                            companyError ? COMPANY_ERROR_ID : undefined
-                                        }
                                     >
                                         <SelectValue placeholder="회사를 선택하세요" />
                                     </SelectTrigger>
@@ -347,11 +288,7 @@ export function ExcelImportDialog({
                                         ))}
                                     </SelectContent>
                                 </Select>
-                                {companyError && (
-                                    <p id={COMPANY_ERROR_ID} className="text-destructive text-xs">
-                                        {companyError}
-                                    </p>
-                                )}
+                                {companyError && <ErrorMessage>{companyError}</ErrorMessage>}
                             </>
                         )}
                     </div>
@@ -361,11 +298,8 @@ export function ExcelImportDialog({
                     <Button variant="outline" onClick={() => handleOpenChange(false)}>
                         취소
                     </Button>
-                    <Button
-                        disabled={!canImport || importMutation.isPending}
-                        onClick={handleImport}
-                    >
-                        {importMutation.isPending ? '임포트 중…' : '임포트'}
+                    <Button disabled={!canCommit} onClick={handleCommit}>
+                        {isCommitting ? '임포트 중…' : '임포트'}
                     </Button>
                 </DialogFooter>
             </DialogContent>

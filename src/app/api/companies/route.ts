@@ -1,9 +1,16 @@
+import { randomUUID } from 'crypto';
+import { NextResponse } from 'next/server';
+import { z } from 'zod';
 import { sql } from '@/lib/db';
 import { apiError } from '@/lib/server/api-response';
 import type { Company, GhgEmission } from '@/types';
-import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
+
+const companyBodySchema = z.object({
+    name: z.string().min(1, '회사명을 입력해 주세요.').max(100),
+    countryCode: z.string().min(1, '국가를 선택해 주세요.'),
+});
 
 type CompanyEmissionRow = {
     id: string;
@@ -67,5 +74,27 @@ export async function GET() {
         return NextResponse.json(rowsToCompanies(rows));
     } catch {
         return apiError('회사 목록을 불러오지 못했습니다.');
+    }
+}
+
+export async function POST(request: Request) {
+    try {
+        const body: unknown = await request.json();
+        const parsed = companyBodySchema.safeParse(body);
+        if (!parsed.success) {
+            return apiError(parsed.error.errors[0]?.message ?? '입력값이 올바르지 않습니다.', 400);
+        }
+
+        const { name, countryCode } = parsed.data;
+        const id = randomUUID();
+
+        await sql`
+            INSERT INTO companies (id, name, country_code)
+            VALUES (${id}, ${name}, ${countryCode})
+        `;
+
+        return NextResponse.json({ id, name, country: countryCode }, { status: 201 });
+    } catch {
+        return apiError('회사 등록에 실패했습니다.');
     }
 }
