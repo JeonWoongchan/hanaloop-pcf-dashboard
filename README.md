@@ -176,6 +176,8 @@ Charts / Cards / Tables
 - Scope 1/2/3 감축 시나리오
 - Action Notes 패널로 회사별 대응 기록 관리
 
+* Action Notes API는 제공된 Fake Backend의 명세와 동일하게 15% 실패 확률을 재현했습니다.
+
 ![Company Detail](./docs/images/company_detail.png)
 
 ![Company Detail PCF activity data](docs/images/company_detail_excel.png)
