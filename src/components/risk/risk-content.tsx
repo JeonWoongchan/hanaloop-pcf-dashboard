@@ -10,7 +10,7 @@ import { useRiskMetrics } from '@/hooks/risk/useRiskMetrics';
 import { parseAsInteger, useQueryState } from 'nuqs';
 import { RiskKpiCards } from './risk-kpi-cards';
 import { RiskPriorityTable } from './risk-priority-table';
-import { TaxScenarioCard } from './tax-scenario-card';
+import { AllowanceScenarioCard } from './allowance-scenario-card';
 
 // 리스크 페이지 로딩 중 스켈레톤
 function RiskSkeleton() {
@@ -46,7 +46,7 @@ export function RiskContent() {
                     <div>
                         <h2 className="text-2xl font-bold tracking-tight">리스크 관리</h2>
                         <p className="text-muted-foreground">
-                            관리 대상 회사의 탄소세 노출액과 감축 우선순위를 확인합니다.
+                            관리 대상 회사의 배출권 구매비용과 감축 우선순위를 확인합니다.
                         </p>
                     </div>
                     <YearSelector
@@ -62,7 +62,7 @@ export function RiskContent() {
                     totalCompanies={companies?.length ?? 0}
                 />
 
-                <TaxScenarioCard />
+                <AllowanceScenarioCard />
 
                 <RiskPriorityTable assessments={assessments} year={selectedYear} />
             </div>

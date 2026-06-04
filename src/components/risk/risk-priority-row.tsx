@@ -44,7 +44,7 @@ export function RiskPriorityRow({ assessment }: Props) {
                 {formatEmissions(assessment.annualEmissions)} tCO₂e
             </TableCell>
             <TableCell className="py-4 pr-4 text-right">
-                {formatKrw(assessment.estimatedTaxKrw)}
+                {formatKrw(assessment.estimatedAllowanceCostKrw)}
             </TableCell>
             <TableCell className={`py-4 pr-4 text-center font-medium ${trend.className}`}>
                 {trend.label}

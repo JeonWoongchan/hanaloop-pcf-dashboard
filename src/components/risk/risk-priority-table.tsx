@@ -13,7 +13,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { CARBON_TAX_RATE_KRW_PER_TCO2E } from '@/constants/risk';
+import { ALLOWANCE_PRICE_KRW_PER_TCO2E } from '@/constants/risk';
 import {
     compareByDirection,
     compareNullableNumber,
@@ -29,7 +29,7 @@ type SortKey =
     | 'name'
     | 'score'
     | 'annualEmissions'
-    | 'estimatedTaxKrw'
+    | 'estimatedAllowanceCostKrw'
     | 'recentTrendPct'
     | 'level';
 
@@ -42,8 +42,8 @@ const SORT_COMPARATORS: SortComparators<RiskAssessment, SortKey> = {
     score: (a, b, direction) => compareByDirection(a.score - b.score, direction),
     annualEmissions: (a, b, direction) =>
         compareByDirection(a.annualEmissions - b.annualEmissions, direction),
-    estimatedTaxKrw: (a, b, direction) =>
-        compareByDirection(a.estimatedTaxKrw - b.estimatedTaxKrw, direction),
+    estimatedAllowanceCostKrw: (a, b, direction) =>
+        compareByDirection(a.estimatedAllowanceCostKrw - b.estimatedAllowanceCostKrw, direction),
     recentTrendPct: (a, b, direction) =>
         compareNullableNumber(a.recentTrendPct, b.recentTrendPct, direction),
 };
@@ -71,12 +71,12 @@ export function RiskPriorityTable({ assessments, year }: Props) {
             <CardHeading
                 title="관리 우선순위"
                 tooltip="리스크 점수는 연간 배출량, 최근 3개월 증가 추세, Scope 구성을 종합해 산정합니다. 실제 규제 등급이 아니라 내부 판단 지표입니다."
-                description={`${year}년 기준 탄소세 노출액과 배출 증가 리스크가 큰 관리 대상 회사`}
+                description={`${year}년 기준 배출권 구매비용과 배출 증가 리스크가 큰 관리 대상 회사`}
             />
             <CardContent>
                 <Table className="min-w-230">
                     <TableCaption className="sr-only">
-                        {year}년 관리 대상 회사별 탄소세 리스크 우선순위
+                        {year}년 관리 대상 회사별 배출권 비용 리스크 우선순위
                     </TableCaption>
                     <TableHeader>
                         <TableRow className="hover:bg-transparent">
@@ -105,12 +105,12 @@ export function RiskPriorityTable({ assessments, year }: Props) {
                                 연간 배출량
                             </SortableHead>
                             <SortableHead
-                                {...sort.getSortProps('estimatedTaxKrw')}
-                                label="예상 비용"
+                                {...sort.getSortProps('estimatedAllowanceCostKrw')}
+                                label="예상 배출권 비용"
                                 align="right"
                                 extra={
                                     <InfoTooltip
-                                        content={`예상 비용 = 선택 연도 연간 배출량 × 가정 탄소세율(${formatEmissions(CARBON_TAX_RATE_KRW_PER_TCO2E)}원/tCO₂e)입니다. 실제 세무, 법률 산정이 아니라 관리 우선순위 판단을 위한 시나리오입니다.`}
+                                        content={`예상 배출권 비용 = 연간 배출량(tCO₂e) × 가정 배출권 단가(${formatEmissions(ALLOWANCE_PRICE_KRW_PER_TCO2E)}원/배출권)입니다. 무상할당·보유 배출권을 고려하지 않은 단순 시나리오입니다.`}
                                     />
                                 }
                             >

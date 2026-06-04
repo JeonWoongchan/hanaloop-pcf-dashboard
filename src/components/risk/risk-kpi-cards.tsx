@@ -1,7 +1,7 @@
 // 리스크 페이지 상단 KPI 카드 렌더링
 
 import { MetricCard } from '@/components/shared/metric-card';
-import { CARBON_TAX_RATE_KRW_PER_TCO2E } from '@/constants/risk';
+import { ALLOWANCE_PRICE_KRW_PER_TCO2E } from '@/constants/risk';
 import { formatEmissions, formatKrw } from '@/lib/format';
 import type { RiskSummary } from '@/lib/risk';
 import { AlertTriangle, Calculator, Gauge, TrendingDown } from 'lucide-react';
@@ -17,9 +17,9 @@ export function RiskKpiCards({ summary, year, totalCompanies }: Props) {
     return (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <MetricCard
-                title="예상 탄소세 노출액"
-                tooltip={`선택 연도 총 배출량에 가정 세율 ${formatEmissions(CARBON_TAX_RATE_KRW_PER_TCO2E)}원/tCO₂e를 곱한 시나리오 금액입니다. 실제 세무 산정이 아닙니다.`}
-                value={formatKrw(summary.totalTaxKrw)}
+                title="예상 배출권 구매비용"
+                tooltip={`선택 연도 총 배출량(tCO₂e)에 가정 배출권 단가 ${formatEmissions(ALLOWANCE_PRICE_KRW_PER_TCO2E)}원/배출권을 곱한 시나리오 금액입니다. 무상할당·보유 배출권을 고려하지 않은 단순 추정치입니다.`}
+                value={formatKrw(summary.totalAllowanceCostKrw)}
                 helper={`${year}년 관리 대상 전체`}
                 icon={Calculator}
             />
@@ -37,7 +37,7 @@ export function RiskKpiCards({ summary, year, totalCompanies }: Props) {
             />
             <MetricCard
                 title="평균 리스크 점수"
-                tooltip="관리 대상 회사의 리스크 점수 평균입니다. 100점에 가까울수록 탄소세·규제 대응 우선순위가 높습니다."
+                tooltip="관리 대상 회사의 리스크 점수 평균입니다. 100점에 가까울수록 배출권 비용·규제 대응 우선순위가 높습니다."
                 value={summary.averageScore}
                 helper="100점 만점"
                 icon={Gauge}
