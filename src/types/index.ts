@@ -48,6 +48,14 @@ export type ActivityRecord = {
     createdAt: string;
 };
 
+// GHG 배출량 Excel 임포트 파싱 결과 — yearMonth·source·emissions 3컬럼
+export type ParsedGhgRow = {
+    yearMonth: string; // "YYYY-MM"
+    source: string;    // SCOPE_MAP 키 (e.g. "electricity")
+    emissions: number; // tCO₂e
+    rowNumber: number;
+};
+
 // Excel 임포트 파싱 결과 — DB 배출계수 적용 전 원본 활동 데이터
 export type ParsedActivityInputRow = {
     // 원본 활동 데이터 (Excel 그대로)

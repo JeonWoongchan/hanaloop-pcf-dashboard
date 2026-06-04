@@ -7,6 +7,7 @@ import { Plus, Upload } from 'lucide-react';
 import { EmptyState } from '@/components/shared/empty-state';
 import { AsyncStateBoundary } from '@/components/shared/async-state-boundary';
 import { ExcelImportDialog } from '@/components/import/excel-import-dialog';
+import { GhgImportDialog } from '@/components/import/ghg-import-dialog';
 import { CardGridSkeleton } from '@/components/shared/loading-skeletons';
 import { MultiSelectPopover } from '@/components/shared/multi-select-popover';
 import { ScopeLegend } from '@/components/shared/scope-legend';
@@ -43,6 +44,7 @@ function CompaniesGridSkeleton() {
 // 회사 목록 컨텐츠 렌더링
 export function CompaniesContent() {
     const [importOpen, setImportOpen] = useState(false);
+    const [ghgImportOpen, setGhgImportOpen] = useState(false);
     const [formOpen, setFormOpen] = useState(false);
     const [editTarget, setEditTarget] = useState<
         { id: string; name: string; countryCode: string } | undefined
@@ -90,6 +92,7 @@ export function CompaniesContent() {
     return (
         <>
             <ExcelImportDialog open={importOpen} onOpenChangeAction={setImportOpen} />
+            <GhgImportDialog open={ghgImportOpen} onOpenChangeAction={setGhgImportOpen} />
             <CompanyFormDialog
                 open={formOpen}
                 onOpenChangeAction={handleFormClose}
@@ -126,6 +129,16 @@ export function CompaniesContent() {
                         >
                             <Upload className="mr-2 h-4 w-4" />
                             활동 데이터 임포트
+                        </Button>
+
+                        {/* Excel GHG 배출량 임포트 */}
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setGhgImportOpen(true)}
+                        >
+                            <Upload className="mr-2 h-4 w-4" />
+                            GHG 배출량 임포트
                         </Button>
 
                         {/* 국가 선택 */}
