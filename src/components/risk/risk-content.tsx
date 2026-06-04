@@ -4,9 +4,11 @@
 
 import { AsyncStateBoundary } from '@/components/shared/async-state-boundary';
 import { ChartSkeleton, MetricGridSkeleton } from '@/components/shared/loading-skeletons';
+import { ReportExportButton } from '@/components/reports/report-export-button';
 import { YearSelector } from '@/components/shared/year-selector';
 import { useCompanies } from '@/hooks/companies/useCompanies';
 import { useRiskMetrics } from '@/hooks/risk/useRiskMetrics';
+import { buildRiskReportWorkbook } from '@/lib/reports/builders/risk-report';
 import { parseAsInteger, useQueryState } from 'nuqs';
 import { RiskKpiCards } from './risk-kpi-cards';
 import { RiskPriorityTable } from './risk-priority-table';
@@ -49,11 +51,24 @@ export function RiskContent() {
                             관리 대상 회사의 배출권 구매비용과 감축 우선순위를 확인합니다.
                         </p>
                     </div>
-                    <YearSelector
-                        years={availableYears}
-                        value={selectedYear}
-                        onChangeAction={(year) => void setYearParam(year)}
-                    />
+                    <div className="flex flex-wrap items-center gap-2">
+                        <YearSelector
+                            years={availableYears}
+                            value={selectedYear}
+                            onChangeAction={(year) => void setYearParam(year)}
+                        />
+                        <ReportExportButton
+                            buildReportAction={() =>
+                                buildRiskReportWorkbook({
+                                    year: selectedYear,
+                                    totalCompanies: companies?.length ?? 0,
+                                    summary,
+                                    assessments,
+                                })
+                            }
+                            fileName={`risk-report-${selectedYear}`}
+                        />
+                    </div>
                 </div>
 
                 <RiskKpiCards
