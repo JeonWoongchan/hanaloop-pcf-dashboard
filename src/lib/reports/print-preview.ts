@@ -1,6 +1,6 @@
 import type { ReportCellValue, ReportColumn, ReportWorkbook } from './types';
 
-const REPORT_BRAND_NAME = 'Carbon Insight Dashboard';
+const REPORT_BRAND_NAME = 'PCF Dashboard';
 
 export function writeReportLoadingPreview(targetWindow: Window) {
     targetWindow.document.open();
@@ -74,7 +74,7 @@ function renderCover(workbook: ReportWorkbook) {
 
             return `<div class="summary-card">
                 <dt>${escapeHtml(String(item))}</dt>
-                <dd>${escapeHtml(formatValue(value))}${unit ? `<span>${escapeHtml(String(unit))}</span>` : ''}</dd>
+                <dd>${escapeHtml(formatValue(value, { label: String(item) }))}${unit ? `<span>${escapeHtml(String(unit))}</span>` : ''}</dd>
             </div>`;
         })
         .join('');
@@ -120,7 +120,7 @@ function renderSheet({
                                       `<tr>${columns
                                           .map(
                                               (column) =>
-                                                  `<td>${escapeHtml(formatValue(row[column.key]))}</td>`
+                                                  `<td>${escapeHtml(formatValue(row[column.key], column))}</td>`
                                           )
                                           .join('')}</tr>`
                               )
@@ -148,11 +148,21 @@ function normalizeReportTitle(fileName: string) {
         .trim();
 }
 
-function formatValue(value: ReportCellValue | undefined) {
+type ReportValueContext = Partial<Pick<ReportColumn, 'key' | 'header'>> & { label?: string };
+
+function formatValue(value: ReportCellValue | undefined, context?: ReportValueContext) {
     if (value === null || value === undefined || value === '') return '-';
+    if (typeof value === 'number' && isYearContext(context)) return String(value);
     if (typeof value === 'number') return formatNumber(value);
 
     return value;
+}
+
+function isYearContext(context?: ReportValueContext) {
+    const key = context?.key?.toLowerCase();
+    const text = [context?.header, context?.label].filter(Boolean).join(' ');
+
+    return key === 'year' || text.includes('기준 연도');
 }
 
 function formatNumber(value: number) {

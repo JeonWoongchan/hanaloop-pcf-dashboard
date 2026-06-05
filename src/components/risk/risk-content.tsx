@@ -52,11 +52,6 @@ export function RiskContent() {
                         </p>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
-                        <YearSelector
-                            years={availableYears}
-                            value={selectedYear}
-                            onChangeAction={(year) => void setYearParam(year)}
-                        />
                         <ReportExportButton
                             buildReportAction={() =>
                                 buildRiskReportWorkbook({
@@ -66,6 +61,11 @@ export function RiskContent() {
                                     assessments,
                                 })
                             }
+                        />
+                        <YearSelector
+                          years={availableYears}
+                          value={selectedYear}
+                          onChangeAction={(year) => void setYearParam(year)}
                         />
                     </div>
                 </div>
