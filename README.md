@@ -131,7 +131,7 @@ Charts / Cards / Tables
 
 - 배출원별 랭킹
 - Scope 항목별 상세 분석 차트
-- 배출원 분석 Excel 보고서 내보내기
+- 배출원 분석 인쇄/PDF 보고서 보기
 
 ![Sources ranking](./docs/images/sources1.png)
 
@@ -143,7 +143,7 @@ Charts / Cards / Tables
 - 예상 배출권 구매비용 및 필요 배출권 수량
 - 최근 배출 증가/감소 추세
 - 관리 우선순위 테이블
-- 리스크 분석 Excel 보고서 내보내기
+- 리스크 분석 인쇄/PDF 보고서 보기
 
 #### 리스크 점수
 
@@ -168,7 +168,7 @@ Charts / Cards / Tables
 - 회사별 PCF 수치, Scope 구성과 리스크 뱃지
 - 회사 추가·편집·삭제
 - 활동 데이터·GHG 배출량 Excel 임포트
-- 전체 회사 현황 Excel 보고서 내보내기
+- 전체 회사 현황 인쇄/PDF 보고서 보기
 
 ![Companies](./docs/images/companies.png)
 
@@ -182,7 +182,7 @@ Charts / Cards / Tables
 - Action Notes 패널로 회사별 대응 기록 관리
 - 활동 데이터·GHG 배출량 Excel 임포트 (해당 회사 자동 선택)
 - GHG 배출량 행 단위 수정·삭제, 활동 데이터 행 삭제
-- 회사별 상세 Excel 보고서 내보내기 (배출량·PCF·리스크·Action Notes 포함)
+- 회사별 상세 인쇄/PDF 보고서 보기 (배출량·PCF·리스크·Action Notes 포함)
 
 * Action Notes API는 제공된 Fake Backend의 명세와 동일하게 15% 실패 확률을 재현했습니다.
 

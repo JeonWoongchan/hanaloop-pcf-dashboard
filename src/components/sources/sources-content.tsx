@@ -118,7 +118,6 @@ export function SourcesContent() {
                                     totalCompanies: companies?.length ?? 0,
                                 })
                             }
-                            fileName={`sources-report-${selectedYear}-${activeSourceId ?? 'all'}`}
                         />
                         <YearSelector
                             years={availableYears}

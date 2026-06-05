@@ -66,7 +66,6 @@ export function RiskContent() {
                                     assessments,
                                 })
                             }
-                            fileName={`risk-report-${selectedYear}`}
                         />
                     </div>
                 </div>

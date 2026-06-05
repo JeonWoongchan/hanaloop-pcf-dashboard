@@ -214,7 +214,6 @@ export function CompanyDetailContent({ id }: { id: string }) {
                                     riskTotal,
                                 });
                             }}
-                            fileName={`company-detail-${company.name}-${selectedYear}`}
                             disabled={isActionNotesLoading}
                         />
                         <YearSelector

@@ -18,7 +18,6 @@ export function AllowanceScenarioCard({ year }: Props) {
         <Card>
             <CardHeading
                 title="배출권 비용 시나리오 가정"
-                description="실제 배출권 정산 비용이 아니라 제한된 과제 데이터 기반의 내부 판단용 시나리오입니다."
             />
             <CardContent>
                 <dl className="text-muted-foreground grid gap-4 text-sm md:grid-cols-3">

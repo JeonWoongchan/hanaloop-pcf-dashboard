@@ -147,7 +147,6 @@ export function CompaniesContent() {
                                     riskMap,
                                 })
                             }
-                            fileName={`companies-report-${selectedYear}`}
                         />
 
                         {/* 국가 선택 */}
