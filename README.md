@@ -1,6 +1,6 @@
 # PCF DASHBOARD
 
-> 여러 회사의 온실가스 배출 현황과 활동 데이터 기반 PCF 산정 결과를 모니터링하는 대시보드입니다.
+> 여러 회사의 온실가스 배출 현황과 활동 데이터 기반 PCF 산정 결과를 모니터링하고, 배출권 비용 리스크와 대응 보고서를 함께 관리하는 대시보드입니다.
 
 ---
 
@@ -69,7 +69,7 @@ GHG Protocol 기준에 따라 배출원을 Scope 1/2/3으로 구분합니다.
 | Chart        | Recharts                         | 대시보드 차트 구현 속도와 커스터마이징 균형을 맞추기 위해                        |
 | Server State | TanStack Query v5                | 서버 데이터 캐싱, 낙관적 업데이트, 실패 롤백을 명확히 분리하기 위해              |
 | URL State    | nuqs                             | 연도·국가·배출원 필터를 URL에 보존해 새로고침과 링크 공유를 지원하기 위해        |
-| Database     | PostgreSQL, postgres npm package | 회사·배출량·Action Notes·활동 데이터·배출계수 버전 이력을 관계형 테이블로 관리   |
+| Database     | PostgreSQL, postgres npm package | 회사·배출량·Action Notes·활동 데이터·배출계수·배출권 단가 이력을 관계형 테이블로 관리 |
 | Infra        | Docker, Docker Compose           | 평가자가 별도 DB 설치 없이 동일한 실행 환경을 만들 수 있게 하기 위해             |
 | Test         | Vitest                           | 배출량 집계, 리스크 산정, 포맷, Excel 파싱 같은 순수 함수를 빠르게 검증하기 위해 |
 
@@ -86,12 +86,12 @@ TanStack Query hooks
     ↓
 Content components
     ↓
-Charts / Cards / Tables
+Charts / Cards / Tables / reports
 ```
 
 | 상태         | 관리 방식      | 예시                                  |
 | ------------ | -------------- | ------------------------------------- |
-| 서버 데이터  | TanStack Query | 회사, 국가, Action Notes, 활동 데이터 |
+| 서버 데이터  | TanStack Query | 회사, 국가, Action Notes, 활동 데이터, 배출권 단가 |
 | URL 필터     | nuqs           | 연도, 국가, 배출원                    |
 | 로컬 UI 상태 | React state    | 탭, 다이얼로그, 슬라이더, 편집 상태   |
 
@@ -111,6 +111,7 @@ Charts / Cards / Tables
 | `posts`            | 회사별 Action Notes                                   |
 | `emission_factors` | 활동 유형·설명·단위별 배출계수와 버전 이력            |
 | `activity_records` | Excel 원본 활동 데이터, 사용한 계수, 계산 결과 스냅샷 |
+| `allowance_prices` | 연도별 배출권 비용 시나리오에 사용할 단가 이력        |
 
 ---
 
@@ -178,7 +179,7 @@ Charts / Cards / Tables
 
 - 특정 회사의 상세 수치 정보를 표시
 - 월별 배출 추이와 PCF 활동 데이터
-- Scope 1/2/3 감축 시나리오
+- Scope 1/2/3 감축 시나리오와 배출권 비용 절감 예상
 - Action Notes 패널로 회사별 대응 기록 관리
 - 활동 데이터·GHG 배출량 Excel 임포트 (해당 회사 자동 선택)
 - GHG 배출량 행 단위 수정·삭제, 활동 데이터 행 삭제
