@@ -31,7 +31,7 @@ export function AppSidebar() {
                                 </div>
                                 <div className="flex flex-col gap-0.5 leading-none">
                                     <span className="font-semibold">{SERVICE_NAME}</span>
-                                    <span className="text-muted-foreground text-xs">PCF Dashboard</span>
+                                    <span className="text-muted-foreground text-xs">Dashboard</span>
                                 </div>
                             </Link>
                         </SidebarMenuButton>
@@ -45,7 +45,7 @@ export function AppSidebar() {
                 <SidebarGlossary />
                 <div className="space-y-2 group-data-[collapsible=icon]:hidden">
                     <p className="text-foreground text-xs font-medium">{SERVICE_NAME}</p>
-                    <p className="text-muted-foreground text-xs">PCF 관리 플랫폼</p>
+                    <p className="text-muted-foreground text-xs">탄소 관리 플랫폼</p>
                     <p className="text-muted-foreground text-xs">
                         © 2026 {SERVICE_NAME}. All rights reserved.
                     </p>
