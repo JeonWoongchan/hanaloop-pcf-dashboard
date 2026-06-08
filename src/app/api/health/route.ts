@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { SERVICE_ID } from '@/constants/service';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -13,7 +14,7 @@ export async function GET() {
     return NextResponse.json(
         {
             status: 'ok',
-            service: 'hanaloop-pcf-dashboard',
+            service: SERVICE_ID,
             timestamp: new Date().toISOString(),
             uptime: Math.round(process.uptime()),
         },

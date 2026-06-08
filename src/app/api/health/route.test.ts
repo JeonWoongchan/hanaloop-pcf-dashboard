@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { SERVICE_ID } from '@/constants/service';
 import { dynamic, GET, HEAD, revalidate, runtime } from './route';
 
 describe('/api/health', () => {
@@ -15,7 +16,7 @@ describe('/api/health', () => {
         expect(response.status).toBe(200);
         expect(response.headers.get('Cache-Control')).toContain('no-store');
         expect(body.status).toBe('ok');
-        expect(body.service).toBe('hanaloop-pcf-dashboard');
+        expect(body.service).toBe(SERVICE_ID);
         expect(typeof body.timestamp).toBe('string');
         expect(Number.isFinite(body.uptime)).toBe(true);
     });

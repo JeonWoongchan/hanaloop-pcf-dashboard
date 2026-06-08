@@ -13,7 +13,7 @@ type SqlClient = ReturnType<typeof postgres>;
 type PostgresSslMode = 'require' | 'allow' | 'prefer' | 'verify-full';
 
 const globalForPostgres = globalThis as typeof globalThis & {
-    hanaloopSql?: SqlClient;
+    carbonflowSql?: SqlClient;
 };
 
 function getPostgresSslOption(): false | PostgresSslMode {
@@ -50,11 +50,11 @@ function getSslModeFromUrl(url: string | undefined): string | undefined {
 }
 
 export const sql =
-    globalForPostgres.hanaloopSql ??
+    globalForPostgres.carbonflowSql ??
     postgres(databaseUrl, {
         ssl: getPostgresSslOption(),
     });
 
 if (process.env.NODE_ENV !== 'production') {
-    globalForPostgres.hanaloopSql = sql;
+    globalForPostgres.carbonflowSql = sql;
 }

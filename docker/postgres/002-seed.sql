@@ -1,4 +1,4 @@
--- Local Postgres seed data for Hanaloop PCF Dashboard
+-- Local Postgres seed data for CarbonFlow
 -- Scope: countries, companies, emission_factors, ghg_emissions, activity_records
 -- Period policy: keep and seed only 2025 and 2026 data. Existing rows outside this period are removed.
 -- Precondition: run the schema in docs/SCHEMA.md before this file.

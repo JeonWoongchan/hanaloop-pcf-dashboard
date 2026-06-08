@@ -1,6 +1,7 @@
 import type { ReportCellValue, ReportColumn, ReportWorkbook } from './types';
+import { SERVICE_NAME } from '@/constants/service';
 
-const REPORT_BRAND_NAME = 'PCF Dashboard';
+const REPORT_BRAND_NAME = SERVICE_NAME;
 
 export function writeReportLoadingPreview(targetWindow: Window) {
     targetWindow.document.open();

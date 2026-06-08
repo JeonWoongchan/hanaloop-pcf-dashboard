@@ -28,7 +28,10 @@ export function useGhgImport(onSuccess?: () => void) {
     return useMutation({
         mutationFn: importGhgEmissions,
         onSuccess: (data) => {
-            // GHG 배출량은 companies API에 LEFT JOIN으로 포함되므로 companies 캐시 무효화
+            // 상세 페이지는 원본 GHG 테이블과 companies LEFT JOIN 집계를 함께 사용한다.
+            void queryClient.invalidateQueries({
+                queryKey: queryKeys.ghgEmissions.byCompany(data.companyId),
+            });
             void queryClient.invalidateQueries({ queryKey: queryKeys.companies.all });
             toast.success(`${data.upserted}건 GHG 배출량 임포트 완료`);
             onSuccess?.();

@@ -4,6 +4,7 @@ import './globals.css';
 import { DashboardShell } from '@/components/layout/dashboard-shell';
 import { Providers } from '@/components/providers';
 import { Toaster } from '@/components/ui/sonner';
+import { SERVICE_NAME } from '@/constants/service';
 import { ReactNode } from 'react';
 
 const geistSans = Geist({
@@ -17,7 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-    title: 'PCF Dashboard',
+    title: SERVICE_NAME,
     description: '기업 PCF 및 온실가스 배출 현황 시각화 대시보드',
 };
 
